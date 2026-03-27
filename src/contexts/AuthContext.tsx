@@ -29,37 +29,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMentor, setIsMentor] = useState(false);
 
+  const resetRoles = () => {
+    setIsAdmin(false);
+    setIsMentor(false);
+  };
+
   const checkRoles = async (userId: string) => {
-    const [adminRes, mentorRes] = await Promise.all([
-      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
-      supabase.from("mentors").select("id").eq("user_id", userId).eq("status", "approved").maybeSingle(),
-    ]);
-    setIsAdmin(!!adminRes.data);
-    setIsMentor(!!mentorRes.data);
+    try {
+      const [adminRes, mentorRes] = await Promise.all([
+        supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+        supabase.from("mentors").select("id").eq("user_id", userId).eq("status", "approved").maybeSingle(),
+      ]);
+      setIsAdmin(Boolean(adminRes.data));
+      setIsMentor(Boolean(mentorRes.data));
+    } catch {
+      resetRoles();
+    }
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          await checkRoles(session.user.id);
-        } else {
-          setIsAdmin(false);
-          setIsMentor(false);
-        }
-        setLoading(false);
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        checkRoles(session.user.id);
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
       setLoading(false);
+
+      if (currentSession?.user) {
+        void checkRoles(currentSession.user.id);
+      } else {
+        resetRoles();
+      }
+    });
+
+    void supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setLoading(false);
+
+      if (currentSession?.user) {
+        void checkRoles(currentSession.user.id);
+      } else {
+        resetRoles();
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -67,8 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setIsAdmin(false);
-    setIsMentor(false);
+    resetRoles();
   };
 
   return (
