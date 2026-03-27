@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { TrendingUp, Search, Star, Clock, Filter } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TrendingUp, Search, Star, Clock, SlidersHorizontal, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMentors } from "@/hooks/use-mentors";
 import type { Mentor } from "@/types/mentor";
 
-const ALL_INSTRUMENTS = ["Futures", "Forex", "Crypto", "Equities"];
-const ALL_CONCEPTS = ["ICT", "Order Flow", "Supply & Demand", "Price Action", "VWAP"];
+const ALL_INSTRUMENTS = ["Futures", "Forex", "Crypto", "Options"];
+const ALL_CONCEPTS = ["ICT", "Order Flow", "Price Action", "Patterns"];
 
 const MentorCard = ({ mentor }: { mentor: Mentor }) => (
   <div className="group rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
@@ -53,24 +54,30 @@ const MentorCard = ({ mentor }: { mentor: Mentor }) => (
 
 const MentorListingPage = () => {
   const [search, setSearch] = useState("");
-  const [activeInstrument, setActiveInstrument] = useState<string | null>(null);
-  const [activeConcept, setActiveConcept] = useState<string | null>(null);
+  const [activeInstruments, setActiveInstruments] = useState<string[]>([]);
+  const [activeConcepts, setActiveConcepts] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number]>([500]);
   const { data: mentors = [], isLoading } = useMentors();
+
+  const toggleItem = (arr: string[], item: string) =>
+    arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 
   const filtered = mentors.filter((m) => {
     const matchesSearch = !search || m.name.toLowerCase().includes(search.toLowerCase()) || m.bio.toLowerCase().includes(search.toLowerCase());
-    const matchesInstrument = !activeInstrument || m.instruments.includes(activeInstrument);
-    const matchesConcept = !activeConcept || m.concepts.includes(activeConcept);
-    return matchesSearch && matchesInstrument && matchesConcept;
+    const matchesInstrument = activeInstruments.length === 0 || activeInstruments.some((i) => m.instruments.includes(i));
+    const matchesConcept = activeConcepts.length === 0 || activeConcepts.some((c) => m.concepts.includes(c));
+    const matchesPrice = m.monthly_price <= priceRange[0];
+    return matchesSearch && matchesInstrument && matchesConcept && matchesPrice;
   });
 
+  const activeFilterCount = activeInstruments.length + activeConcepts.length + (priceRange[0] < 500 ? 1 : 0);
+
   const clearFilters = () => {
-    setActiveInstrument(null);
-    setActiveConcept(null);
+    setActiveInstruments([]);
+    setActiveConcepts([]);
+    setPriceRange([500]);
     setSearch("");
   };
-
-  const hasFilters = !!activeInstrument || !!activeConcept || !!search;
 
   return (
     <div className="min-h-screen bg-background">
@@ -92,34 +99,68 @@ const MentorListingPage = () => {
           </Link>
         </div>
 
-        <div className="space-y-4 mb-8">
-          <div className="relative">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search mentors..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card border-border" />
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground"><Filter className="h-3 w-3" /> Instruments</div>
-            <div className="flex flex-wrap gap-2">
-              {ALL_INSTRUMENTS.map((inst) => (
-                <button key={inst} onClick={() => setActiveInstrument(activeInstrument === inst ? null : inst)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all duration-200 ${activeInstrument === inst ? "border-primary/50 bg-primary/10 text-primary" : "border-border bg-secondary text-muted-foreground hover:text-foreground"}`}>
-                  {inst}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground"><Filter className="h-3 w-3" /> Concepts</div>
-            <div className="flex flex-wrap gap-2">
-              {ALL_CONCEPTS.map((c) => (
-                <button key={c} onClick={() => setActiveConcept(activeConcept === c ? null : c)}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-all duration-200 ${activeConcept === c ? "border-primary/50 bg-primary/10 text-primary" : "border-border bg-secondary text-muted-foreground hover:text-foreground"}`}>
-                  {c}
-                </button>
-              ))}
-            </div>
-          </div>
-          {hasFilters && <button onClick={clearFilters} className="text-xs text-primary hover:underline">Clear all filters</button>}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="relative gap-2 shrink-0">
+                <SlidersHorizontal className="h-4 w-4" /> Filters
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 space-y-5" align="end">
+              <div className="flex items-center justify-between">
+                <h4 className="font-heading font-semibold text-sm text-foreground">Filters</h4>
+                {activeFilterCount > 0 && (
+                  <button onClick={clearFilters} className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <X className="h-3 w-3" /> Clear all
+                  </button>
+                )}
+              </div>
+
+              {/* Price slider */}
+              <div className="space-y-3">
+                <label className="text-xs font-medium text-muted-foreground">Max Price: ${priceRange[0]}/mo</label>
+                <Slider value={priceRange} onValueChange={(v) => setPriceRange(v as [number])} min={10} max={500} step={10} />
+                <div className="flex justify-between text-[10px] text-muted-foreground">
+                  <span>$10</span><span>$500</span>
+                </div>
+              </div>
+
+              {/* Concepts */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">Concepts</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {ALL_CONCEPTS.map((c) => (
+                    <button key={c} onClick={() => setActiveConcepts(toggleItem(activeConcepts, c))}
+                      className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-all ${activeConcepts.includes(c) ? "border-primary/50 bg-primary/10 text-primary" : "border-border bg-secondary text-muted-foreground hover:text-foreground"}`}>
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Instruments */}
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">Indexes</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {ALL_INSTRUMENTS.map((inst) => (
+                    <button key={inst} onClick={() => setActiveInstruments(toggleItem(activeInstruments, inst))}
+                      className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-all ${activeInstruments.includes(inst) ? "border-primary/50 bg-primary/10 text-primary" : "border-border bg-secondary text-muted-foreground hover:text-foreground"}`}>
+                      {inst}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="space-y-4">
