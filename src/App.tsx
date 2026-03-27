@@ -8,6 +8,7 @@ import Homepage from "./pages/Homepage.tsx";
 import Index from "./pages/Index.tsx";
 import MentorListing from "./pages/MentorListing.tsx";
 import MentorProfile from "./pages/MentorProfile.tsx";
+import Subscribe from "./pages/Subscribe.tsx";
 import Auth from "./pages/Auth.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import StudentDashboard from "./pages/StudentDashboard.tsx";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/" element={<Homepage />} />
             <Route path="/mentors" element={<MentorListing />} />
             <Route path="/mentor/:id" element={<MentorProfile />} />
+            <Route path="/subscribe/:id" element={<Subscribe />} />
             <Route path="/apply" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminDashboard />} />
