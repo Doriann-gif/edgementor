@@ -148,6 +148,47 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_read: boolean
+          recipient_id: string
+          sender_mentor_id: string | null
+          sender_name: string
+          subject: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id: string
+          sender_mentor_id?: string | null
+          sender_name: string
+          subject: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id?: string
+          sender_mentor_id?: string | null
+          sender_name?: string
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_sender_mentor_id_fkey"
+            columns: ["sender_mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -171,6 +212,70 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      saved_mentors: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_mentors_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          expires_at: string | null
+          id: string
+          mentor_id: string
+          started_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          id?: string
+          mentor_id: string
+          started_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          id?: string
+          mentor_id?: string
+          started_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
