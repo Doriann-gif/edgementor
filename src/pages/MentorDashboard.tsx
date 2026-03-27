@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
   ArrowLeft, LogOut, Users, DollarSign, TrendingUp, Edit3, Save,
-  X, Clock, Star, Eye,
+  X, Clock, Star, Eye, Tag,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -102,6 +102,9 @@ const MentorDashboard = () => {
           <div className="flex items-center gap-3">
             <Link to={`/mentor/${mentor.id}`}>
               <Button variant="outline" size="sm" className="text-xs"><Eye className="h-3.5 w-3.5 mr-1" /> View Public Profile</Button>
+            </Link>
+            <Link to="/codes">
+              <Button variant="outline" size="sm" className="text-xs"><Tag className="h-3.5 w-3.5 mr-1" /> Promo Codes</Button>
             </Link>
             <Button variant="outline" size="sm" className="text-xs" onClick={signOut}>
               <LogOut className="h-3.5 w-3.5 mr-1.5" /> Sign Out

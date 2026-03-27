@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   TrendingUp, Star, Users, Play, MessageCircle, ArrowRight, Zap,
-  Shield, BarChart3, ChevronRight, User,
+  Shield, BarChart3, ChevronRight, User, Settings,
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,6 +47,7 @@ const Homepage = () => {
                   {isAdmin && <Link to="/admin"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Admin</Button></Link>}
                   {isMentor && <Link to="/mentor-dashboard"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Mentor Hub</Button></Link>}
                   <Link to="/dashboard"><Button variant="outline" size="sm" className="text-xs"><User className="h-3.5 w-3.5 mr-1" /> Dashboard</Button></Link>
+                  <Link to="/settings"><Button variant="ghost" size="icon" className="h-9 w-9"><Settings className="h-4 w-4 text-muted-foreground" /></Button></Link>
                 </>
               ) : (
                 <>

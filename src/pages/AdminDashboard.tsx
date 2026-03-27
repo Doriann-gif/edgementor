@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, Navigate } from "react-router-dom";
-import { Zap, ArrowLeft, CheckCircle2, XCircle, Clock, LogOut } from "lucide-react";
+import { Zap, ArrowLeft, CheckCircle2, XCircle, Clock, LogOut, Tag } from "lucide-react";
 import { toast } from "sonner";
 
 interface Application {
@@ -126,9 +126,14 @@ const AdminDashboard = () => {
             </h1>
             <p className="text-sm text-muted-foreground mt-1">Review and manage mentor applications.</p>
           </div>
-          <Button variant="outline" size="sm" className="text-xs" onClick={signOut}>
-            <LogOut className="h-3.5 w-3.5 mr-1.5" /> Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/codes">
+              <Button variant="outline" size="sm" className="text-xs"><Tag className="h-3.5 w-3.5 mr-1.5" /> Codes</Button>
+            </Link>
+            <Button variant="outline" size="sm" className="text-xs" onClick={signOut}>
+              <LogOut className="h-3.5 w-3.5 mr-1.5" /> Sign Out
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}
