@@ -150,9 +150,11 @@ const MentorCard = ({ mentor }: { mentor: Mentor }) => (
     {/* Footer */}
     <div className="flex items-center justify-between">
       <span className="text-xs text-muted-foreground">{mentor.students} students</span>
-      <Button size="sm" className="h-8 text-xs font-semibold">
-        View Profile
-      </Button>
+      <Link to={`/mentor/${mentor.id}`}>
+        <Button size="sm" className="h-8 text-xs font-semibold">
+          View Profile
+        </Button>
+      </Link>
     </div>
   </div>
 );
