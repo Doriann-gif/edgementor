@@ -14,7 +14,140 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      mentor_applications: {
+        Row: {
+          bio: string
+          concepts: string[]
+          created_at: string
+          experience: string
+          full_name: string
+          id: string
+          instruments: string[]
+          monthly_price: number
+          proof_url: string | null
+          session: string
+          status: string
+        }
+        Insert: {
+          bio: string
+          concepts?: string[]
+          created_at?: string
+          experience: string
+          full_name: string
+          id?: string
+          instruments?: string[]
+          monthly_price: number
+          proof_url?: string | null
+          session: string
+          status?: string
+        }
+        Update: {
+          bio?: string
+          concepts?: string[]
+          created_at?: string
+          experience?: string
+          full_name?: string
+          id?: string
+          instruments?: string[]
+          monthly_price?: number
+          proof_url?: string | null
+          session?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      mentor_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          rating: number
+          review_date: string
+          review_text: string
+          reviewer_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          rating: number
+          review_date: string
+          review_text: string
+          reviewer_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          rating?: number
+          review_date?: string
+          review_text?: string
+          reviewer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_reviews_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentors: {
+        Row: {
+          avatar: string
+          bio: string
+          concepts: string[]
+          created_at: string
+          experience: string
+          full_bio: string
+          highlights: string[]
+          id: string
+          instruments: string[]
+          monthly_price: number
+          name: string
+          rating: number
+          session: string
+          status: string
+          students: number
+        }
+        Insert: {
+          avatar: string
+          bio: string
+          concepts?: string[]
+          created_at?: string
+          experience: string
+          full_bio?: string
+          highlights?: string[]
+          id?: string
+          instruments?: string[]
+          monthly_price: number
+          name: string
+          rating?: number
+          session: string
+          status?: string
+          students?: number
+        }
+        Update: {
+          avatar?: string
+          bio?: string
+          concepts?: string[]
+          created_at?: string
+          experience?: string
+          full_bio?: string
+          highlights?: string[]
+          id?: string
+          instruments?: string[]
+          monthly_price?: number
+          name?: string
+          rating?: number
+          session?: string
+          status?: string
+          students?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
