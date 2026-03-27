@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Homepage from "./pages/Homepage.tsx";
 import Index from "./pages/Index.tsx";
 import MentorListing from "./pages/MentorListing.tsx";
 import MentorProfile from "./pages/MentorProfile.tsx";
@@ -17,7 +18,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<MentorListing />} />
+          <Route path="/" element={<Homepage />} />
+          <Route path="/mentors" element={<MentorListing />} />
           <Route path="/mentor/:id" element={<MentorProfile />} />
           <Route path="/apply" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
