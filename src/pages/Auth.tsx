@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Zap, ArrowLeft } from "lucide-react";
+import { Zap, ArrowLeft, CheckCircle2 } from "lucide-react";
+import confetti from "canvas-confetti";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -13,7 +17,14 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (showSuccess) {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
+    }
+  }, [showSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +41,7 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Account created successfully! 🎉 Welcome to EdgeMentor.");
-        navigate("/");
+        setShowSuccess(true);
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -95,6 +105,27 @@ const Auth = () => {
           </p>
         </form>
       </div>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccess} onOpenChange={(open) => {
+        setShowSuccess(open);
+        if (!open) navigate("/");
+      }}>
+        <DialogContent className="sm:max-w-sm text-center">
+          <DialogHeader className="items-center">
+            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <CheckCircle2 className="h-7 w-7 text-primary" />
+            </div>
+            <DialogTitle className="font-heading text-xl">Account Created! 🎉</DialogTitle>
+            <DialogDescription className="text-sm">
+              Welcome to EdgeMentor! Your account has been created successfully. Start exploring mentors and level up your trading.
+            </DialogDescription>
+          </DialogHeader>
+          <Button className="w-full font-semibold" onClick={() => { setShowSuccess(false); navigate("/"); }}>
+            Get Started
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
