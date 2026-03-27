@@ -137,7 +137,9 @@ const MentorProfile = () => {
             <Button variant="outline" size="icon" className="h-11 w-11" onClick={handleSave} disabled={toggleSave.isPending}>
               <Heart className={`h-5 w-5 ${isSaved ? "fill-pink-400 text-pink-400" : ""}`} />
             </Button>
-            <Button className="h-11 px-6 font-semibold">Subscribe Now</Button>
+            <Link to={`/subscribe/${mentor.id}`}>
+              <Button className="h-11 px-6 font-semibold">Subscribe Now</Button>
+            </Link>
           </div>
         </div>
       </div>

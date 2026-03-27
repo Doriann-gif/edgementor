@@ -30,7 +30,7 @@ const Auth = () => {
           },
         });
         if (error) throw error;
-        toast.success("Account created! You're now signed in.");
+        toast.success("Account created successfully! 🎉 Welcome to EdgeMentor.");
         navigate("/");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
