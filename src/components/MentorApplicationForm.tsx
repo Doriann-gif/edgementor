@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
+import { CheckCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -23,6 +25,7 @@ const MentorApplicationForm = () => {
   const [monthlyPrice, setMonthlyPrice] = useState("");
   const [bio, setBio] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +48,7 @@ const MentorApplicationForm = () => {
 
       if (error) throw error;
 
-      toast.success("Application submitted successfully! We'll review it shortly.");
+      setShowSuccess(true);
       setFullName("");
       setExperience("");
       setInstruments([]);
@@ -125,6 +128,23 @@ const MentorApplicationForm = () => {
           <p className="text-center text-xs text-muted-foreground">Applications are reviewed within 48 hours. You'll receive an email notification.</p>
         </form>
       </div>
+
+      <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
+        <DialogContent className="sm:max-w-md text-center">
+          <DialogHeader className="items-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <CheckCircle className="h-8 w-8 text-primary" />
+            </div>
+            <DialogTitle className="text-xl">Application Submitted! 🎉</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mt-2">
+              Thanks for applying! Our team will review your application shortly — you'll receive an email once it's been approved. Hang tight!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogClose asChild>
+            <Button className="mt-4 w-full">Got it</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
