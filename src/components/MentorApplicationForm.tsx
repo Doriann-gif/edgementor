@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { CheckCircle } from "lucide-react";
@@ -26,6 +27,12 @@ const MentorApplicationForm = () => {
   const [bio, setBio] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    if (showSuccess) {
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.5 } });
+    }
+  }, [showSuccess]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
