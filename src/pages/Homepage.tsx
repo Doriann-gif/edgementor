@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  TrendingUp, Star, Users, Play, MessageCircle, ArrowRight,
+  TrendingUp, Star, Users, Play, MessageCircle, ArrowRight, Zap,
   Shield, BarChart3, ChevronRight,
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
