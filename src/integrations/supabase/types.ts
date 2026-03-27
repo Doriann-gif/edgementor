@@ -96,6 +96,7 @@ export type Database = {
       }
       mentors: {
         Row: {
+          available: boolean
           avatar: string
           bio: string
           concepts: string[]
@@ -111,8 +112,10 @@ export type Database = {
           session: string
           status: string
           students: number
+          user_id: string | null
         }
         Insert: {
+          available?: boolean
           avatar: string
           bio: string
           concepts?: string[]
@@ -128,8 +131,10 @@ export type Database = {
           session: string
           status?: string
           students?: number
+          user_id?: string | null
         }
         Update: {
+          available?: boolean
           avatar?: string
           bio?: string
           concepts?: string[]
@@ -145,6 +150,7 @@ export type Database = {
           session?: string
           status?: string
           students?: number
+          user_id?: string | null
         }
         Relationships: []
       }
