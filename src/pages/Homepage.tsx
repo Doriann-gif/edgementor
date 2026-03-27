@@ -1,10 +1,15 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
+import {
   TrendingUp, Star, Users, Play, MessageCircle, ArrowRight, Zap,
-  Shield, BarChart3, ChevronRight,
+  Shield, BarChart3, ChevronRight, UserPlus,
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DISCORD_GROUPS = [
   { name: "Order Flow Trading", members: 2340, description: "Tape reading, delta analysis, and footprint charts. Share setups in real-time during NY session.", tags: ["Futures", "Order Flow"], active: true },
@@ -23,9 +28,46 @@ const VIDEOS = [
 const Homepage = () => {
   const { data: featuredMentors = [] } = useFeaturedMentors();
   const { data: allMentors = [] } = useMentors();
+  const { user, loading } = useAuth();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!user && !sessionStorage.getItem("welcomed")) {
+      const timer = setTimeout(() => {
+        setShowWelcome(true);
+        sessionStorage.setItem("welcomed", "1");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [user, loading]);
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Welcome Dialog for new visitors */}
+      <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
+        <DialogContent className="sm:max-w-sm text-center">
+          <DialogHeader className="items-center">
+            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <UserPlus className="h-7 w-7 text-primary" />
+            </div>
+            <DialogTitle className="font-heading text-xl">Welcome to EdgeMentor! 👋</DialogTitle>
+            <DialogDescription className="text-sm">
+              Join our community of traders. Create an account to save mentors, subscribe to mentorships, and access exclusive content.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-2">
+            <Link to="/auth" className="w-full">
+              <Button className="w-full font-semibold" onClick={() => setShowWelcome(false)}>
+                <UserPlus className="h-4 w-4 mr-2" /> Create Account
+              </Button>
+            </Link>
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground" onClick={() => setShowWelcome(false)}>
+              Browse first
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className="fixed inset-0 opacity-[0.03]" style={{
         backgroundImage: "linear-gradient(hsl(160 84% 39% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(160 84% 39% / 0.3) 1px, transparent 1px)",
         backgroundSize: "60px 60px",

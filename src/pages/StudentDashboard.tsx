@@ -4,6 +4,7 @@ import { useSubscriptions, useMessages, useMarkMessageRead } from "@/hooks/use-s
 import { useSavedMentors } from "@/hooks/use-student";
 import { useMentors } from "@/hooks/use-mentors";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Zap, ArrowLeft, Star, Clock, BookOpen, Heart, MessageSquare,
   Mail, MailOpen, LogOut, ChevronRight, Users,
@@ -56,7 +57,7 @@ const StudentDashboard = () => {
         <div className="grid grid-cols-3 gap-4 mb-8">
           {[
             { icon: BookOpen, label: "Active Mentorships", value: subscriptions.length, color: "text-primary" },
-            { icon: Heart, label: "Saved Mentors", value: savedMentors.length, color: "text-pink-400" },
+            { icon: Heart, label: "Favourites", value: savedMentors.length, color: "text-pink-400" },
             { icon: MessageSquare, label: "Unread Messages", value: unreadCount, color: "text-amber-400" },
           ].map((stat) => (
             <div key={stat.label} className="rounded-2xl border border-border bg-card p-4">
@@ -69,138 +70,149 @@ const StudentDashboard = () => {
           ))}
         </div>
 
-        {/* Active Mentorships */}
-        <section className="mb-8">
-          <h2 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
-            <BookOpen className="h-4 w-4 text-primary" /> Active Mentorships
-          </h2>
-          {subsLoading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          ) : subscriptions.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
-              <p className="text-sm text-muted-foreground mb-3">You don't have any active mentorships yet.</p>
-              <Link to="/mentors">
-                <Button size="sm" className="text-xs font-semibold">
-                  Browse Mentors <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {subscriptions.map((sub: any) => {
-                const mentor = sub.mentors as Mentor;
-                return (
-                  <Link key={sub.id} to={`/mentor/${mentor.id}`} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-sm">
+        {/* Tabbed Content */}
+        <Tabs defaultValue="mentorships" className="space-y-6">
+          <TabsList className="w-full grid grid-cols-3 h-11">
+            <TabsTrigger value="mentorships" className="text-xs font-semibold">
+              <BookOpen className="h-3.5 w-3.5 mr-1.5" /> Mentorships
+            </TabsTrigger>
+            <TabsTrigger value="favourites" className="text-xs font-semibold">
+              <Heart className="h-3.5 w-3.5 mr-1.5" /> Favourites
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="text-xs font-semibold">
+              <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Messages
+              {unreadCount > 0 && (
+                <span className="ml-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5">{unreadCount}</span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Active Mentorships Tab */}
+          <TabsContent value="mentorships">
+            {subsLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : subscriptions.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
+                <p className="text-sm text-muted-foreground mb-3">You don't have any active mentorships yet.</p>
+                <Link to="/mentors">
+                  <Button size="sm" className="text-xs font-semibold">
+                    Browse Mentors <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {subscriptions.map((sub: any) => {
+                  const mentor = sub.mentors as Mentor;
+                  return (
+                    <Link key={sub.id} to={`/mentor/${mentor.id}`} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-sm">
+                        {mentor.avatar}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-heading font-semibold text-foreground text-sm">{mentor.name}</h3>
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Since {new Date(sub.started_at).toLocaleDateString()}</span>
+                          <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="font-heading font-bold text-foreground text-sm">${mentor.monthly_price}</span>
+                        <span className="text-xs text-muted-foreground block">/mo</span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Favourites Tab */}
+          <TabsContent value="favourites">
+            {savedLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : savedMentors.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
+                <Heart className="h-8 w-8 text-pink-400/30 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground mb-1">No favourite mentors yet.</p>
+                <p className="text-xs text-muted-foreground mb-4">Browse mentors and tap the heart icon to save your favourites.</p>
+                <Link to="/mentors">
+                  <Button size="sm" variant="outline" className="text-xs font-semibold">
+                    Find Mentors <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {savedMentors.map((mentor) => (
+                  <Link key={mentor.id} to={`/mentor/${mentor.id}`} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-xs">
                       {mentor.avatar}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-heading font-semibold text-foreground text-sm">{mentor.name}</h3>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Since {new Date(sub.started_at).toLocaleDateString()}</span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-heading font-semibold text-foreground text-sm truncate">{mentor.name}</h3>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                         <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                        <span>${mentor.monthly_price}/mo</span>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <span className="font-heading font-bold text-foreground text-sm">${mentor.monthly_price}</span>
-                      <span className="text-xs text-muted-foreground block">/mo</span>
-                    </div>
+                    <Button variant="outline" size="sm" className="text-xs shrink-0" onClick={(e) => { e.preventDefault(); }}>
+                      <Heart className="h-3.5 w-3.5 fill-pink-400 text-pink-400" />
+                    </Button>
                   </Link>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        {/* Saved Mentors */}
-        <section className="mb-8">
-          <h2 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Heart className="h-4 w-4 text-pink-400" /> Saved Mentors
-          </h2>
-          {savedLoading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          ) : savedMentors.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
-              <p className="text-sm text-muted-foreground mb-3">No saved mentors yet. Browse and save the ones you like.</p>
-              <Link to="/mentors">
-                <Button size="sm" variant="outline" className="text-xs font-semibold">
-                  Find Mentors <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {savedMentors.map((mentor) => (
-                <Link key={mentor.id} to={`/mentor/${mentor.id}`} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-xs">
-                    {mentor.avatar}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-heading font-semibold text-foreground text-sm truncate">{mentor.name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                      <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
-                      <span>${mentor.monthly_price}/mo</span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Messages */}
-        <section>
-          <h2 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-amber-400" /> Messages & Feedback
-            {unreadCount > 0 && (
-              <span className="rounded-full bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5">{unreadCount} new</span>
+                ))}
+              </div>
             )}
-          </h2>
-          {msgsLoading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          ) : messages.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
-              <p className="text-sm text-muted-foreground">No messages yet. Messages from your mentors will appear here.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`rounded-2xl border bg-card p-4 transition-all ${
-                    msg.is_read ? "border-border" : "border-primary/30 bg-primary/[0.02]"
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {msg.is_read ? (
-                        <MailOpen className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Mail className="h-4 w-4 text-primary" />
-                      )}
-                      <span className="font-heading font-semibold text-sm text-foreground">{msg.sender_name}</span>
+          </TabsContent>
+
+          {/* Messages Tab */}
+          <TabsContent value="messages">
+            {msgsLoading ? (
+              <p className="text-sm text-muted-foreground">Loading...</p>
+            ) : messages.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
+                <p className="text-sm text-muted-foreground">No messages yet. Messages from your mentors will appear here.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`rounded-2xl border bg-card p-4 transition-all ${
+                      msg.is_read ? "border-border" : "border-primary/30 bg-primary/[0.02]"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {msg.is_read ? (
+                          <MailOpen className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Mail className="h-4 w-4 text-primary" />
+                        )}
+                        <span className="font-heading font-semibold text-sm text-foreground">{msg.sender_name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-muted-foreground">
+                          {new Date(msg.created_at).toLocaleDateString()}
+                        </span>
+                        {!msg.is_read && (
+                          <button
+                            onClick={() => markRead.mutate(msg.id)}
+                            className="text-[10px] text-primary hover:underline"
+                          >
+                            Mark read
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground">
-                        {new Date(msg.created_at).toLocaleDateString()}
-                      </span>
-                      {!msg.is_read && (
-                        <button
-                          onClick={() => markRead.mutate(msg.id)}
-                          className="text-[10px] text-primary hover:underline"
-                        >
-                          Mark read
-                        </button>
-                      )}
-                    </div>
+                    <h4 className="text-sm font-medium text-foreground mb-1">{msg.subject}</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{msg.body}</p>
                   </div>
-                  <h4 className="text-sm font-medium text-foreground mb-1">{msg.subject}</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{msg.body}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
