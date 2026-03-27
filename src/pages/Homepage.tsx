@@ -2,9 +2,10 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   TrendingUp, Star, Users, Play, MessageCircle, ArrowRight, Zap,
-  Shield, BarChart3, ChevronRight,
+  Shield, BarChart3, ChevronRight, User,
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DISCORD_GROUPS = [
   { name: "Order Flow Trading", members: 2340, description: "Tape reading, delta analysis, and footprint charts. Share setups in real-time during NY session.", tags: ["Futures", "Order Flow"], active: true },
@@ -23,6 +24,7 @@ const VIDEOS = [
 const Homepage = () => {
   const { data: featuredMentors = [] } = useFeaturedMentors();
   const { data: allMentors = [] } = useMentors();
+  const { user, isAdmin } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -40,7 +42,17 @@ const Homepage = () => {
             </Link>
             <div className="flex items-center gap-3">
               <Link to="/mentors"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Mentors</Button></Link>
-              <Link to="/apply"><Button variant="outline" size="sm" className="text-xs">Become a Mentor</Button></Link>
+              {user ? (
+                <>
+                  {isAdmin && <Link to="/admin"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Admin</Button></Link>}
+                  <Link to="/dashboard"><Button variant="outline" size="sm" className="text-xs"><User className="h-3.5 w-3.5 mr-1" /> Dashboard</Button></Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/apply"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Become a Mentor</Button></Link>
+                  <Link to="/auth"><Button variant="outline" size="sm" className="text-xs">Sign In</Button></Link>
+                </>
+              )}
             </div>
           </div>
         </nav>

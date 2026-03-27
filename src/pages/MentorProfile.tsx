@@ -1,7 +1,10 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare } from "lucide-react";
+import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare, Heart } from "lucide-react";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
+import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -15,6 +18,16 @@ const MentorProfile = () => {
   const { id } = useParams<{ id: string }>();
   const { data: mentor, isLoading } = useMentor(id);
   const { data: reviews = [] } = useMentorReviews(id);
+  const { user } = useAuth();
+  const { data: savedMentorIds } = useSavedMentors();
+  const toggleSave = useToggleSaveMentor();
+  const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
+
+  const handleSave = () => {
+    if (!user) { toast.error("Sign in to save mentors"); return; }
+    if (!id) return;
+    toggleSave.mutate({ mentorId: id, isSaved });
+  };
 
   if (isLoading) {
     return (
@@ -120,7 +133,12 @@ const MentorProfile = () => {
             <span className="font-heading text-2xl font-bold text-foreground">${mentor.monthly_price}</span>
             <span className="text-sm text-muted-foreground">/month</span>
           </div>
-          <Button className="h-11 px-6 font-semibold">Subscribe Now</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" className="h-11 w-11" onClick={handleSave} disabled={toggleSave.isPending}>
+              <Heart className={`h-5 w-5 ${isSaved ? "fill-pink-400 text-pink-400" : ""}`} />
+            </Button>
+            <Button className="h-11 px-6 font-semibold">Subscribe Now</Button>
+          </div>
         </div>
       </div>
     </div>
