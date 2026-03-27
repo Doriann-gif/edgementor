@@ -14,7 +14,7 @@ import StudentDashboard from "./pages/StudentDashboard.tsx";
 import MentorDashboard from "./pages/MentorDashboard.tsx";
 import AccountSettings from "./pages/AccountSettings.tsx";
 import DiscountCodes from "./pages/DiscountCodes.tsx";
-import HomeButton from "./components/HomeButton";
+import Navbar from "./components/Navbar";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -26,7 +26,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <HomeButton />
+          <Navbar />
           <Routes>
             <Route path="/" element={<Homepage />} />
             <Route path="/mentors" element={<MentorListing />} />

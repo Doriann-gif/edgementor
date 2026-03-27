@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
-  TrendingUp, Star, Users, Play, MessageCircle, ArrowRight, Zap,
-  Shield, BarChart3, ChevronRight, User, Settings,
+  TrendingUp, Star, Users, Play, MessageCircle, ArrowRight,
+  Shield, BarChart3, ChevronRight,
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
-import { useAuth } from "@/contexts/AuthContext";
 
 const DISCORD_GROUPS = [
   { name: "Order Flow Trading", members: 2340, description: "Tape reading, delta analysis, and footprint charts. Share setups in real-time during NY session.", tags: ["Futures", "Order Flow"], active: true },
@@ -24,7 +23,6 @@ const VIDEOS = [
 const Homepage = () => {
   const { data: featuredMentors = [] } = useFeaturedMentors();
   const { data: allMentors = [] } = useMentors();
-  const { user, isAdmin, isMentor } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,30 +32,6 @@ const Homepage = () => {
       }} />
 
       <div className="relative">
-        {/* Nav */}
-        <nav className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-            <Link to="/" className="font-heading font-bold text-lg text-foreground flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary" /> EdgeMentor
-            </Link>
-            <div className="flex items-center gap-3">
-              <Link to="/mentors"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Mentors</Button></Link>
-              {user ? (
-                <>
-                  {isAdmin && <Link to="/admin"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Admin</Button></Link>}
-                  {isMentor && <Link to="/mentor-dashboard"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Mentor Hub</Button></Link>}
-                  <Link to="/dashboard"><Button variant="outline" size="sm" className="text-xs"><User className="h-3.5 w-3.5 mr-1" /> Dashboard</Button></Link>
-                  <Link to="/settings"><Button variant="ghost" size="icon" className="h-9 w-9"><Settings className="h-4 w-4 text-muted-foreground" /></Button></Link>
-                </>
-              ) : (
-                <>
-                  <Link to="/apply"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Become a Mentor</Button></Link>
-                  <Link to="/auth"><Button variant="outline" size="sm" className="text-xs">Sign In</Button></Link>
-                </>
-              )}
-            </div>
-          </div>
-        </nav>
 
         {/* Hero */}
         <section className="py-20 sm:py-28 px-4 sm:px-6">
