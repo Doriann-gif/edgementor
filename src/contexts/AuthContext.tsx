@@ -7,6 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   isAdmin: boolean;
+  isMentor: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -15,6 +16,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   isAdmin: false,
+  isMentor: false,
   signOut: async () => {},
 });
 
@@ -25,13 +27,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isMentor, setIsMentor] = useState(false);
 
-  const checkAdmin = async (userId: string) => {
-    const { data } = await supabase.rpc("has_role", {
-      _user_id: userId,
-      _role: "admin",
-    });
-    setIsAdmin(!!data);
+  const checkRoles = async (userId: string) => {
+    const [adminRes, mentorRes] = await Promise.all([
+      supabase.rpc("has_role", { _user_id: userId, _role: "admin" }),
+      supabase.from("mentors").select("id").eq("user_id", userId).eq("status", "approved").maybeSingle(),
+    ]);
+    setIsAdmin(!!adminRes.data);
+    setIsMentor(!!mentorRes.data);
   };
 
   useEffect(() => {
@@ -40,9 +44,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await checkAdmin(session.user.id);
+          await checkRoles(session.user.id);
         } else {
           setIsAdmin(false);
+          setIsMentor(false);
         }
         setLoading(false);
       }
@@ -52,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        checkAdmin(session.user.id);
+        checkRoles(session.user.id);
       }
       setLoading(false);
     });
@@ -63,10 +68,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     await supabase.auth.signOut();
     setIsAdmin(false);
+    setIsMentor(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, isAdmin, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isAdmin, isMentor, signOut }}>
       {children}
     </AuthContext.Provider>
   );
