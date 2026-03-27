@@ -14,6 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
+      code_redemptions: {
+        Row: {
+          code_id: string
+          id: string
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          id?: string
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          id?: string
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discount_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string
+          current_uses: number
+          discount_percent: number
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          mentor_id: string | null
+          type: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by: string
+          current_uses?: number
+          discount_percent?: number
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          mentor_id?: string | null
+          type?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string
+          current_uses?: number
+          discount_percent?: number
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          mentor_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_codes_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_applications: {
         Row: {
           bio: string
@@ -200,21 +279,27 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string | null
+          email_notifications: boolean
           id: string
+          marketing_emails: boolean
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email_notifications?: boolean
           id: string
+          marketing_emails?: boolean
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
+          email_notifications?: boolean
           id?: string
+          marketing_emails?: boolean
           updated_at?: string
         }
         Relationships: []
