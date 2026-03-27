@@ -24,7 +24,7 @@ const VIDEOS = [
 const Homepage = () => {
   const { data: featuredMentors = [] } = useFeaturedMentors();
   const { data: allMentors = [] } = useMentors();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isMentor } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,6 +45,7 @@ const Homepage = () => {
               {user ? (
                 <>
                   {isAdmin && <Link to="/admin"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Admin</Button></Link>}
+                  {isMentor && <Link to="/mentor-dashboard"><Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Mentor Hub</Button></Link>}
                   <Link to="/dashboard"><Button variant="outline" size="sm" className="text-xs"><User className="h-3.5 w-3.5 mr-1" /> Dashboard</Button></Link>
                 </>
               ) : (
