@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const INSTRUMENTS = ["Futures", "Forex", "Crypto", "Equities"];
-const CONCEPTS = ["ICT", "Order Flow", "Supply & Demand", "Price Action", "VWAP"];
+const CONCEPTS = ["ICT", "Order Flow", "Supply & Demand", "Price Action", "SMC"];
 const SESSIONS = ["London", "New York", "Asian"];
 
 const MentorApplicationForm = () => {
