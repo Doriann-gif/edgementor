@@ -67,7 +67,7 @@ const MentorApplicationForm = () => {
       setInstruments([]);
       setConcepts([]);
       setSession("");
-      setProofFile("");
+      setProofFile(null);
       setMonthlyPrice("");
       setBio("");
     } catch (err) {
