@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptions, useMessages, useMarkMessageRead } from "@/hooks/use-student";
 import { useSavedMentors } from "@/hooks/use-student";
+import { useQueryClient } from "@tanstack/react-query";
 import { useMentors } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Zap, ArrowLeft, Star, Clock, BookOpen, Heart, MessageSquare,
-  Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard,
+  Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard, MoreVertical, XCircle, ExternalLink,
 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import type { Mentor } from "@/types/mentor";
 
 const StudentDashboard = () => {
@@ -23,6 +31,9 @@ const StudentDashboard = () => {
   const markRead = useMarkMessageRead();
   const [portalLoading, setPortalLoading] = useState(false);
   const [canManageBilling, setCanManageBilling] = useState(false);
+  const [cancellingSubId, setCancellingSubId] = useState<string | null>(null);
+  const [confirmCancelSub, setConfirmCancelSub] = useState<{ id: string; mentorName: string } | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let isActive = true;
@@ -92,6 +103,25 @@ const StudentDashboard = () => {
       toast.error(err.message || "Failed to open billing portal");
     } finally {
       setPortalLoading(false);
+    }
+  };
+
+  const cancelSubscription = async (subId: string) => {
+    setCancellingSubId(subId);
+    try {
+      const { error } = await supabase
+        .from("subscriptions")
+        .update({ status: "cancelled" })
+        .eq("id", subId)
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      toast.success("Membership cancelled successfully.");
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to cancel membership.");
+    } finally {
+      setCancellingSubId(null);
+      setConfirmCancelSub(null);
     }
   };
 
@@ -188,22 +218,49 @@ const StudentDashboard = () => {
                 {subscriptions.map((sub: any) => {
                   const mentor = sub.mentors as Mentor;
                   return (
-                    <Link key={sub.id} to={`/mentor/${mentor.id}`} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-sm">
-                        {mentor.avatar}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-heading font-semibold text-foreground text-sm">{mentor.name}</h3>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Since {new Date(sub.started_at).toLocaleDateString()}</span>
-                          <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                    <div key={sub.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
+                      <Link to={`/mentorship/${mentor.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-sm">
+                          {mentor.avatar}
                         </div>
-                      </div>
-                      <div className="text-right shrink-0">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-heading font-semibold text-foreground text-sm">{mentor.name}</h3>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Since {new Date(sub.started_at).toLocaleDateString()}</span>
+                            <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                          </div>
+                        </div>
+                      </Link>
+                      <div className="text-right shrink-0 mr-1">
                         <span className="font-heading font-bold text-foreground text-sm">${mentor.monthly_price}</span>
                         <span className="text-xs text-muted-foreground block">/mo</span>
                       </div>
-                    </Link>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
+                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/mentorship/${mentor.id}`} className="flex items-center gap-2">
+                              <ExternalLink className="h-3.5 w-3.5" /> Access Content
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`/mentor/${mentor.id}`} className="flex items-center gap-2">
+                              <Users className="h-3.5 w-3.5" /> View Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive flex items-center gap-2"
+                            onClick={() => setConfirmCancelSub({ id: sub.id, mentorName: mentor.name })}
+                          >
+                            <XCircle className="h-3.5 w-3.5" /> Cancel Membership
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   );
                 })}
               </div>
@@ -296,6 +353,28 @@ const StudentDashboard = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Cancel Confirmation Dialog */}
+        <AlertDialog open={!!confirmCancelSub} onOpenChange={(open) => !open && setConfirmCancelSub(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel Membership</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to cancel your membership with <span className="font-semibold text-foreground">{confirmCancelSub?.mentorName}</span>? You'll lose access to their exclusive content immediately.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep Membership</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => confirmCancelSub && cancelSubscription(confirmCancelSub.id)}
+                disabled={!!cancellingSubId}
+              >
+                {cancellingSubId ? "Cancelling..." : "Yes, Cancel"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
