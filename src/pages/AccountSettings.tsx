@@ -532,7 +532,7 @@ const AccountSettings = () => {
                           <div className="flex-1 space-y-2">
                             <Input value={editingContent.title} onChange={(e) => setEditingContent({ ...editingContent, title: e.target.value })} className="bg-muted border-border text-sm" />
                             <Textarea value={editingContent.description} onChange={(e) => setEditingContent({ ...editingContent, description: e.target.value })} className="bg-muted border-border text-sm min-h-[50px]" />
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
                               <Select value={editingContent.content_type} onValueChange={(v) => setEditingContent({ ...editingContent, content_type: v })}>
                                 <SelectTrigger className="w-32 bg-muted border-border text-sm"><SelectValue /></SelectTrigger>
                                 <SelectContent>
@@ -541,9 +541,18 @@ const AccountSettings = () => {
                                   <SelectItem value="discord">Discord</SelectItem>
                                   <SelectItem value="call">Call</SelectItem>
                                   <SelectItem value="resource">Resource</SelectItem>
+                                  <SelectItem value="file">File Upload</SelectItem>
                                 </SelectContent>
                               </Select>
                               <Input value={editingContent.content_url} onChange={(e) => setEditingContent({ ...editingContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" placeholder="URL" />
+                              <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => editFileRef.current?.click()} disabled={uploadingFile}>
+                                <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload"}
+                              </Button>
+                              <input ref={editFileRef} type="file" className="hidden" onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleContentFileUpload(f, 'edit');
+                                e.target.value = '';
+                              }} />
                             </div>
                             <div className="flex gap-2">
                               <Button size="sm" className="text-xs" onClick={updateContent} disabled={savingContent}>{savingContent ? "Saving..." : "Save"}</Button>
