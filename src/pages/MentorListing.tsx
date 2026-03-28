@@ -432,7 +432,13 @@ const MentorListingPage = () => {
 
         {/* Bottom CTA */}
         {!isLoading && sorted.length > 0 && (
-          <div className="mt-16 text-center">
+          <motion.div
+            className="mt-16 text-center"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="inline-flex flex-col items-center gap-4 rounded-2xl border border-border bg-card/50 backdrop-blur-sm px-8 py-8">
               <h3 className="font-heading font-bold text-foreground text-lg">Are you a profitable trader?</h3>
               <p className="text-sm text-muted-foreground max-w-sm">Share your knowledge, build your community, and earn recurring revenue.</p>
@@ -445,7 +451,7 @@ const MentorListingPage = () => {
           </div>
         )}
       </div>
-    </div>
+          </motion.div>
   );
 };
 
