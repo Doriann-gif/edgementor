@@ -72,6 +72,47 @@ const AccountSettings = () => {
   const [newContent, setNewContent] = useState({ title: "", description: "", content_type: "link", content_url: "" });
   const [showAddContent, setShowAddContent] = useState(false);
   const [savingContent, setSavingContent] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const contentFileRef = useRef<HTMLInputElement>(null);
+  const editFileRef = useRef<HTMLInputElement>(null);
+
+  const uploadContentFile = async (file: File): Promise<string> => {
+    if (!mentorProfile) throw new Error("No mentor profile");
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const filePath = `${mentorProfile.id}/${fileName}`;
+
+    const { error } = await supabase.storage
+      .from("mentor-content")
+      .upload(filePath, file, { upsert: true });
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("mentor-content")
+      .getPublicUrl(filePath);
+    return publicUrl;
+  };
+
+  const handleContentFileUpload = async (file: File, target: 'new' | 'edit') => {
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File too large. Max 50MB.");
+      return;
+    }
+    setUploadingFile(true);
+    try {
+      const url = await uploadContentFile(file);
+      if (target === 'new') {
+        setNewContent(prev => ({ ...prev, content_url: url }));
+      } else if (editingContent) {
+        setEditingContent((prev: any) => ({ ...prev, content_url: url }));
+      }
+      toast.success("File uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed.");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
 
   useEffect(() => {
     if (profile) {
@@ -454,9 +495,20 @@ const AccountSettings = () => {
                           <SelectItem value="discord">Discord</SelectItem>
                           <SelectItem value="call">Call</SelectItem>
                           <SelectItem value="resource">Resource</SelectItem>
+                          <SelectItem value="file">File Upload</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Input placeholder="URL" value={newContent.content_url} onChange={(e) => setNewContent({ ...newContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" />
+                      <div className="flex-1 flex gap-2">
+                        <Input placeholder="URL" value={newContent.content_url} onChange={(e) => setNewContent({ ...newContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" />
+                        <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => contentFileRef.current?.click()} disabled={uploadingFile}>
+                          <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload"}
+                        </Button>
+                        <input ref={contentFileRef} type="file" className="hidden" onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleContentFileUpload(f, 'new');
+                          e.target.value = '';
+                        }} />
+                      </div>
                     </div>
                     <Button size="sm" className="text-xs font-semibold" onClick={addContent} disabled={savingContent || !newContent.title.trim()}>
                       {savingContent ? "Saving..." : "Save Content"}
@@ -480,7 +532,7 @@ const AccountSettings = () => {
                           <div className="flex-1 space-y-2">
                             <Input value={editingContent.title} onChange={(e) => setEditingContent({ ...editingContent, title: e.target.value })} className="bg-muted border-border text-sm" />
                             <Textarea value={editingContent.description} onChange={(e) => setEditingContent({ ...editingContent, description: e.target.value })} className="bg-muted border-border text-sm min-h-[50px]" />
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
                               <Select value={editingContent.content_type} onValueChange={(v) => setEditingContent({ ...editingContent, content_type: v })}>
                                 <SelectTrigger className="w-32 bg-muted border-border text-sm"><SelectValue /></SelectTrigger>
                                 <SelectContent>
@@ -489,9 +541,18 @@ const AccountSettings = () => {
                                   <SelectItem value="discord">Discord</SelectItem>
                                   <SelectItem value="call">Call</SelectItem>
                                   <SelectItem value="resource">Resource</SelectItem>
+                                  <SelectItem value="file">File Upload</SelectItem>
                                 </SelectContent>
                               </Select>
                               <Input value={editingContent.content_url} onChange={(e) => setEditingContent({ ...editingContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" placeholder="URL" />
+                              <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => editFileRef.current?.click()} disabled={uploadingFile}>
+                                <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload"}
+                              </Button>
+                              <input ref={editFileRef} type="file" className="hidden" onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleContentFileUpload(f, 'edit');
+                                e.target.value = '';
+                              }} />
                             </div>
                             <div className="flex gap-2">
                               <Button size="sm" className="text-xs" onClick={updateContent} disabled={savingContent}>{savingContent ? "Saving..." : "Save"}</Button>

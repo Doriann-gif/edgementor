@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Video, Link2, MessageCircle, Calendar, BookOpen,
-  Plus, Trash2, ExternalLink, GripVertical,
+  Video, Link2, MessageCircle, Calendar, BookOpen, FileUp,
+  Plus, Trash2, ExternalLink, GripVertical, Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,6 +29,7 @@ const CONTENT_TYPES = [
   { value: "discord", label: "Discord / Community", icon: MessageCircle },
   { value: "call", label: "Scheduled Call", icon: Calendar },
   { value: "resource", label: "Course Material", icon: BookOpen },
+  { value: "file", label: "File Upload", icon: FileUp },
 ];
 
 const TYPE_COLORS: Record<string, string> = {
@@ -37,6 +38,7 @@ const TYPE_COLORS: Record<string, string> = {
   discord: "text-indigo-400 bg-indigo-400/10",
   call: "text-amber-400 bg-amber-400/10",
   resource: "text-primary bg-primary/10",
+  file: "text-emerald-400 bg-emerald-400/10",
 };
 
 interface MentorContentManagerProps {
@@ -50,6 +52,33 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
   const [description, setDescription] = useState("");
   const [contentType, setContentType] = useState("link");
   const [contentUrl, setContentUrl] = useState("");
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const contentFileRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (file: File) => {
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File too large. Max 50MB.");
+      return;
+    }
+    setUploadingFile(true);
+    try {
+      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const filePath = `${mentorId}/${fileName}`;
+      const { error } = await supabase.storage
+        .from("mentor-content")
+        .upload(filePath, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage
+        .from("mentor-content")
+        .getPublicUrl(filePath);
+      setContentUrl(publicUrl);
+      toast.success("File uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed.");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
 
   const { data: content = [], isLoading } = useQuery({
     queryKey: ["mentor-content", mentorId],
@@ -158,13 +187,23 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">URL</Label>
-            <Input
-              placeholder="https://..."
-              value={contentUrl}
-              onChange={(e) => setContentUrl(e.target.value)}
-              className="bg-muted border-border text-sm"
-            />
+            <Label className="text-xs">URL or File</Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="https://..."
+                value={contentUrl}
+                onChange={(e) => setContentUrl(e.target.value)}
+                className="bg-muted border-border text-sm flex-1"
+              />
+              <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => contentFileRef.current?.click()} disabled={uploadingFile}>
+                <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload File"}
+              </Button>
+              <input ref={contentFileRef} type="file" className="hidden" onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFileUpload(f);
+                e.target.value = '';
+              }} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Description (optional)</Label>
