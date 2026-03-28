@@ -3,60 +3,160 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { TrendingUp, Search, Star, Clock, SlidersHorizontal, X } from "lucide-react";
+import { TrendingUp, Search, Star, Clock, SlidersHorizontal, X, Crown, ArrowUpDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMentors } from "@/hooks/use-mentors";
-import type { Mentor } from "@/types/mentor";
+import TierBadge from "@/components/TierBadge";
+import type { Mentor, MentorTier } from "@/types/mentor";
 
 const ALL_INSTRUMENTS = ["Futures", "Forex", "Crypto", "Options"];
 const ALL_CONCEPTS = ["ICT", "Order Flow", "Price Action", "Patterns"];
 
-const MentorCard = ({ mentor }: { mentor: Mentor }) => (
-  <div className="group rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-    <div className="flex items-start gap-4 mb-4">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-sm">
-        {mentor.avatar}
-      </div>
-      <div className="min-w-0 flex-1">
-        <h3 className="font-heading font-semibold text-foreground truncate">{mentor.name}</h3>
-        <div className="flex items-center gap-3 mt-0.5">
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" /> {mentor.experience}
-          </span>
-          <span className="flex items-center gap-1 text-xs text-amber-400">
-            <Star className="h-3 w-3 fill-current" /> {mentor.rating}
+type SortOption = "featured" | "newest" | "top_rated" | "most_students" | "trending";
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: "featured", label: "Featured" },
+  { value: "newest", label: "Newest" },
+  { value: "top_rated", label: "Top Rated" },
+  { value: "most_students", label: "Most Students" },
+  { value: "trending", label: "Trending" },
+];
+
+const TIER_ORDER: Record<MentorTier, number> = { elite: 0, pro: 1, verified: 2 };
+
+const sortMentors = (mentors: Mentor[], sort: SortOption): Mentor[] => {
+  const sorted = [...mentors];
+  switch (sort) {
+    case "featured":
+      return sorted.sort((a, b) => (TIER_ORDER[a.tier || "verified"] ?? 2) - (TIER_ORDER[b.tier || "verified"] ?? 2) || b.rating - a.rating);
+    case "newest":
+      return sorted.sort((a, b) => b.id.localeCompare(a.id));
+    case "top_rated":
+      return sorted.sort((a, b) => b.rating - a.rating);
+    case "most_students":
+      return sorted.sort((a, b) => b.students - a.students);
+    case "trending":
+      return sorted.sort((a, b) => (b.students * b.rating) - (a.students * a.rating));
+    default:
+      return sorted;
+  }
+};
+
+const MentorCard = ({ mentor }: { mentor: Mentor }) => {
+  const tier = mentor.tier || "verified";
+  const isElite = tier === "elite";
+
+  return (
+    <div className={`group relative rounded-2xl border p-5 transition-all duration-300 hover:shadow-lg ${
+      isElite
+        ? "border-slate-600/50 bg-gradient-to-br from-slate-900 via-card to-slate-900/80 hover:border-slate-400/40 hover:shadow-slate-400/10"
+        : "border-border bg-card hover:border-primary/30 hover:shadow-primary/5"
+    }`}>
+      {isElite && (
+        <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-slate-400/50 to-transparent" />
+      )}
+      {isElite && (
+        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-900 border border-slate-600/50 px-2.5 py-0.5 text-[10px] font-semibold text-slate-200 shadow-[0_0_12px_rgba(203,213,225,0.15)]">
+            <Crown className="h-3 w-3 drop-shadow-[0_0_6px_rgba(203,213,225,0.5)]" /> FEATURED
           </span>
         </div>
+      )}
+      <div className="flex items-start gap-4 mb-4">
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full font-heading font-bold text-sm ${
+          isElite ? "bg-slate-700/50 text-slate-200" : "bg-primary/10 text-primary"
+        }`}>
+          {mentor.avatar}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h3 className="font-heading font-semibold text-foreground truncate">{mentor.name}</h3>
+            <TierBadge tier={tier} size="sm" showLabel={false} />
+          </div>
+          <div className="flex items-center gap-3 mt-0.5">
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" /> {mentor.experience}
+            </span>
+            <span className="flex items-center gap-1 text-xs text-amber-400">
+              <Star className="h-3 w-3 fill-current" /> {mentor.rating}
+            </span>
+            <TierBadge tier={tier} size="sm" />
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <span className="font-heading font-bold text-foreground">${mentor.monthly_price}</span>
+          <span className="text-xs text-muted-foreground block">/month</span>
+        </div>
       </div>
-      <div className="text-right shrink-0">
-        <span className="font-heading font-bold text-foreground">${mentor.monthly_price}</span>
-        <span className="text-xs text-muted-foreground block">/month</span>
+      <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-2">{mentor.bio}</p>
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {mentor.instruments.map((i) => (
+          <span key={i} className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${isElite ? "bg-slate-700/50 text-slate-300" : "bg-primary/10 text-primary"}`}>{i}</span>
+        ))}
+        {mentor.concepts.map((c) => (
+          <span key={c} className="rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">{c}</span>
+        ))}
+        <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{mentor.session}</span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">{mentor.students} students</span>
+        <Link to={`/mentor/${mentor.id}`}>
+          <Button size="sm" className={`h-8 text-xs font-semibold ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : ""}`}>View Profile</Button>
+        </Link>
       </div>
     </div>
-    <p className="text-sm text-muted-foreground leading-relaxed mb-4 line-clamp-2">{mentor.bio}</p>
-    <div className="flex flex-wrap gap-1.5 mb-4">
-      {mentor.instruments.map((i) => (
-        <span key={i} className="rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">{i}</span>
-      ))}
-      {mentor.concepts.map((c) => (
-        <span key={c} className="rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">{c}</span>
-      ))}
-      <span className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">{mentor.session}</span>
+  );
+};
+
+const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
+  const eliteMentors = mentors.filter((m) => (m.tier || "verified") === "elite");
+  if (eliteMentors.length === 0) return null;
+
+  return (
+    <div className="mb-10">
+      <div className="flex items-center gap-2.5 mb-4">
+        <Crown className="h-5 w-5 text-slate-200 drop-shadow-[0_0_6px_rgba(203,213,225,0.5)]" />
+        <h2 className="font-heading text-lg font-bold text-foreground">Featured Mentors</h2>
+      </div>
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+        {eliteMentors.map((mentor) => (
+          <Link key={mentor.id} to={`/mentor/${mentor.id}`} className="min-w-[280px] max-w-[320px] shrink-0">
+            <div className="relative rounded-2xl border border-slate-600/50 bg-gradient-to-br from-slate-900 via-card to-slate-900/80 p-5 transition-all hover:border-slate-400/40 hover:shadow-lg hover:shadow-slate-400/10">
+              <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-slate-400/50 to-transparent" />
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-700/50 text-slate-200 font-heading font-bold text-sm">
+                  {mentor.avatar}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <h3 className="font-heading font-semibold text-foreground text-sm truncate">{mentor.name}</h3>
+                    <Crown className="h-3.5 w-3.5 text-slate-200 drop-shadow-[0_0_6px_rgba(203,213,225,0.5)] shrink-0" />
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="flex items-center gap-1 text-xs text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                    <span className="text-xs text-muted-foreground">{mentor.students} students</span>
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{mentor.bio}</p>
+              <div className="flex items-center justify-between">
+                <span className="font-heading font-bold text-foreground text-sm">${mentor.monthly_price}<span className="text-xs text-muted-foreground font-normal">/mo</span></span>
+                <TierBadge tier="elite" size="sm" />
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
-    <div className="flex items-center justify-between">
-      <span className="text-xs text-muted-foreground">{mentor.students} students</span>
-      <Link to={`/mentor/${mentor.id}`}>
-        <Button size="sm" className="h-8 text-xs font-semibold">View Profile</Button>
-      </Link>
-    </div>
-  </div>
-);
+  );
+};
 
 const MentorListingPage = () => {
   const [search, setSearch] = useState("");
   const [activeInstruments, setActiveInstruments] = useState<string[]>([]);
   const [activeConcepts, setActiveConcepts] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number]>([500]);
+  const [sortBy, setSortBy] = useState<SortOption>("featured");
   const { data: mentors = [], isLoading } = useMentors();
 
   const toggleItem = (arr: string[], item: string) =>
@@ -70,6 +170,7 @@ const MentorListingPage = () => {
     return matchesSearch && matchesInstrument && matchesConcept && matchesPrice;
   });
 
+  const sorted = sortMentors(filtered, sortBy);
   const activeFilterCount = activeInstruments.length + activeConcepts.length + (priceRange[0] < 500 ? 1 : 0);
 
   const clearFilters = () => {
@@ -99,7 +200,11 @@ const MentorListingPage = () => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-3 mb-8">
+        {/* Featured Mentors Row */}
+        {!isLoading && <FeaturedMentorsRow mentors={mentors} />}
+
+        {/* Search + Filters + Sort */}
+        <div className="flex items-center gap-3 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search mentors..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 bg-card border-border" />
@@ -124,17 +229,11 @@ const MentorListingPage = () => {
                   </button>
                 )}
               </div>
-
-              {/* Price slider */}
               <div className="space-y-3">
                 <label className="text-xs font-medium text-muted-foreground">Max Price: ${priceRange[0]}/mo</label>
                 <Slider value={priceRange} onValueChange={(v) => setPriceRange(v as [number])} min={10} max={500} step={10} />
-                <div className="flex justify-between text-[10px] text-muted-foreground">
-                  <span>$10</span><span>$500</span>
-                </div>
+                <div className="flex justify-between text-[10px] text-muted-foreground"><span>$10</span><span>$500</span></div>
               </div>
-
-              {/* Concepts */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">Concepts</label>
                 <div className="flex flex-wrap gap-1.5">
@@ -146,8 +245,6 @@ const MentorListingPage = () => {
                   ))}
                 </div>
               </div>
-
-              {/* Instruments */}
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">Indexes</label>
                 <div className="flex flex-wrap gap-1.5">
@@ -163,16 +260,35 @@ const MentorListingPage = () => {
           </Popover>
         </div>
 
+        {/* Sort Options */}
+        <div className="flex items-center gap-2 mb-6">
+          <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground mr-1">Sort:</span>
+          {SORT_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setSortBy(opt.value)}
+              className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-all ${
+                sortBy === opt.value
+                  ? "border-primary/50 bg-primary/10 text-primary"
+                  : "border-border bg-secondary text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
         <div className="space-y-4">
           {isLoading ? (
             <div className="text-center py-16 text-muted-foreground"><p className="text-sm">Loading mentors...</p></div>
-          ) : filtered.length === 0 ? (
+          ) : sorted.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground">
               <p className="text-sm">No mentors match your filters.</p>
               <button onClick={clearFilters} className="text-primary text-sm mt-2 hover:underline">Clear filters</button>
             </div>
           ) : (
-            filtered.map((mentor) => <MentorCard key={mentor.id} mentor={mentor} />)
+            sorted.map((mentor) => <MentorCard key={mentor.id} mentor={mentor} />)
           )}
         </div>
       </div>
