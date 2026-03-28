@@ -218,22 +218,49 @@ const StudentDashboard = () => {
                 {subscriptions.map((sub: any) => {
                   const mentor = sub.mentors as Mentor;
                   return (
-                    <Link key={sub.id} to={`/mentor/${mentor.id}`} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-sm">
-                        {mentor.avatar}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-heading font-semibold text-foreground text-sm">{mentor.name}</h3>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Since {new Date(sub.started_at).toLocaleDateString()}</span>
-                          <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                    <div key={sub.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
+                      <Link to={`/mentorship/${mentor.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-sm">
+                          {mentor.avatar}
                         </div>
-                      </div>
-                      <div className="text-right shrink-0">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-heading font-semibold text-foreground text-sm">{mentor.name}</h3>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Since {new Date(sub.started_at).toLocaleDateString()}</span>
+                            <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                          </div>
+                        </div>
+                      </Link>
+                      <div className="text-right shrink-0 mr-1">
                         <span className="font-heading font-bold text-foreground text-sm">${mentor.monthly_price}</span>
                         <span className="text-xs text-muted-foreground block">/mo</span>
                       </div>
-                    </Link>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
+                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem asChild>
+                            <Link to={`/mentorship/${mentor.id}`} className="flex items-center gap-2">
+                              <ExternalLink className="h-3.5 w-3.5" /> Access Content
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link to={`/mentor/${mentor.id}`} className="flex items-center gap-2">
+                              <Users className="h-3.5 w-3.5" /> View Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive flex items-center gap-2"
+                            onClick={() => setConfirmCancelSub({ id: sub.id, mentorName: mentor.name })}
+                          >
+                            <XCircle className="h-3.5 w-3.5" /> Cancel Membership
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   );
                 })}
               </div>
