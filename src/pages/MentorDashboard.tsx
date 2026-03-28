@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MentorContentManager from "@/components/MentorContentManager";
 import {
   ArrowLeft, LogOut, Users, DollarSign, TrendingUp, Edit3, Save,
-  X, Clock, Star, Eye, Tag,
+  X, Clock, Star, Eye, Tag, Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 
