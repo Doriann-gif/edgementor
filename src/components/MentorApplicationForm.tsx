@@ -20,6 +20,8 @@ const MentorApplicationForm = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [socialLink, setSocialLink] = useState("");
+  const [confirmGenuine, setConfirmGenuine] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [experience, setExperience] = useState("");
   const [instruments, setInstruments] = useState<string[]>([]);
   const [concepts, setConcepts] = useState<string[]>([]);
@@ -143,7 +145,17 @@ const MentorApplicationForm = () => {
             <Label htmlFor="bio" className="text-sm font-medium">Short Bio</Label>
             <Textarea id="bio" placeholder="Describe your trading journey, edge, and what students can expect..." rows={4} value={bio} onChange={(e) => setBio(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors resize-none" />
           </div>
-          <Button type="submit" className="w-full h-12 text-sm font-semibold tracking-wide" disabled={submitting}>
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={confirmGenuine} onChange={(e) => setConfirmGenuine(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-border accent-primary" />
+              <span className="text-sm text-muted-foreground">I confirm all information and documents submitted are genuine and accurate</span>
+            </label>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input type="checkbox" checked={agreeTerms} onChange={(e) => setAgreeTerms(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-border accent-primary" />
+              <span className="text-sm text-muted-foreground">I agree to EdgeMentor's <a href="/terms" className="text-primary hover:underline">Terms and Conditions</a></span>
+            </label>
+          </div>
+          <Button type="submit" className="w-full h-12 text-sm font-semibold tracking-wide" disabled={submitting || !confirmGenuine || !agreeTerms}>
             {submitting ? "Submitting..." : "Submit Application"}
           </Button>
           <p className="text-center text-xs text-muted-foreground">Applications are reviewed within 48 hours. You'll receive an email notification.</p>
