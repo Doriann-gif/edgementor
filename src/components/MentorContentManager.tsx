@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Video, Link2, MessageCircle, Calendar, BookOpen,
-  Plus, Trash2, ExternalLink, GripVertical,
+  Video, Link2, MessageCircle, Calendar, BookOpen, FileUp,
+  Plus, Trash2, ExternalLink, GripVertical, Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,6 +29,7 @@ const CONTENT_TYPES = [
   { value: "discord", label: "Discord / Community", icon: MessageCircle },
   { value: "call", label: "Scheduled Call", icon: Calendar },
   { value: "resource", label: "Course Material", icon: BookOpen },
+  { value: "file", label: "File Upload", icon: FileUp },
 ];
 
 const TYPE_COLORS: Record<string, string> = {
