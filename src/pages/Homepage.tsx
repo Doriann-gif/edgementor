@@ -27,7 +27,7 @@ const floatingOrb = {
   transition: {
     duration: 8,
     repeat: Infinity,
-    ease: "easeInOut",
+    ease: "easeInOut" as const,
   },
 };
 
@@ -40,7 +40,7 @@ const floatingOrbSlow = {
   transition: {
     duration: 12,
     repeat: Infinity,
-    ease: "easeInOut",
+    ease: "easeInOut" as const,
   },
 };
 
@@ -53,7 +53,7 @@ const staggerContainer = {
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
 
 const Homepage = () => {
