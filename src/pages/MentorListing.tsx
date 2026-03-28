@@ -235,11 +235,20 @@ const MentorListingPage = () => {
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Hero Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-5 backdrop-blur-sm">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-5 backdrop-blur-sm"
+          >
             <Target className="h-3.5 w-3.5" /> {mentors.length} Verified Mentors Available
-          </div>
+          </motion.div>
           <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
             Find Your <span className="text-primary">Edge</span>
           </h1>
@@ -253,11 +262,17 @@ const MentorListingPage = () => {
               { value: `${mentors.length}`, label: "Mentors" },
               { value: "4.8", label: "Avg Rating" },
               { value: "1.2K+", label: "Students" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                className="text-center"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.1, duration: 0.4 }}
+              >
                 <div className="font-heading font-bold text-xl text-foreground">{stat.value}</div>
                 <div className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
