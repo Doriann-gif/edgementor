@@ -27,6 +27,7 @@ const MentorApplicationForm = () => {
   const [concepts, setConcepts] = useState<string[]>([]);
   const [session, setSession] = useState("");
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [monthlyPrice, setMonthlyPrice] = useState("");
   const [bio, setBio] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -72,6 +73,7 @@ const MentorApplicationForm = () => {
       setConcepts([]);
       setSession("");
       setProofFile(null);
+      setProfilePhoto(null);
       setMonthlyPrice("");
       setBio("");
     } catch (err) {
@@ -131,6 +133,21 @@ const MentorApplicationForm = () => {
             </div>
           </div>
           <div className="space-y-2">
+            <Label className="text-sm font-medium flex items-center gap-2"><User className="h-3.5 w-3.5 text-primary" /> Profile Photo</Label>
+            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/50 p-6 transition-colors hover:border-primary/30 hover:bg-muted">
+              {profilePhoto ? (
+                <img src={URL.createObjectURL(profilePhoto)} alt="Preview" className="h-20 w-20 rounded-full object-cover mb-2" />
+              ) : (
+                <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-2">
+                  <User className="h-8 w-8 text-muted-foreground" />
+                </div>
+              )}
+              <span className="text-sm font-medium text-foreground">{profilePhoto ? profilePhoto.name : "Upload profile photo"}</span>
+              <span className="text-xs text-muted-foreground mt-1">PNG, JPG up to 5MB</span>
+              <input type="file" className="hidden" accept=".png,.jpg,.jpeg,.webp" onChange={(e) => setProfilePhoto(e.target.files?.[0] ?? null)} />
+            </label>
+          </div>
+          <div className="space-y-2">
             <Label className="text-sm font-medium flex items-center gap-2"><FileText className="h-3.5 w-3.5 text-primary" /> Proof of Profitability</Label>
             <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/50 p-8 transition-colors hover:border-primary/30 hover:bg-muted">
               <Upload className="h-8 w-8 text-muted-foreground mb-2" />
@@ -145,7 +162,7 @@ const MentorApplicationForm = () => {
           </div>
           <div className="space-y-2">
             <Label htmlFor="bio" className="text-sm font-medium">Short Bio</Label>
-            <Textarea id="bio" placeholder="Describe your trading journey, edge, and what students can expect..." rows={4} value={bio} onChange={(e) => setBio(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors resize-none" />
+            <Textarea id="bio" placeholder="Describe your trading journey, edge, and what students can expect..." rows={6} value={bio} onChange={(e) => setBio(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors resize-none" />
           </div>
           <div className="space-y-3">
             <label className="flex items-start gap-3 cursor-pointer">
