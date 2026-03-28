@@ -134,16 +134,18 @@ const MentorApplicationForm = () => {
           </div>
           <div className="space-y-2">
             <Label className="text-sm font-medium flex items-center gap-2"><User className="h-3.5 w-3.5 text-primary" /> Profile Photo</Label>
-            <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/50 p-6 transition-colors hover:border-primary/30 hover:bg-muted">
+            <label className="flex cursor-pointer items-center gap-4 rounded-xl border-2 border-dashed border-border bg-muted/50 p-4 transition-colors hover:border-primary/30 hover:bg-muted">
               {profilePhoto ? (
-                <img src={URL.createObjectURL(profilePhoto)} alt="Preview" className="h-20 w-20 rounded-full object-cover mb-2" />
+                <img src={URL.createObjectURL(profilePhoto)} alt="Preview" className="h-12 w-12 rounded-full object-cover shrink-0" />
               ) : (
-                <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-2">
-                  <User className="h-8 w-8 text-muted-foreground" />
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center shrink-0">
+                  <User className="h-5 w-5 text-muted-foreground" />
                 </div>
               )}
-              <span className="text-sm font-medium text-foreground">{profilePhoto ? profilePhoto.name : "Upload profile photo"}</span>
-              <span className="text-xs text-muted-foreground mt-1">PNG, JPG up to 5MB</span>
+              <div>
+                <span className="text-sm font-medium text-foreground block">{profilePhoto ? profilePhoto.name : "Upload profile photo"}</span>
+                <span className="text-xs text-muted-foreground">PNG, JPG up to 5MB</span>
+              </div>
               <input type="file" className="hidden" accept=".png,.jpg,.jpeg,.webp" onChange={(e) => setProfilePhoto(e.target.files?.[0] ?? null)} />
             </label>
           </div>
