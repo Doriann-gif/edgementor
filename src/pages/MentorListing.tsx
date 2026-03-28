@@ -142,7 +142,12 @@ const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
   if (eliteMentors.length === 0) return null;
 
   return (
-    <div className="mb-12">
+    <motion.div
+      className="mb-12"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
       <div className="flex items-center gap-3 mb-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/10">
           <Crown className="h-4 w-4 text-amber-400" />
@@ -189,7 +194,7 @@ const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
           </Link>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -277,7 +282,12 @@ const MentorListingPage = () => {
           </div>
         </motion.div>
 
-        <div className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-3 mb-8 shadow-lg shadow-background/50">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-3 mb-8 shadow-lg shadow-background/50"
+        >
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -375,7 +385,7 @@ const MentorListingPage = () => {
               {sorted.length} result{sorted.length !== 1 ? "s" : ""}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Featured Mentors Row */}
         {!isLoading && <FeaturedMentorsRow mentors={mentors} />}
