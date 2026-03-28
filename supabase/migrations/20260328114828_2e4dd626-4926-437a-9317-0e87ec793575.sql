@@ -1,0 +1,1 @@
+ALTER TABLE public.mentor_applications ADD COLUMN email text, ADD COLUMN social_link text;

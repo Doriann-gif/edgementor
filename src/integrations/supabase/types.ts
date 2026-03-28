@@ -122,6 +122,7 @@ export type Database = {
           bio: string
           concepts: string[]
           created_at: string
+          email: string | null
           experience: string
           full_name: string
           id: string
@@ -129,12 +130,14 @@ export type Database = {
           monthly_price: number
           proof_url: string | null
           session: string
+          social_link: string | null
           status: string
         }
         Insert: {
           bio: string
           concepts?: string[]
           created_at?: string
+          email?: string | null
           experience: string
           full_name: string
           id?: string
@@ -142,12 +145,14 @@ export type Database = {
           monthly_price: number
           proof_url?: string | null
           session: string
+          social_link?: string | null
           status?: string
         }
         Update: {
           bio?: string
           concepts?: string[]
           created_at?: string
+          email?: string | null
           experience?: string
           full_name?: string
           id?: string
@@ -155,6 +160,7 @@ export type Database = {
           monthly_price?: number
           proof_url?: string | null
           session?: string
+          social_link?: string | null
           status?: string
         }
         Relationships: []
