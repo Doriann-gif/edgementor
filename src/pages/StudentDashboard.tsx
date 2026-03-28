@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptions, useMessages, useMarkMessageRead } from "@/hooks/use-student";
@@ -22,24 +22,67 @@ const StudentDashboard = () => {
   const { data: messages = [], isLoading: msgsLoading } = useMessages();
   const markRead = useMarkMessageRead();
   const [portalLoading, setPortalLoading] = useState(false);
+  const [canManageBilling, setCanManageBilling] = useState(false);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const checkBillingAccess = async () => {
+      if (!user) {
+        if (isActive) setCanManageBilling(false);
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("check-subscription", {
+        body: {},
+      });
+
+      if (isActive) {
+        setCanManageBilling(!error && !!data?.subscribed);
+      }
+    };
+
+    void checkBillingAccess();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user?.id]);
 
   const openBillingPortal = async () => {
     setPortalLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) {
-        // Check if it's a "no customer" 404
-        const parsed = typeof error === 'object' && 'message' in error ? error.message : String(error);
-        if (parsed.includes("no_customer") || parsed.includes("404")) {
+        let noCustomer = false;
+        const errorMessage =
+          typeof error === "object" && error && "message" in error
+            ? String((error as { message?: string }).message ?? "")
+            : String(error);
+
+        if (typeof error === "object" && error && "context" in error) {
+          const response = (error as { context?: Response }).context;
+          if (response) {
+            const errorBody = await response.json().catch(() => null);
+            if (errorBody?.error === "no_customer") {
+              noCustomer = true;
+            }
+          }
+        }
+
+        if (noCustomer || errorMessage.includes("no_customer") || errorMessage.includes("404")) {
           toast.error("You need to complete a Stripe checkout first before managing billing.");
           return;
         }
+
         throw error;
       }
+
       if (data?.error === "no_customer") {
         toast.error("You need to complete a Stripe checkout first before managing billing.");
         return;
       }
+
       if (data?.url) {
         window.open(data.url, "_blank");
       } else {
@@ -82,7 +125,7 @@ const StudentDashboard = () => {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {subscriptions.length > 0 && (
+            {canManageBilling && (
               <Button variant="outline" size="sm" className="text-xs" onClick={openBillingPortal} disabled={portalLoading}>
                 <CreditCard className="h-3.5 w-3.5 mr-1.5" /> {portalLoading ? "Opening..." : "Manage Billing"}
               </Button>
