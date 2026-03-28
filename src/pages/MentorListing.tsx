@@ -172,7 +172,7 @@ const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
                 </div>
               </div>
 
-              <p className="text-xs text-muted-foreground line-clamp-2 mb-4 leading-relaxed". >{mentor.bio}</p>
+              <p className="text-xs text-muted-foreground line-clamp-2 mb-4 leading-relaxed">{mentor.bio}</p>
 
               <div className="flex items-center justify-between">
                 <span className="font-heading font-bold text-foreground">
