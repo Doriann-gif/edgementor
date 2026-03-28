@@ -38,7 +38,7 @@ const MentorApplicationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !experience || instruments.length === 0 || concepts.length === 0 || !session || !monthlyPrice || !bio) {
+    if (!fullName || !email || !experience || instruments.length === 0 || concepts.length === 0 || !session || !monthlyPrice || !bio) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -47,6 +47,8 @@ const MentorApplicationForm = () => {
     try {
       const { error } = await supabase.from("mentor_applications").insert({
         full_name: fullName,
+        email,
+        social_link: socialLink || null,
         experience,
         instruments,
         concepts,
@@ -59,11 +61,13 @@ const MentorApplicationForm = () => {
 
       setShowSuccess(true);
       setFullName("");
+      setEmail("");
+      setSocialLink("");
       setExperience("");
       setInstruments([]);
       setConcepts([]);
       setSession("");
-      setProofFile(null);
+      setProofFile("");
       setMonthlyPrice("");
       setBio("");
     } catch (err) {
