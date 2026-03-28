@@ -30,6 +30,9 @@ const StudentDashboard = () => {
   const markRead = useMarkMessageRead();
   const [portalLoading, setPortalLoading] = useState(false);
   const [canManageBilling, setCanManageBilling] = useState(false);
+  const [cancellingSubId, setCancellingSubId] = useState<string | null>(null);
+  const [confirmCancelSub, setConfirmCancelSub] = useState<{ id: string; mentorName: string } | null>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     let isActive = true;
