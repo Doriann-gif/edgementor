@@ -1,15 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMyMentorProfile } from "@/hooks/use-mentor-dashboard";
+import { useMentorContent } from "@/hooks/use-mentor-content";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  ArrowLeft, User, Lock, Bell, CreditCard, Trash2, Save, Zap, LogOut,
+  ArrowLeft, User, Lock, Bell, CreditCard, Trash2, Save, LogOut,
+  Camera, Upload, BookOpen, Plus, GripVertical, Pencil, Trash, X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,6 +23,7 @@ const AccountSettings = () => {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get("tab") || "profile";
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Profile data
   const { data: profile, isLoading: profileLoading } = useQuery({
@@ -33,6 +39,10 @@ const AccountSettings = () => {
       return data;
     },
   });
+
+  // Mentor profile (to conditionally show My Content tab)
+  const { data: mentorProfile } = useMyMentorProfile();
+  const { data: mentorContent = [], isLoading: contentLoading } = useMentorContent(mentorProfile?.id);
 
   // Subscriptions (billing history)
   const { data: subscriptions = [] } = useQuery({
@@ -53,9 +63,15 @@ const AccountSettings = () => {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  // Content editing state
+  const [editingContent, setEditingContent] = useState<any | null>(null);
+  const [newContent, setNewContent] = useState({ title: "", description: "", content_type: "link", content_url: "" });
+  const [showAddContent, setShowAddContent] = useState(false);
+  const [savingContent, setSavingContent] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -65,6 +81,39 @@ const AccountSettings = () => {
       setMarketingEmails(profile.marketing_emails ?? false);
     }
   }, [profile]);
+
+  const uploadAvatar = async (file: File) => {
+    if (!user) return;
+    setUploading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      const url = `${publicUrl}?t=${Date.now()}`;
+      setAvatarUrl(url);
+
+      await supabase
+        .from("profiles")
+        .update({ avatar_url: url, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      toast.success("Profile picture updated!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload avatar.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const updateProfileMutation = useMutation({
     mutationFn: async () => {
@@ -95,7 +144,6 @@ const AccountSettings = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
       toast.success("Password updated!");
@@ -105,16 +153,82 @@ const AccountSettings = () => {
 
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
-      // Sign out — actual account deletion would require an edge function with service role
       await supabase.auth.signOut();
       toast.success("You have been signed out. Contact support to fully delete your account.");
     },
   });
 
+  // Content management functions
+  const addContent = async () => {
+    if (!mentorProfile || !newContent.title.trim()) return;
+    setSavingContent(true);
+    try {
+      const { error } = await supabase.from("mentor_content").insert({
+        mentor_id: mentorProfile.id,
+        title: newContent.title,
+        description: newContent.description,
+        content_type: newContent.content_type,
+        content_url: newContent.content_url,
+        display_order: mentorContent.length,
+      });
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["mentor-content"] });
+      setNewContent({ title: "", description: "", content_type: "link", content_url: "" });
+      setShowAddContent(false);
+      toast.success("Content added!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to add content.");
+    } finally {
+      setSavingContent(false);
+    }
+  };
+
+  const updateContent = async () => {
+    if (!editingContent) return;
+    setSavingContent(true);
+    try {
+      const { error } = await supabase.from("mentor_content")
+        .update({
+          title: editingContent.title,
+          description: editingContent.description,
+          content_type: editingContent.content_type,
+          content_url: editingContent.content_url,
+        })
+        .eq("id", editingContent.id);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["mentor-content"] });
+      setEditingContent(null);
+      toast.success("Content updated!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update content.");
+    } finally {
+      setSavingContent(false);
+    }
+  };
+
+  const deleteContent = async (id: string) => {
+    if (!window.confirm("Delete this content item?")) return;
+    try {
+      const { error } = await supabase.from("mentor_content").delete().eq("id", id);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["mentor-content"] });
+      toast.success("Content deleted.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete.");
+    }
+  };
+
   if (authLoading || profileLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
   }
   if (!user) return <Navigate to="/auth" replace />;
+
+  const initials = (displayName || user.email || "?")
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,7 +252,7 @@ const AccountSettings = () => {
         </div>
 
         <Tabs defaultValue={defaultTab} className="space-y-6">
-          <TabsList className="bg-secondary border border-border rounded-xl p-1 h-auto">
+          <TabsList className="bg-secondary border border-border rounded-xl p-1 h-auto flex-wrap">
             <TabsTrigger value="profile" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
               <User className="h-3.5 w-3.5 mr-1.5" /> Profile
             </TabsTrigger>
@@ -151,18 +265,84 @@ const AccountSettings = () => {
             <TabsTrigger value="billing" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
               <CreditCard className="h-3.5 w-3.5 mr-1.5" /> Billing
             </TabsTrigger>
+            {mentorProfile && (
+              <TabsTrigger value="content" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
+                <BookOpen className="h-3.5 w-3.5 mr-1.5" /> My Content
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Profile */}
           <TabsContent value="profile">
             <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+              {/* Avatar Upload */}
+              <div className="space-y-2">
+                <Label className="text-xs">Profile Picture</Label>
+                <div className="flex items-center gap-4">
+                  <div className="relative group">
+                    <div className="h-20 w-20 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center border-2 border-border">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        <span className="text-primary font-heading font-bold text-lg">{initials}</span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    >
+                      <Camera className="h-5 w-5 text-white" />
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      <Upload className="h-3.5 w-3.5 mr-1.5" />
+                      {uploading ? "Uploading..." : "Upload Photo"}
+                    </Button>
+                    {avatarUrl && (
+                      <button
+                        onClick={() => {
+                          setAvatarUrl("");
+                          supabase.from("profiles").update({ avatar_url: null, updated_at: new Date().toISOString() }).eq("id", user.id).then(() => {
+                            queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+                            toast.success("Profile picture removed.");
+                          });
+                        }}
+                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors text-left"
+                      >
+                        Remove photo
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        if (file.size > 5 * 1024 * 1024) {
+                          toast.error("File too large. Max 5MB.");
+                          return;
+                        }
+                        uploadAvatar(file);
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label className="text-xs">Display Name</Label>
                 <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="bg-muted border-border text-sm" placeholder="Your name" />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs">Avatar URL</Label>
-                <Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} className="bg-muted border-border text-sm" placeholder="https://..." />
               </div>
               <div className="space-y-2">
                 <Label className="text-xs">Email</Label>
@@ -241,6 +421,110 @@ const AccountSettings = () => {
               )}
             </div>
           </TabsContent>
+
+          {/* My Content (Mentors only) */}
+          {mentorProfile && (
+            <TabsContent value="content">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <h3 className="font-heading font-semibold text-foreground">Exclusive Content</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Manage content your subscribers can access.</p>
+                  </div>
+                  <Button size="sm" className="text-xs font-semibold" onClick={() => setShowAddContent(true)}>
+                    <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Content
+                  </Button>
+                </div>
+
+                {/* Add Content Form */}
+                {showAddContent && (
+                  <div className="rounded-xl border border-primary/20 bg-primary/[0.02] p-4 mb-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-heading font-semibold text-foreground text-sm">New Content</h4>
+                      <button onClick={() => setShowAddContent(false)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+                    </div>
+                    <Input placeholder="Title" value={newContent.title} onChange={(e) => setNewContent({ ...newContent, title: e.target.value })} className="bg-muted border-border text-sm" />
+                    <Textarea placeholder="Description (optional)" value={newContent.description} onChange={(e) => setNewContent({ ...newContent, description: e.target.value })} className="bg-muted border-border text-sm min-h-[60px]" />
+                    <div className="flex gap-3">
+                      <Select value={newContent.content_type} onValueChange={(v) => setNewContent({ ...newContent, content_type: v })}>
+                        <SelectTrigger className="w-36 bg-muted border-border text-sm"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="link">Link</SelectItem>
+                          <SelectItem value="video">Video</SelectItem>
+                          <SelectItem value="discord">Discord</SelectItem>
+                          <SelectItem value="call">Call</SelectItem>
+                          <SelectItem value="resource">Resource</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input placeholder="URL" value={newContent.content_url} onChange={(e) => setNewContent({ ...newContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" />
+                    </div>
+                    <Button size="sm" className="text-xs font-semibold" onClick={addContent} disabled={savingContent || !newContent.title.trim()}>
+                      {savingContent ? "Saving..." : "Save Content"}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Content List */}
+                {contentLoading ? (
+                  <p className="text-sm text-muted-foreground">Loading...</p>
+                ) : mentorContent.length === 0 ? (
+                  <div className="text-center py-8">
+                    <BookOpen className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No content yet. Add videos, links, and resources for your subscribers.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {mentorContent.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3">
+                        {editingContent?.id === item.id ? (
+                          <div className="flex-1 space-y-2">
+                            <Input value={editingContent.title} onChange={(e) => setEditingContent({ ...editingContent, title: e.target.value })} className="bg-muted border-border text-sm" />
+                            <Textarea value={editingContent.description} onChange={(e) => setEditingContent({ ...editingContent, description: e.target.value })} className="bg-muted border-border text-sm min-h-[50px]" />
+                            <div className="flex gap-2">
+                              <Select value={editingContent.content_type} onValueChange={(v) => setEditingContent({ ...editingContent, content_type: v })}>
+                                <SelectTrigger className="w-32 bg-muted border-border text-sm"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="link">Link</SelectItem>
+                                  <SelectItem value="video">Video</SelectItem>
+                                  <SelectItem value="discord">Discord</SelectItem>
+                                  <SelectItem value="call">Call</SelectItem>
+                                  <SelectItem value="resource">Resource</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <Input value={editingContent.content_url} onChange={(e) => setEditingContent({ ...editingContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" placeholder="URL" />
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" className="text-xs" onClick={updateContent} disabled={savingContent}>{savingContent ? "Saving..." : "Save"}</Button>
+                              <Button size="sm" variant="ghost" className="text-xs" onClick={() => setEditingContent(null)}>Cancel</Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-foreground text-sm truncate">{item.title}</h4>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[11px] text-muted-foreground capitalize rounded bg-muted px-1.5 py-0.5">{item.content_type}</span>
+                                {item.description && <span className="text-[11px] text-muted-foreground truncate">{item.description}</span>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setEditingContent({ ...item })}>
+                                <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => deleteContent(item.id)}>
+                                <Trash className="h-3.5 w-3.5 text-destructive" />
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Danger Zone */}
