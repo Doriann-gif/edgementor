@@ -125,6 +125,7 @@ const StudentDashboard = () => {
     }
   };
 
+  if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
   }
   if (!user) return <Navigate to="/auth" replace />;
