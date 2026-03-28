@@ -58,7 +58,12 @@ const Navbar = () => {
           <Settings className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuLabel className="font-normal">
+          <p className="text-sm font-medium text-foreground truncate">{profile?.display_name || "User"}</p>
+          <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate("/settings?tab=profile")} className="cursor-pointer">
           <User className="h-4 w-4 mr-2" /> Profile
         </DropdownMenuItem>
