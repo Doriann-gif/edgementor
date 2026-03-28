@@ -97,6 +97,13 @@ const MentorApplicationForm = () => {
             <Input id="fullName" placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors" />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> Email Address</Label>
+            <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="socialLink" className="text-sm font-medium flex items-center gap-2"><Instagram className="h-3.5 w-3.5 text-primary" /> Social Link (TikTok, Instagram, etc.)</Label>
+            <Input id="socialLink" placeholder="https://instagram.com/yourhandle" value={socialLink} onChange={(e) => setSocialLink(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors" />
+          </div>
             <Label htmlFor="experience" className="text-sm font-medium flex items-center gap-2"><TrendingUp className="h-3.5 w-3.5 text-primary" /> Years of Trading Experience</Label>
             <Select value={experience} onValueChange={setExperience}>
               <SelectTrigger className="bg-muted border-border focus:border-primary/50"><SelectValue placeholder="Select experience" /></SelectTrigger>
