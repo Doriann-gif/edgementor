@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -51,13 +52,15 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
 
   return (
     <Link to={`/mentor/${mentor.id}`} className="block group">
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
         className={`relative rounded-2xl border p-5 transition-all duration-500 hover:-translate-y-1 ${
           isElite
             ? "border-slate-600/50 bg-gradient-to-br from-slate-900 via-card to-slate-800/60 hover:border-slate-400/50 hover:shadow-[0_20px_60px_-15px_rgba(148,163,184,0.15)]"
             : "border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-[0_20px_60px_-15px_hsl(160_84%_39%/0.12)]"
         }`}
-        style={{ animationDelay: `${index * 60}ms` }}
       >
         {/* Elite glow line */}
         {isElite && (
@@ -129,7 +132,7 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
             View Profile <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
           </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 };
