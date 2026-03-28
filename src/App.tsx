@@ -15,6 +15,7 @@ import StudentDashboard from "./pages/StudentDashboard.tsx";
 import MentorDashboard from "./pages/MentorDashboard.tsx";
 import AccountSettings from "./pages/AccountSettings.tsx";
 import DiscountCodes from "./pages/DiscountCodes.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import Navbar from "./components/Navbar";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/mentor-dashboard" element={<MentorDashboard />} />
             <Route path="/settings" element={<AccountSettings />} />
             <Route path="/codes" element={<DiscountCodes />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

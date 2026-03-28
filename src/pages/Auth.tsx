@@ -91,7 +91,32 @@ const Auth = () => {
             <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="bg-muted border-border" required />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm">Password</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password" className="text-sm">Password</Label>
+              {!isSignUp && (
+                <button
+                  type="button"
+                  className="text-xs text-primary hover:underline"
+                  onClick={async () => {
+                    if (!email) {
+                      toast.error("Please enter your email first.");
+                      return;
+                    }
+                    try {
+                      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: `${window.location.origin}/reset-password`,
+                      });
+                      if (error) throw error;
+                      toast.success("Password reset email sent! Check your inbox.");
+                    } catch (err: any) {
+                      toast.error(err.message || "Failed to send reset email.");
+                    }
+                  }}
+                >
+                  Forgot password?
+                </button>
+              )}
+            </div>
             <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted border-border" required minLength={6} />
           </div>
           <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
