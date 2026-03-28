@@ -70,7 +70,7 @@ const Subscribe = () => {
         .insert({ user_id: user.id, mentor_id: id });
       if (error) throw error;
       toast.success(`You're now subscribed to ${mentor.name}! 🎉`);
-      navigate(`/mentor/${id}`);
+      navigate(`/mentorship/${id}`);
     } catch (err: any) {
       toast.error(err.message || "Subscription failed.");
     } finally {
