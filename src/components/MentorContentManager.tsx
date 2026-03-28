@@ -52,6 +52,33 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
   const [description, setDescription] = useState("");
   const [contentType, setContentType] = useState("link");
   const [contentUrl, setContentUrl] = useState("");
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const contentFileRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = async (file: File) => {
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File too large. Max 50MB.");
+      return;
+    }
+    setUploadingFile(true);
+    try {
+      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const filePath = `${mentorId}/${fileName}`;
+      const { error } = await supabase.storage
+        .from("mentor-content")
+        .upload(filePath, file, { upsert: true });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage
+        .from("mentor-content")
+        .getPublicUrl(filePath);
+      setContentUrl(publicUrl);
+      toast.success("File uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed.");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
 
   const { data: content = [], isLoading } = useQuery({
     queryKey: ["mentor-content", mentorId],
