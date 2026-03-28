@@ -1,12 +1,63 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Zap, User, Settings, Menu, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Zap, User, Settings, Menu, X, Moon, Sun, Bell, Shield, LogOut, CreditCard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useState } from "react";
 
 const Navbar = () => {
-  const { user, isAdmin, isMentor } = useAuth();
+  const { user, isAdmin, isMentor, signOut } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  const SettingsDropdown = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-9 w-9">
+          <Settings className="h-4 w-4 text-muted-foreground" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+          <User className="h-4 w-4 mr-2" /> Profile
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+          <Shield className="h-4 w-4 mr-2" /> Privacy & Security
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+          <Bell className="h-4 w-4 mr-2" /> Notifications
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+          <CreditCard className="h-4 w-4 mr-2" /> Billing
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={toggleTheme} className="cursor-pointer">
+          {theme === "dark" ? (
+            <><Sun className="h-4 w-4 mr-2" /> Light Mode</>
+          ) : (
+            <><Moon className="h-4 w-4 mr-2" /> Dark Mode</>
+          )}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
+          <LogOut className="h-4 w-4 mr-2" /> Log Out
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   return (
     <nav className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
@@ -40,16 +91,17 @@ const Navbar = () => {
                   <User className="h-3.5 w-3.5 mr-1" /> Dashboard
                 </Button>
               </Link>
-              <Link to="/settings">
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Settings className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </Link>
+              <SettingsDropdown />
             </>
           ) : (
-            <Link to="/auth">
-              <Button variant="outline" size="sm" className="text-xs">Sign In</Button>
-            </Link>
+            <>
+              <Button variant="ghost" size="icon" className="h-9 w-9" onClick={toggleTheme}>
+                {theme === "dark" ? <Sun className="h-4 w-4 text-muted-foreground" /> : <Moon className="h-4 w-4 text-muted-foreground" />}
+              </Button>
+              <Link to="/auth">
+                <Button variant="outline" size="sm" className="text-xs">Sign In</Button>
+              </Link>
+            </>
           )}
         </div>
 
@@ -88,13 +140,33 @@ const Navbar = () => {
                 <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">Dashboard</Button>
               </Link>
               <Link to="/settings" onClick={() => setMobileOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">Settings</Button>
+                <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">
+                  <Settings className="h-3.5 w-3.5 mr-1.5" /> Settings
+                </Button>
               </Link>
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground" onClick={toggleTheme}>
+                {theme === "dark" ? <Sun className="h-3.5 w-3.5 mr-1.5" /> : <Moon className="h-3.5 w-3.5 mr-1.5" />}
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-xs text-destructive"
+                onClick={() => { setMobileOpen(false); handleSignOut(); }}
+              >
+                <LogOut className="h-3.5 w-3.5 mr-1.5" /> Log Out
+              </Button>
             </>
           ) : (
-            <Link to="/auth" onClick={() => setMobileOpen(false)}>
-              <Button variant="outline" size="sm" className="w-full text-xs mt-1">Sign In</Button>
-            </Link>
+            <>
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground" onClick={toggleTheme}>
+                {theme === "dark" ? <Sun className="h-3.5 w-3.5 mr-1.5" /> : <Moon className="h-3.5 w-3.5 mr-1.5" />}
+                {theme === "dark" ? "Light Mode" : "Dark Mode"}
+              </Button>
+              <Link to="/auth" onClick={() => setMobileOpen(false)}>
+                <Button variant="outline" size="sm" className="w-full text-xs mt-1">Sign In</Button>
+              </Link>
+            </>
           )}
         </div>
       )}
