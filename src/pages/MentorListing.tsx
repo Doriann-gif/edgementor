@@ -275,7 +275,6 @@ const MentorListingPage = () => {
               </motion.div>
             ))}
           </div>
-          </div>
         </motion.div>
 
         <div className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-3 mb-8 shadow-lg shadow-background/50">
