@@ -448,10 +448,10 @@ const MentorListingPage = () => {
                 </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
-          </motion.div>
+    </div>
   );
 };
 
