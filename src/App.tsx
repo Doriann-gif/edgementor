@@ -15,6 +15,7 @@ import StudentDashboard from "./pages/StudentDashboard.tsx";
 import MentorDashboard from "./pages/MentorDashboard.tsx";
 import AccountSettings from "./pages/AccountSettings.tsx";
 import DiscountCodes from "./pages/DiscountCodes.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import Navbar from "./components/Navbar";
 import NotFound from "./pages/NotFound.tsx";
 
