@@ -65,6 +65,8 @@ const MentorApplicationForm = () => {
       setFullName("");
       setEmail("");
       setSocialLink("");
+      setConfirmGenuine(false);
+      setAgreeTerms(false);
       setExperience("");
       setInstruments([]);
       setConcepts([]);
