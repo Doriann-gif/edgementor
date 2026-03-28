@@ -165,6 +165,47 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_content: {
+        Row: {
+          content_type: string
+          content_url: string
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          mentor_id: string
+          title: string
+        }
+        Insert: {
+          content_type?: string
+          content_url?: string
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          mentor_id: string
+          title: string
+        }
+        Update: {
+          content_type?: string
+          content_url?: string
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          mentor_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_content_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_reviews: {
         Row: {
           created_at: string
