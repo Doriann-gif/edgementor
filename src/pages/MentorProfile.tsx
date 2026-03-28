@@ -1,8 +1,9 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare, Heart } from "lucide-react";
+import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown } from "lucide-react";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
 import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
+import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
@@ -20,6 +21,7 @@ const MentorProfile = () => {
   const { data: reviews = [] } = useMentorReviews(id);
   const { user } = useAuth();
   const { data: savedMentorIds } = useSavedMentors();
+  const { data: isSubscribed } = useIsSubscribed(id);
   const toggleSave = useToggleSaveMentor();
   const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
 
@@ -137,9 +139,17 @@ const MentorProfile = () => {
             <Button variant="outline" size="icon" className="h-11 w-11" onClick={handleSave} disabled={toggleSave.isPending}>
               <Heart className={`h-5 w-5 ${isSaved ? "fill-pink-400 text-pink-400" : ""}`} />
             </Button>
-            <Link to={`/subscribe/${mentor.id}`}>
-              <Button className="h-11 px-6 font-semibold">Subscribe Now</Button>
-            </Link>
+            {isSubscribed ? (
+              <Link to={`/mentorship/${mentor.id}`}>
+                <Button className="h-11 px-6 font-semibold">
+                  <Crown className="h-4 w-4 mr-2" /> Access Mentorship
+                </Button>
+              </Link>
+            ) : (
+              <Link to={`/subscribe/${mentor.id}`}>
+                <Button className="h-11 px-6 font-semibold">Subscribe Now</Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

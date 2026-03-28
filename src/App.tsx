@@ -17,6 +17,7 @@ import AccountSettings from "./pages/AccountSettings.tsx";
 import DiscountCodes from "./pages/DiscountCodes.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Terms from "./pages/Terms.tsx";
+import MentorContentPage from "./pages/MentorContent.tsx";
 import Navbar from "./components/Navbar";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/codes" element={<DiscountCodes />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/mentorship/:id" element={<MentorContentPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
