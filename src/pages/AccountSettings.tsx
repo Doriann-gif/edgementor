@@ -495,9 +495,20 @@ const AccountSettings = () => {
                           <SelectItem value="discord">Discord</SelectItem>
                           <SelectItem value="call">Call</SelectItem>
                           <SelectItem value="resource">Resource</SelectItem>
+                          <SelectItem value="file">File Upload</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Input placeholder="URL" value={newContent.content_url} onChange={(e) => setNewContent({ ...newContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" />
+                      <div className="flex-1 flex gap-2">
+                        <Input placeholder="URL" value={newContent.content_url} onChange={(e) => setNewContent({ ...newContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" />
+                        <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => contentFileRef.current?.click()} disabled={uploadingFile}>
+                          <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload"}
+                        </Button>
+                        <input ref={contentFileRef} type="file" className="hidden" onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleContentFileUpload(f, 'new');
+                          e.target.value = '';
+                        }} />
+                      </div>
                     </div>
                     <Button size="sm" className="text-xs font-semibold" onClick={addContent} disabled={savingContent || !newContent.title.trim()}>
                       {savingContent ? "Saving..." : "Save Content"}
