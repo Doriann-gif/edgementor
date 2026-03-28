@@ -36,16 +36,31 @@ export const useIsSubscribed = (mentorId: string | undefined) => {
       if (!mentorId) return false;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
-      const { data, error } = await supabase
+
+      // Primary check: verify via Stripe
+      try {
+        const { data, error } = await supabase.functions.invoke("check-subscription", {
+          body: { mentorId },
+        });
+        if (!error && data) {
+          return !!data.subscribed;
+        }
+      } catch {
+        // Fallback to local DB if edge function fails
+      }
+
+      // Fallback: local database check
+      const { data: localSub, error: dbError } = await supabase
         .from("subscriptions")
         .select("id")
         .eq("user_id", user.id)
         .eq("mentor_id", mentorId)
         .eq("status", "active")
         .maybeSingle();
-      if (error) throw error;
-      return !!data;
+      if (dbError) throw dbError;
+      return !!localSub;
     },
     enabled: !!mentorId,
+    staleTime: 60_000, // Re-check every 60s
   });
 };
