@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,6 +16,8 @@ import { toast } from "sonner";
 const AccountSettings = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const defaultTab = searchParams.get("tab") || "profile";
 
   // Profile data
   const { data: profile, isLoading: profileLoading } = useQuery({
@@ -135,7 +137,7 @@ const AccountSettings = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
           <TabsList className="bg-secondary border border-border rounded-xl p-1 h-auto">
             <TabsTrigger value="profile" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
               <User className="h-3.5 w-3.5 mr-1.5" /> Profile
