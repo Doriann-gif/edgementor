@@ -106,7 +106,25 @@ const StudentDashboard = () => {
     }
   };
 
-  if (loading) {
+  const cancelSubscription = async (subId: string) => {
+    setCancellingSubId(subId);
+    try {
+      const { error } = await supabase
+        .from("subscriptions")
+        .update({ status: "cancelled" })
+        .eq("id", subId)
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      toast.success("Membership cancelled successfully.");
+      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to cancel membership.");
+    } finally {
+      setCancellingSubId(null);
+      setConfirmCancelSub(null);
+    }
+  };
+
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
   }
   if (!user) return <Navigate to="/auth" replace />;
