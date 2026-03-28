@@ -1,0 +1,1 @@
+ALTER TABLE public.mentors ADD COLUMN tier text NOT NULL DEFAULT 'verified';

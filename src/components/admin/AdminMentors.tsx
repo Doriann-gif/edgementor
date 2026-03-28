@@ -2,9 +2,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Ban, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import TierBadge from "@/components/TierBadge";
+import type { MentorTier } from "@/types/mentor";
 
 const AdminMentors = () => {
   const queryClient = useQueryClient();
@@ -41,6 +44,19 @@ const AdminMentors = () => {
     },
   });
 
+  const tierMutation = useMutation({
+    mutationFn: async ({ id, tier }: { id: string; tier: MentorTier }) => {
+      const { error } = await supabase.from("mentors").update({ tier }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-mentors"] });
+      queryClient.invalidateQueries({ queryKey: ["mentors"] });
+      toast.success("Tier updated.");
+    },
+    onError: () => toast.error("Failed to update tier."),
+  });
+
   if (isLoading) return <p className="text-center py-12 text-muted-foreground text-sm">Loading mentors...</p>;
 
   return (
@@ -49,6 +65,7 @@ const AdminMentors = () => {
         <TableHeader>
           <TableRow>
             <TableHead>Name</TableHead>
+            <TableHead>Tier</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Instruments</TableHead>
             <TableHead>Price</TableHead>
@@ -59,10 +76,31 @@ const AdminMentors = () => {
         </TableHeader>
         <TableBody>
           {mentors.length === 0 ? (
-            <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-12">No mentors found.</TableCell></TableRow>
+            <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-12">No mentors found.</TableCell></TableRow>
           ) : mentors.map((m) => (
             <TableRow key={m.id}>
               <TableCell className="font-medium">{m.name}</TableCell>
+              <TableCell>
+                <Select
+                  value={(m as any).tier || "verified"}
+                  onValueChange={(value: MentorTier) => tierMutation.mutate({ id: m.id, tier: value })}
+                >
+                  <SelectTrigger className="w-[120px] h-7 text-[11px] bg-muted border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="verified">
+                      <span className="flex items-center gap-1.5">✅ Verified</span>
+                    </SelectItem>
+                    <SelectItem value="pro">
+                      <span className="flex items-center gap-1.5">⭐ Pro</span>
+                    </SelectItem>
+                    <SelectItem value="elite">
+                      <span className="flex items-center gap-1.5">👑 Elite</span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </TableCell>
               <TableCell>
                 <Badge variant={m.status === "approved" ? "default" : "secondary"} className="text-[10px] capitalize">{m.status}</Badge>
                 {!m.available && <Badge variant="destructive" className="text-[10px] ml-1">Suspended</Badge>}

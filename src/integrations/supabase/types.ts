@@ -262,6 +262,7 @@ export type Database = {
           session: string
           status: string
           students: number
+          tier: string
           user_id: string | null
         }
         Insert: {
@@ -281,6 +282,7 @@ export type Database = {
           session: string
           status?: string
           students?: number
+          tier?: string
           user_id?: string | null
         }
         Update: {
@@ -300,6 +302,7 @@ export type Database = {
           session?: string
           status?: string
           students?: number
+          tier?: string
           user_id?: string | null
         }
         Relationships: []

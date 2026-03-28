@@ -1,3 +1,5 @@
+export type MentorTier = 'verified' | 'pro' | 'elite';
+
 export interface Mentor {
   id: string;
   name: string;
@@ -13,6 +15,7 @@ export interface Mentor {
   students: number;
   highlights: string[];
   status: string;
+  tier: MentorTier;
 }
 
 export interface MentorReview {
