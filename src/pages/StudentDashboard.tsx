@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptions, useMessages, useMarkMessageRead } from "@/hooks/use-student";
 import { useSavedMentors } from "@/hooks/use-student";
 import { useMentors } from "@/hooks/use-mentors";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import {
   Zap, ArrowLeft, Star, Clock, BookOpen, Heart, MessageSquare,
-  Mail, MailOpen, LogOut, ChevronRight, Users,
+  Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard,
 } from "lucide-react";
 import type { Mentor } from "@/types/mentor";
 
@@ -18,6 +21,24 @@ const StudentDashboard = () => {
   const { data: allMentors = [] } = useMentors();
   const { data: messages = [], isLoading: msgsLoading } = useMessages();
   const markRead = useMarkMessageRead();
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const openBillingPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("customer-portal");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      } else {
+        throw new Error("No portal URL returned");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to open billing portal");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
@@ -48,9 +69,16 @@ const StudentDashboard = () => {
               Welcome back, {user.user_metadata?.display_name || user.email}
             </p>
           </div>
-          <Button variant="outline" size="sm" className="text-xs" onClick={signOut}>
-            <LogOut className="h-3.5 w-3.5 mr-1.5" /> Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            {subscriptions.length > 0 && (
+              <Button variant="outline" size="sm" className="text-xs" onClick={openBillingPortal} disabled={portalLoading}>
+                <CreditCard className="h-3.5 w-3.5 mr-1.5" /> {portalLoading ? "Opening..." : "Manage Billing"}
+              </Button>
+            )}
+            <Button variant="outline" size="sm" className="text-xs" onClick={signOut}>
+              <LogOut className="h-3.5 w-3.5 mr-1.5" /> Sign Out
+            </Button>
+          </div>
         </div>
 
         {/* Stats Row */}
