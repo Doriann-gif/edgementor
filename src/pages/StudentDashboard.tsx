@@ -3,6 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptions, useMessages, useMarkMessageRead } from "@/hooks/use-student";
 import { useSavedMentors } from "@/hooks/use-student";
+import { useQueryClient } from "@tanstack/react-query";
 import { useMentors } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
