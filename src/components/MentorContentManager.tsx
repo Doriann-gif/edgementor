@@ -38,6 +38,7 @@ const TYPE_COLORS: Record<string, string> = {
   discord: "text-indigo-400 bg-indigo-400/10",
   call: "text-amber-400 bg-amber-400/10",
   resource: "text-primary bg-primary/10",
+  file: "text-emerald-400 bg-emerald-400/10",
 };
 
 interface MentorContentManagerProps {
