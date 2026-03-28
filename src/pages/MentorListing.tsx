@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -51,13 +52,15 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
 
   return (
     <Link to={`/mentor/${mentor.id}`} className="block group">
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
         className={`relative rounded-2xl border p-5 transition-all duration-500 hover:-translate-y-1 ${
           isElite
             ? "border-slate-600/50 bg-gradient-to-br from-slate-900 via-card to-slate-800/60 hover:border-slate-400/50 hover:shadow-[0_20px_60px_-15px_rgba(148,163,184,0.15)]"
             : "border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-[0_20px_60px_-15px_hsl(160_84%_39%/0.12)]"
         }`}
-        style={{ animationDelay: `${index * 60}ms` }}
       >
         {/* Elite glow line */}
         {isElite && (
@@ -129,7 +132,7 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
             View Profile <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
           </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 };
@@ -139,7 +142,12 @@ const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
   if (eliteMentors.length === 0) return null;
 
   return (
-    <div className="mb-12">
+    <motion.div
+      className="mb-12"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+    >
       <div className="flex items-center gap-3 mb-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-400/10">
           <Crown className="h-4 w-4 text-amber-400" />
@@ -186,7 +194,7 @@ const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
           </Link>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -232,11 +240,20 @@ const MentorListingPage = () => {
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Hero Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-5 backdrop-blur-sm">
+        <motion.div
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1, duration: 0.4 }}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-5 backdrop-blur-sm"
+          >
             <Target className="h-3.5 w-3.5" /> {mentors.length} Verified Mentors Available
-          </div>
+          </motion.div>
           <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
             Find Your <span className="text-primary">Edge</span>
           </h1>
@@ -250,17 +267,27 @@ const MentorListingPage = () => {
               { value: `${mentors.length}`, label: "Mentors" },
               { value: "4.8", label: "Avg Rating" },
               { value: "1.2K+", label: "Students" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
+            ].map((stat, i) => (
+              <motion.div
+                key={stat.label}
+                className="text-center"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.1, duration: 0.4 }}
+              >
                 <div className="font-heading font-bold text-xl text-foreground">{stat.value}</div>
                 <div className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</div>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        {/* Search + Filters Bar */}
-        <div className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-3 mb-8 shadow-lg shadow-background/50">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-3 mb-8 shadow-lg shadow-background/50"
+        >
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -358,7 +385,7 @@ const MentorListingPage = () => {
               {sorted.length} result{sorted.length !== 1 ? "s" : ""}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Featured Mentors Row */}
         {!isLoading && <FeaturedMentorsRow mentors={mentors} />}
@@ -405,7 +432,13 @@ const MentorListingPage = () => {
 
         {/* Bottom CTA */}
         {!isLoading && sorted.length > 0 && (
-          <div className="mt-16 text-center">
+          <motion.div
+            className="mt-16 text-center"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.5 }}
+          >
             <div className="inline-flex flex-col items-center gap-4 rounded-2xl border border-border bg-card/50 backdrop-blur-sm px-8 py-8">
               <h3 className="font-heading font-bold text-foreground text-lg">Are you a profitable trader?</h3>
               <p className="text-sm text-muted-foreground max-w-sm">Share your knowledge, build your community, and earn recurring revenue.</p>
@@ -415,7 +448,7 @@ const MentorListingPage = () => {
                 </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </div>
