@@ -72,6 +72,47 @@ const AccountSettings = () => {
   const [newContent, setNewContent] = useState({ title: "", description: "", content_type: "link", content_url: "" });
   const [showAddContent, setShowAddContent] = useState(false);
   const [savingContent, setSavingContent] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const contentFileRef = useRef<HTMLInputElement>(null);
+  const editFileRef = useRef<HTMLInputElement>(null);
+
+  const uploadContentFile = async (file: File): Promise<string> => {
+    if (!mentorProfile) throw new Error("No mentor profile");
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    const filePath = `${mentorProfile.id}/${fileName}`;
+
+    const { error } = await supabase.storage
+      .from("mentor-content")
+      .upload(filePath, file, { upsert: true });
+    if (error) throw error;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from("mentor-content")
+      .getPublicUrl(filePath);
+    return publicUrl;
+  };
+
+  const handleContentFileUpload = async (file: File, target: 'new' | 'edit') => {
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error("File too large. Max 50MB.");
+      return;
+    }
+    setUploadingFile(true);
+    try {
+      const url = await uploadContentFile(file);
+      if (target === 'new') {
+        setNewContent(prev => ({ ...prev, content_url: url }));
+      } else if (editingContent) {
+        setEditingContent((prev: any) => ({ ...prev, content_url: url }));
+      }
+      toast.success("File uploaded!");
+    } catch (err: any) {
+      toast.error(err.message || "Upload failed.");
+    } finally {
+      setUploadingFile(false);
+    }
+  };
 
   useEffect(() => {
     if (profile) {
