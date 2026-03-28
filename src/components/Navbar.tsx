@@ -1,16 +1,20 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Zap, User, Settings, Menu, X, Moon, Sun, Bell, Shield, LogOut, CreditCard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const { user, isAdmin, isMentor, signOut } = useAuth();
@@ -23,14 +27,43 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const { data: profile } = useQuery({
+    queryKey: ["navbar-profile", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name, avatar_url")
+        .eq("id", user!.id)
+        .single();
+      return data;
+    },
+  });
+
+  const initials = (profile?.display_name || user?.email || "U")
+    .split(/[\s@]/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0].toUpperCase())
+    .join("");
+
   const SettingsDropdown = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <Settings className="h-4 w-4 text-muted-foreground" />
-        </Button>
+        <button className="flex items-center gap-2 rounded-full border border-border/50 pl-1 pr-2.5 py-1 hover:bg-muted/50 transition-colors cursor-pointer">
+          <Avatar className="h-7 w-7">
+            <AvatarImage src={profile?.avatar_url || undefined} alt="avatar" />
+            <AvatarFallback className="bg-primary/15 text-primary text-xs font-semibold">{initials}</AvatarFallback>
+          </Avatar>
+          <Settings className="h-3.5 w-3.5 text-muted-foreground" />
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuLabel className="font-normal">
+          <p className="text-sm font-medium text-foreground truncate">{profile?.display_name || "User"}</p>
+          <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => navigate("/settings?tab=profile")} className="cursor-pointer">
           <User className="h-4 w-4 mr-2" /> Profile
         </DropdownMenuItem>
