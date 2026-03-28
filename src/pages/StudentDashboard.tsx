@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptions, useMessages, useMarkMessageRead } from "@/hooks/use-student";
 import { useSavedMentors } from "@/hooks/use-student";
 import { useMentors } from "@/hooks/use-mentors";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import {
   Zap, ArrowLeft, Star, Clock, BookOpen, Heart, MessageSquare,
-  Mail, MailOpen, LogOut, ChevronRight, Users,
+  Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard,
 } from "lucide-react";
 import type { Mentor } from "@/types/mentor";
 
