@@ -187,13 +187,23 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs">URL</Label>
-            <Input
-              placeholder="https://..."
-              value={contentUrl}
-              onChange={(e) => setContentUrl(e.target.value)}
-              className="bg-muted border-border text-sm"
-            />
+            <Label className="text-xs">URL or File</Label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="https://..."
+                value={contentUrl}
+                onChange={(e) => setContentUrl(e.target.value)}
+                className="bg-muted border-border text-sm flex-1"
+              />
+              <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => contentFileRef.current?.click()} disabled={uploadingFile}>
+                <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload File"}
+              </Button>
+              <input ref={contentFileRef} type="file" className="hidden" onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFileUpload(f);
+                e.target.value = '';
+              }} />
+            </div>
           </div>
           <div className="space-y-2">
             <Label className="text-xs">Description (optional)</Label>
