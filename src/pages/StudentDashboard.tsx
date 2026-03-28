@@ -27,7 +27,19 @@ const StudentDashboard = () => {
     setPortalLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("customer-portal");
-      if (error) throw error;
+      if (error) {
+        // Check if it's a "no customer" 404
+        const parsed = typeof error === 'object' && 'message' in error ? error.message : String(error);
+        if (parsed.includes("no_customer") || parsed.includes("404")) {
+          toast.error("You need to complete a Stripe checkout first before managing billing.");
+          return;
+        }
+        throw error;
+      }
+      if (data?.error === "no_customer") {
+        toast.error("You need to complete a Stripe checkout first before managing billing.");
+        return;
+      }
       if (data?.url) {
         window.open(data.url, "_blank");
       } else {
