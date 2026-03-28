@@ -353,6 +353,28 @@ const StudentDashboard = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Cancel Confirmation Dialog */}
+        <AlertDialog open={!!confirmCancelSub} onOpenChange={(open) => !open && setConfirmCancelSub(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel Membership</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to cancel your membership with <span className="font-semibold text-foreground">{confirmCancelSub?.mentorName}</span>? You'll lose access to their exclusive content immediately.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Keep Membership</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => confirmCancelSub && cancelSubscription(confirmCancelSub.id)}
+                disabled={!!cancellingSubId}
+              >
+                {cancellingSubId ? "Cancelling..." : "Yes, Cancel"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
