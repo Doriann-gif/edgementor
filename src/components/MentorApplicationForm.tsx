@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MultiSelect from "@/components/MultiSelect";
-import { Upload, TrendingUp, DollarSign, User, FileText } from "lucide-react";
+import { Upload, TrendingUp, DollarSign, User, FileText, Instagram } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,6 +18,8 @@ const SESSIONS = ["London", "New York", "Asian"];
 
 const MentorApplicationForm = () => {
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [socialLink, setSocialLink] = useState("");
   const [experience, setExperience] = useState("");
   const [instruments, setInstruments] = useState<string[]>([]);
   const [concepts, setConcepts] = useState<string[]>([]);
@@ -26,6 +28,7 @@ const MentorApplicationForm = () => {
   const [monthlyPrice, setMonthlyPrice] = useState("");
   const [bio, setBio] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
