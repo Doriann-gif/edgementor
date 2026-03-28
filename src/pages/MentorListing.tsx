@@ -275,9 +275,9 @@ const MentorListingPage = () => {
               </motion.div>
             ))}
           </div>
-        </div>
+          </div>
+        </motion.div>
 
-        {/* Search + Filters Bar */}
         <div className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-3 mb-8 shadow-lg shadow-background/50">
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
