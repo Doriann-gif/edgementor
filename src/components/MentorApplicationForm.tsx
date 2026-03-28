@@ -2,13 +2,13 @@ import { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Mail } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MultiSelect from "@/components/MultiSelect";
-import { Upload, TrendingUp, DollarSign, User, FileText } from "lucide-react";
+import { Upload, TrendingUp, DollarSign, User, FileText, Instagram } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,6 +18,8 @@ const SESSIONS = ["London", "New York", "Asian"];
 
 const MentorApplicationForm = () => {
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [socialLink, setSocialLink] = useState("");
   const [experience, setExperience] = useState("");
   const [instruments, setInstruments] = useState<string[]>([]);
   const [concepts, setConcepts] = useState<string[]>([]);
@@ -36,7 +38,7 @@ const MentorApplicationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !experience || instruments.length === 0 || concepts.length === 0 || !session || !monthlyPrice || !bio) {
+    if (!fullName || !email || !experience || instruments.length === 0 || concepts.length === 0 || !session || !monthlyPrice || !bio) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -45,6 +47,8 @@ const MentorApplicationForm = () => {
     try {
       const { error } = await supabase.from("mentor_applications").insert({
         full_name: fullName,
+        email,
+        social_link: socialLink || null,
         experience,
         instruments,
         concepts,
@@ -57,6 +61,8 @@ const MentorApplicationForm = () => {
 
       setShowSuccess(true);
       setFullName("");
+      setEmail("");
+      setSocialLink("");
       setExperience("");
       setInstruments([]);
       setConcepts([]);
@@ -89,6 +95,14 @@ const MentorApplicationForm = () => {
           <div className="space-y-2">
             <Label htmlFor="fullName" className="text-sm font-medium flex items-center gap-2"><User className="h-3.5 w-3.5 text-primary" /> Full Name</Label>
             <Input id="fullName" placeholder="John Doe" value={fullName} onChange={(e) => setFullName(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> Email Address</Label>
+            <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="socialLink" className="text-sm font-medium flex items-center gap-2"><Instagram className="h-3.5 w-3.5 text-primary" /> Social Link (TikTok, Instagram, etc.)</Label>
+            <Input id="socialLink" placeholder="https://instagram.com/yourhandle" value={socialLink} onChange={(e) => setSocialLink(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-colors" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="experience" className="text-sm font-medium flex items-center gap-2"><TrendingUp className="h-3.5 w-3.5 text-primary" /> Years of Trading Experience</Label>
