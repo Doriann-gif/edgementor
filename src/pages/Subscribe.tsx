@@ -65,15 +65,20 @@ const Subscribe = () => {
     if (!mentor || !id) return;
     setSubscribing(true);
     try {
-      const { error } = await supabase
-        .from("subscriptions")
-        .insert({ user_id: user.id, mentor_id: id });
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: {
+          mentorId: id,
+          promoCode: appliedCode || undefined,
+        },
+      });
       if (error) throw error;
-      toast.success(`You're now subscribed to ${mentor.name}! 🎉`);
-      navigate(`/mentorship/${id}`);
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
     } catch (err: any) {
-      toast.error(err.message || "Subscription failed.");
-    } finally {
+      toast.error(err.message || "Failed to start checkout.");
       setSubscribing(false);
     }
   };

@@ -20,6 +20,7 @@ import ResetPassword from "./pages/ResetPassword.tsx";
 import Terms from "./pages/Terms.tsx";
 import MentorContentPage from "./pages/MentorContent.tsx";
 import Navbar from "./components/Navbar";
+import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
