@@ -31,16 +31,16 @@ const Navbar = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => navigate("/settings?tab=profile")} className="cursor-pointer">
           <User className="h-4 w-4 mr-2" /> Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => navigate("/settings?tab=password")} className="cursor-pointer">
           <Shield className="h-4 w-4 mr-2" /> Privacy & Security
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => navigate("/settings?tab=notifications")} className="cursor-pointer">
           <Bell className="h-4 w-4 mr-2" /> Notifications
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+        <DropdownMenuItem onClick={() => navigate("/settings?tab=billing")} className="cursor-pointer">
           <CreditCard className="h-4 w-4 mr-2" /> Billing
         </DropdownMenuItem>
         <DropdownMenuSeparator />
