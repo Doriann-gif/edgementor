@@ -5,7 +5,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  TrendingUp, Star, Users, Play, ArrowRight, Zap,
+  TrendingUp, Star, Users, ArrowRight, Zap,
   Shield, BarChart3, ChevronRight, UserPlus,
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
