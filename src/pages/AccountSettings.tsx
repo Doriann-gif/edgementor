@@ -575,10 +575,82 @@ const AccountSettings = () => {
           </TabsContent>
 
           {/* ──────────── BILLING TAB ──────────── */}
-          <TabsContent value="billing">
-            <div className="rounded-2xl border border-border bg-card p-6">
-              <div className="flex items-center gap-2 mb-5">
+          <TabsContent value="billing" className="space-y-6">
+            {/* Manage Billing Card */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={0} className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-center gap-2 mb-4">
                 <CreditCard className="h-4 w-4 text-primary" />
+                <h3 className="font-heading font-semibold text-foreground">Manage Billing</h3>
+              </div>
+              <p className="text-sm text-muted-foreground mb-5">
+                View invoices, update your payment method, or change your plan through the billing portal.
+              </p>
+              <Button
+                variant="glow"
+                className="w-full sm:w-auto"
+                onClick={async () => {
+                  try {
+                    const { data, error } = await supabase.functions.invoke("customer-portal");
+                    if (error) throw error;
+                    if (data?.url) window.open(data.url, "_blank");
+                    else toast.error("Could not open billing portal.");
+                  } catch (err: any) {
+                    toast.error(err.message || "Failed to open billing portal.");
+                  }
+                }}
+              >
+                <CreditCard className="h-4 w-4 mr-1.5" /> Open Billing Portal
+              </Button>
+            </motion.div>
+
+            {/* Active Subscriptions with Cancel */}
+            {activeSubCount > 0 && (
+              <motion.div variants={fadeIn} initial="hidden" animate="show" custom={1} className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-foreground">Active Subscriptions</h3>
+                </div>
+                <div className="space-y-3">
+                  {subscriptions.filter((s: any) => s.status === "active").map((sub: any) => (
+                    <div key={sub.id} className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 p-4">
+                      <div>
+                        <h4 className="font-heading font-semibold text-foreground text-sm">{sub.mentors?.name || "Mentor"}</h4>
+                        <span className="text-xs text-muted-foreground">Since {new Date(sub.started_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <span className="font-heading font-bold text-foreground">${sub.mentors?.monthly_price || 0}/mo</span>
+                          <span className="block text-[11px] font-medium text-primary mt-0.5">Active</span>
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs"
+                          onClick={async () => {
+                            if (!window.confirm(`Cancel your subscription to ${sub.mentors?.name || "this mentor"}? You can re-subscribe anytime.`)) return;
+                            try {
+                              const { data, error } = await supabase.functions.invoke("customer-portal");
+                              if (error) throw error;
+                              if (data?.url) window.open(data.url, "_blank");
+                              else toast.error("Could not open cancellation portal.");
+                            } catch (err: any) {
+                              toast.error(err.message || "Failed to open portal.");
+                            }
+                          }}
+                        >
+                          <X className="h-3 w-3 mr-1" /> Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Subscription History */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={2} className="rounded-2xl border border-border bg-card p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <Clock className="h-4 w-4 text-primary" />
                 <h3 className="font-heading font-semibold text-foreground">Subscription History</h3>
               </div>
               {subscriptions.length === 0 ? (
@@ -601,7 +673,7 @@ const AccountSettings = () => {
                   ))}
                 </div>
               )}
-            </div>
+            </motion.div>
           </TabsContent>
 
           {/* ──────────── APPEARANCE TAB ──────────── */}
