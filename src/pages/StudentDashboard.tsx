@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSubscriptions, useMessages, useMarkMessageRead } from "@/hooks/use-student";
-import { useSavedMentors } from "@/hooks/use-student";
+import { useSubscriptions, useMessages, useMarkMessageRead, useSavedMentors } from "@/hooks/use-student";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMentors } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import {
-  Zap, ArrowLeft, Star, Clock, BookOpen, Heart, MessageSquare,
-  Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard, MoreVertical, XCircle, ExternalLink,
+  ArrowLeft, Star, Clock, BookOpen, Heart, MessageSquare,
+  Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard, MoreVertical,
+  XCircle, ExternalLink, TrendingUp, Sparkles, CalendarDays, Search, Flame, Target, Award,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -21,6 +23,27 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Mentor } from "@/types/mentor";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.06, duration: 0.4, ease: "easeOut" as const },
+  }),
+};
+
+const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
+
+const getGreeting = () => {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  return "Good evening";
+};
+
+const getDaysSince = (dateStr: string) => {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+};
 
 const StudentDashboard = () => {
   const { user, loading, signOut } = useAuth();
@@ -33,31 +56,18 @@ const StudentDashboard = () => {
   const [canManageBilling, setCanManageBilling] = useState(false);
   const [cancellingSubId, setCancellingSubId] = useState<string | null>(null);
   const [confirmCancelSub, setConfirmCancelSub] = useState<{ id: string; mentorName: string } | null>(null);
+  const [activeTab, setActiveTab] = useState("mentorships");
   const queryClient = useQueryClient();
 
   useEffect(() => {
     let isActive = true;
-
     const checkBillingAccess = async () => {
-      if (!user) {
-        if (isActive) setCanManageBilling(false);
-        return;
-      }
-
-      const { data, error } = await supabase.functions.invoke("check-subscription", {
-        body: {},
-      });
-
-      if (isActive) {
-        setCanManageBilling(!error && !!data?.subscribed);
-      }
+      if (!user) { if (isActive) setCanManageBilling(false); return; }
+      const { data, error } = await supabase.functions.invoke("check-subscription", { body: {} });
+      if (isActive) setCanManageBilling(!error && !!data?.subscribed);
     };
-
     void checkBillingAccess();
-
-    return () => {
-      isActive = false;
-    };
+    return () => { isActive = false; };
   }, [user?.id]);
 
   const openBillingPortal = async () => {
@@ -66,39 +76,22 @@ const StudentDashboard = () => {
       const { data, error } = await supabase.functions.invoke("customer-portal");
       if (error) {
         let noCustomer = false;
-        const errorMessage =
-          typeof error === "object" && error && "message" in error
-            ? String((error as { message?: string }).message ?? "")
-            : String(error);
-
+        const errorMessage = typeof error === "object" && error && "message" in error ? String((error as { message?: string }).message ?? "") : String(error);
         if (typeof error === "object" && error && "context" in error) {
           const response = (error as { context?: Response }).context;
           if (response) {
             const errorBody = await response.json().catch(() => null);
-            if (errorBody?.error === "no_customer") {
-              noCustomer = true;
-            }
+            if (errorBody?.error === "no_customer") noCustomer = true;
           }
         }
-
         if (noCustomer || errorMessage.includes("no_customer") || errorMessage.includes("404")) {
           toast.error("You need to complete a Stripe checkout first before managing billing.");
           return;
         }
-
         throw error;
       }
-
-      if (data?.error === "no_customer") {
-        toast.error("You need to complete a Stripe checkout first before managing billing.");
-        return;
-      }
-
-      if (data?.url) {
-        window.open(data.url, "_blank");
-      } else {
-        throw new Error("No portal URL returned");
-      }
+      if (data?.error === "no_customer") { toast.error("You need to complete a Stripe checkout first before managing billing."); return; }
+      if (data?.url) window.open(data.url, "_blank"); else throw new Error("No portal URL returned");
     } catch (err: any) {
       toast.error(err.message || "Failed to open billing portal");
     } finally {
@@ -109,11 +102,7 @@ const StudentDashboard = () => {
   const cancelSubscription = async (subId: string) => {
     setCancellingSubId(subId);
     try {
-      const { error } = await supabase
-        .from("subscriptions")
-        .update({ status: "cancelled" })
-        .eq("id", subId)
-        .eq("user_id", user!.id);
+      const { error } = await supabase.from("subscriptions").update({ status: "cancelled" }).eq("id", subId).eq("user_id", user!.id);
       if (error) throw error;
       toast.success("Membership cancelled successfully.");
       queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
@@ -126,256 +115,492 @@ const StudentDashboard = () => {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
+          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-muted-foreground text-sm">Loading your dashboard...</p>
+        </motion.div>
+      </div>
+    );
   }
   if (!user) return <Navigate to="/auth" replace />;
 
   const savedMentors = allMentors.filter((m) => savedMentorIds?.has(m.id));
   const unreadCount = messages.filter((m) => !m.is_read).length;
+  const displayName = user.user_metadata?.display_name || user.email?.split("@")[0] || "Trader";
+  const totalSpend = subscriptions.reduce((sum: number, s: any) => sum + ((s.mentors as Mentor)?.monthly_price || 0), 0);
+  const oldestSub = subscriptions.length > 0 ? subscriptions.reduce((oldest: any, s: any) => new Date(s.started_at) < new Date(oldest.started_at) ? s : oldest) : null;
+  const learningDays = oldestSub ? getDaysSince(oldestSub.started_at) : 0;
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed inset-0 opacity-[0.03]" style={{
-        backgroundImage: 'linear-gradient(hsl(160 84% 39% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(160 84% 39% / 0.3) 1px, transparent 1px)',
-        backgroundSize: '60px 60px'
-      }} />
+      {/* Ambient Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(160 84% 39% / 0.3) 1px, transparent 0)',
+          backgroundSize: '48px 48px',
+        }} />
+        <motion.div
+          className="absolute top-[-80px] right-1/4 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]"
+          animate={{ y: [0, -20, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-[-60px] left-1/3 w-[400px] h-[400px] bg-pink-400/[0.025] rounded-full blur-[100px]"
+          animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8">
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <motion.div className="flex items-center justify-between mb-6" initial="hidden" animate="show">
           <div>
-            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3">
-              <ArrowLeft className="h-4 w-4" /> Back to home
-            </Link>
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-              My Dashboard
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Welcome back, {user.user_metadata?.display_name || user.email}
-            </p>
+            <motion.div variants={fadeUp} custom={0}>
+              <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3">
+                <ArrowLeft className="h-4 w-4" /> Back to home
+              </Link>
+            </motion.div>
+            <motion.h1 variants={fadeUp} custom={1} className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+              {getGreeting()},{" "}
+              <span className="bg-gradient-to-r from-primary via-pink-400 to-primary bg-clip-text text-transparent">{displayName}</span>
+            </motion.h1>
+            <motion.p variants={fadeUp} custom={2} className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5 text-primary" /> Your trading journey at a glance
+            </motion.p>
           </div>
-          <div className="flex items-center gap-2">
+          <motion.div variants={fadeUp} custom={1} className="flex items-center gap-2">
             {canManageBilling && (
-              <Button variant="outline" size="sm" className="text-xs" onClick={openBillingPortal} disabled={portalLoading}>
-                <CreditCard className="h-3.5 w-3.5 mr-1.5" /> {portalLoading ? "Opening..." : "Manage Billing"}
-              </Button>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                <Button variant="outline" size="sm" className="text-xs" onClick={openBillingPortal} disabled={portalLoading}>
+                  <CreditCard className="h-3.5 w-3.5 mr-1.5" /> {portalLoading ? "Opening..." : "Manage Billing"}
+                </Button>
+              </motion.div>
             )}
-            <Button variant="outline" size="sm" className="text-xs" onClick={signOut}>
-              <LogOut className="h-3.5 w-3.5 mr-1.5" /> Sign Out
-            </Button>
-          </div>
-        </div>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Button variant="outline" size="sm" className="text-xs" onClick={signOut}>
+                <LogOut className="h-3.5 w-3.5 mr-1.5" /> Sign Out
+              </Button>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
-        {/* Stats Row */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        {/* Stats Cards */}
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8"
+          variants={stagger}
+          initial="hidden"
+          animate="show"
+        >
           {[
-            { icon: BookOpen, label: "Active Mentorships", value: subscriptions.length, color: "text-primary" },
-            { icon: Heart, label: "Favourites", value: savedMentors.length, color: "text-pink-400" },
-            { icon: MessageSquare, label: "Unread Messages", value: unreadCount, color: "text-amber-400" },
-          ].map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                <span className="text-xs text-muted-foreground">{stat.label}</span>
+            { icon: BookOpen, label: "Active Mentorships", value: subscriptions.length, color: "text-primary", bgColor: "bg-primary/10", borderColor: "border-primary/20" },
+            { icon: Heart, label: "Saved Mentors", value: savedMentors.length, color: "text-pink-400", bgColor: "bg-pink-400/10", borderColor: "border-pink-400/20" },
+            { icon: MessageSquare, label: "Unread Messages", value: unreadCount, color: "text-amber-400", bgColor: "bg-amber-400/10", borderColor: "border-amber-400/20" },
+            { icon: CalendarDays, label: "Days Learning", value: learningDays, color: "text-blue-400", bgColor: "bg-blue-400/10", borderColor: "border-blue-400/20" },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              variants={fadeUp}
+              custom={i}
+              whileHover={{ y: -4, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className={`rounded-2xl border ${stat.borderColor} bg-card p-4 cursor-default`}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <div className={`h-8 w-8 rounded-lg ${stat.bgColor} flex items-center justify-center`}>
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
               </div>
               <span className="font-heading text-2xl font-bold text-foreground">{stat.value}</span>
-            </div>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
+
+        {/* Quick Actions */}
+        <motion.div
+          className="flex flex-wrap gap-2 mb-8"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Link to="/mentors">
+            <motion.div whileHover={{ scale: 1.05, y: -1 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="outline" size="sm" className="text-xs gap-1.5 rounded-full border-primary/20 hover:border-primary/40 hover:bg-primary/5">
+                <Search className="h-3.5 w-3.5" /> Browse Mentors
+              </Button>
+            </motion.div>
+          </Link>
+          <Link to="/learn">
+            <motion.div whileHover={{ scale: 1.05, y: -1 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="outline" size="sm" className="text-xs gap-1.5 rounded-full border-pink-400/20 hover:border-pink-400/40 hover:bg-pink-400/5">
+                <TrendingUp className="h-3.5 w-3.5" /> Free Tutorials
+              </Button>
+            </motion.div>
+          </Link>
+          <Link to="/settings">
+            <motion.div whileHover={{ scale: 1.05, y: -1 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="outline" size="sm" className="text-xs gap-1.5 rounded-full">
+                <Users className="h-3.5 w-3.5" /> Account Settings
+              </Button>
+            </motion.div>
+          </Link>
+        </motion.div>
+
+        {/* Learning Progress (show when subscriptions exist) */}
+        {subscriptions.length > 0 && (
+          <motion.div
+            className="rounded-2xl border border-border bg-card p-5 mb-8"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Flame className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold text-sm text-foreground">Your Trading Journey</h3>
+                  <p className="text-[11px] text-muted-foreground">Keep going — consistency is key!</p>
+                </div>
+              </div>
+              <span className="text-xs text-muted-foreground">${totalSpend}/mo invested</span>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { icon: Target, label: "Mentors", value: subscriptions.length, max: 5, tip: "Track up to 5 mentors" },
+                { icon: CalendarDays, label: "Days Active", value: Math.min(learningDays, 365), max: 365, tip: "1 year milestone" },
+                { icon: Award, label: "Messages Read", value: messages.filter(m => m.is_read).length, max: Math.max(messages.length, 1), tip: "Stay on top of updates" },
+              ].map((item) => (
+                <div key={item.label} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                      <item.icon className="h-3 w-3" /> {item.label}
+                    </span>
+                    <span className="text-[11px] font-medium text-foreground">{item.value}/{item.max}</span>
+                  </div>
+                  <Progress value={(item.value / item.max) * 100} className="h-1.5" />
+                  <p className="text-[10px] text-muted-foreground/70">{item.tip}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Tabbed Content */}
-        <Tabs defaultValue="mentorships" className="space-y-6">
-          <TabsList className="w-full grid grid-cols-3 h-11">
-            <TabsTrigger value="mentorships" className="text-xs font-semibold">
-              <BookOpen className="h-3.5 w-3.5 mr-1.5" /> Mentorships
-            </TabsTrigger>
-            <TabsTrigger value="favourites" className="text-xs font-semibold">
-              <Heart className="h-3.5 w-3.5 mr-1.5" /> Favourites
-            </TabsTrigger>
-            <TabsTrigger value="messages" className="text-xs font-semibold">
-              <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Messages
-              {unreadCount > 0 && (
-                <span className="ml-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold px-1.5 py-0.5">{unreadCount}</span>
-              )}
-            </TabsTrigger>
-          </TabsList>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="w-full grid grid-cols-3 h-11 bg-muted/50 border border-border">
+              <TabsTrigger value="mentorships" className="text-xs font-semibold gap-1.5 data-[state=active]:shadow-md">
+                <BookOpen className="h-3.5 w-3.5" /> Mentorships
+              </TabsTrigger>
+              <TabsTrigger value="favourites" className="text-xs font-semibold gap-1.5 data-[state=active]:shadow-md">
+                <Heart className="h-3.5 w-3.5" /> Favourites
+              </TabsTrigger>
+              <TabsTrigger value="messages" className="text-xs font-semibold gap-1.5 data-[state=active]:shadow-md">
+                <MessageSquare className="h-3.5 w-3.5" /> Messages
+                {unreadCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="ml-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 min-w-[18px] text-center"
+                  >
+                    {unreadCount}
+                  </motion.span>
+                )}
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Active Mentorships Tab */}
-          <TabsContent value="mentorships">
-            {subsLoading ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
-            ) : subscriptions.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
-                <p className="text-sm text-muted-foreground mb-3">You don't have any active mentorships yet.</p>
-                <Link to="/mentors">
-                  <Button size="sm" className="text-xs font-semibold">
-                    Browse Mentors <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {subscriptions.map((sub: any) => {
-                  const mentor = sub.mentors as Mentor;
-                  return (
-                    <div key={sub.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
-                      <Link to={`/mentorship/${mentor.id}`} className="flex items-center gap-4 flex-1 min-w-0">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-sm">
-                          {mentor.avatar}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-heading font-semibold text-foreground text-sm">{mentor.name}</h3>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> Since {new Date(sub.started_at).toLocaleDateString()}</span>
-                            <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+            {/* Active Mentorships Tab */}
+            <TabsContent value="mentorships">
+              <AnimatePresence mode="wait">
+                {subsLoading ? (
+                  <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-12">
+                    <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">Loading mentorships...</p>
+                  </motion.div>
+                ) : subscriptions.length === 0 ? (
+                  <motion.div key="empty" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
+                    <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+                      <BookOpen className="h-10 w-10 text-primary/20 mx-auto mb-4" />
+                    </motion.div>
+                    <p className="text-sm text-muted-foreground mb-1">You don't have any active mentorships yet.</p>
+                    <p className="text-xs text-muted-foreground/70 mb-5">Find a mentor to start your trading journey.</p>
+                    <Link to="/mentors">
+                      <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                        <Button size="sm" className="text-xs font-semibold shadow-lg shadow-primary/20">
+                          Browse Mentors <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
+                      </motion.div>
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.div key="list" variants={stagger} initial="hidden" animate="show" className="space-y-3">
+                    {subscriptions.map((sub: any, i: number) => {
+                      const mentor = sub.mentors as Mentor;
+                      const days = getDaysSince(sub.started_at);
+                      return (
+                        <motion.div
+                          key={sub.id}
+                          variants={fadeUp}
+                          custom={i}
+                          whileHover={{ y: -2, scale: 1.005 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                        >
+                          <Link to={`/mentorship/${mentor.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                            <motion.div
+                              whileHover={{ rotate: [0, -5, 5, 0] }}
+                              transition={{ duration: 0.4 }}
+                              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-pink-400/10 text-primary font-heading font-bold text-sm border border-primary/20"
+                            >
+                              {mentor.avatar}
+                            </motion.div>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-heading font-semibold text-foreground text-sm">{mentor.name}</h3>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                                <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {days}d ago</span>
+                                <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                                <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {mentor.students} students</span>
+                              </div>
+                            </div>
+                          </Link>
+                          <div className="text-right shrink-0 mr-1">
+                            <span className="font-heading font-bold text-foreground text-sm">${mentor.monthly_price}</span>
+                            <span className="text-[10px] text-muted-foreground block">/month</span>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0 hover:bg-muted">
+                                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem asChild>
+                                <Link to={`/mentorship/${mentor.id}`} className="flex items-center gap-2">
+                                  <ExternalLink className="h-3.5 w-3.5" /> Access Content
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link to={`/mentor/${mentor.id}`} className="flex items-center gap-2">
+                                  <Users className="h-3.5 w-3.5" /> View Profile
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive flex items-center gap-2"
+                                onClick={() => setConfirmCancelSub({ id: sub.id, mentorName: mentor.name })}
+                              >
+                                <XCircle className="h-3.5 w-3.5" /> Cancel Membership
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </motion.div>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </TabsContent>
+
+            {/* Favourites Tab */}
+            <TabsContent value="favourites">
+              <AnimatePresence mode="wait">
+                {savedLoading ? (
+                  <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-12">
+                    <div className="h-6 w-6 border-2 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">Loading favourites...</p>
+                  </motion.div>
+                ) : savedMentors.length === 0 ? (
+                  <motion.div key="empty" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
+                    <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+                      <Heart className="h-10 w-10 text-pink-400/20 mx-auto mb-4" />
+                    </motion.div>
+                    <p className="text-sm text-muted-foreground mb-1">No favourite mentors yet.</p>
+                    <p className="text-xs text-muted-foreground/70 mb-5">Browse mentors and tap the heart icon to save your favourites.</p>
+                    <Link to="/mentors">
+                      <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                        <Button size="sm" variant="outline" className="text-xs font-semibold">
+                          Find Mentors <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
+                      </motion.div>
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.div key="list" variants={stagger} initial="hidden" animate="show" className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {savedMentors.map((mentor, i) => (
+                      <motion.div key={mentor.id} variants={fadeUp} custom={i}>
+                        <Link to={`/mentor/${mentor.id}`}>
+                          <motion.div
+                            whileHover={{ y: -3, scale: 1.01 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-pink-400/30 hover:shadow-lg hover:shadow-pink-400/5"
+                          >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-400/20 to-primary/10 text-primary font-heading font-bold text-xs border border-pink-400/20">
+                              {mentor.avatar}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-heading font-semibold text-foreground text-sm truncate">{mentor.name}</h3>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
+                                <span>${mentor.monthly_price}/mo</span>
+                                <span>{mentor.students} students</span>
+                              </div>
+                            </div>
+                            <Heart className="h-4 w-4 fill-pink-400 text-pink-400 shrink-0" />
+                          </motion.div>
+                        </Link>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </TabsContent>
+
+            {/* Messages Tab */}
+            <TabsContent value="messages">
+              <AnimatePresence mode="wait">
+                {msgsLoading ? (
+                  <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-12">
+                    <div className="h-6 w-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">Loading messages...</p>
+                  </motion.div>
+                ) : messages.length === 0 ? (
+                  <motion.div key="empty" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
+                    <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+                      <Mail className="h-10 w-10 text-amber-400/20 mx-auto mb-4" />
+                    </motion.div>
+                    <p className="text-sm text-muted-foreground">No messages yet.</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Messages from your mentors will appear here.</p>
+                  </motion.div>
+                ) : (
+                  <motion.div key="list" variants={stagger} initial="hidden" animate="show" className="space-y-3">
+                    {messages.map((msg, i) => (
+                      <motion.div
+                        key={msg.id}
+                        variants={fadeUp}
+                        custom={i}
+                        whileHover={{ y: -2 }}
+                        className={`rounded-2xl border bg-card p-4 transition-all cursor-default ${
+                          msg.is_read ? "border-border" : "border-primary/30 bg-primary/[0.02] shadow-md shadow-primary/5"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <motion.div
+                              whileHover={{ scale: 1.15 }}
+                              className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                                msg.is_read ? "bg-muted" : "bg-primary/10"
+                              }`}
+                            >
+                              {msg.is_read ? (
+                                <MailOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                              ) : (
+                                <Mail className="h-3.5 w-3.5 text-primary" />
+                              )}
+                            </motion.div>
+                            <div>
+                              <span className="font-heading font-semibold text-sm text-foreground">{msg.sender_name}</span>
+                              {!msg.is_read && (
+                                <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 text-primary text-[9px] font-bold px-1.5 py-0.5">NEW</span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] text-muted-foreground">
+                              {new Date(msg.created_at).toLocaleDateString()}
+                            </span>
+                            {!msg.is_read && (
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => markRead.mutate(msg.id)}
+                                className="text-[10px] text-primary hover:underline font-medium"
+                              >
+                                Mark read
+                              </motion.button>
+                            )}
                           </div>
                         </div>
-                      </Link>
-                      <div className="text-right shrink-0 mr-1">
-                        <span className="font-heading font-bold text-foreground text-sm">${mentor.monthly_price}</span>
-                        <span className="text-xs text-muted-foreground block">/mo</span>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0">
-                            <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem asChild>
-                            <Link to={`/mentorship/${mentor.id}`} className="flex items-center gap-2">
-                              <ExternalLink className="h-3.5 w-3.5" /> Access Content
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link to={`/mentor/${mentor.id}`} className="flex items-center gap-2">
-                              <Users className="h-3.5 w-3.5" /> View Profile
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive flex items-center gap-2"
-                            onClick={() => setConfirmCancelSub({ id: sub.id, mentorName: mentor.name })}
-                          >
-                            <XCircle className="h-3.5 w-3.5" /> Cancel Membership
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </TabsContent>
+                        <h4 className="text-sm font-medium text-foreground mb-1">{msg.subject}</h4>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{msg.body}</p>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
 
-          {/* Favourites Tab */}
-          <TabsContent value="favourites">
-            {savedLoading ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
-            ) : savedMentors.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
-                <Heart className="h-8 w-8 text-pink-400/30 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground mb-1">No favourite mentors yet.</p>
-                <p className="text-xs text-muted-foreground mb-4">Browse mentors and tap the heart icon to save your favourites.</p>
-                <Link to="/mentors">
-                  <Button size="sm" variant="outline" className="text-xs font-semibold">
-                    Find Mentors <ChevronRight className="h-3.5 w-3.5 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {savedMentors.map((mentor) => (
-                  <Link key={mentor.id} to={`/mentor/${mentor.id}`} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/30">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-heading font-bold text-xs">
-                      {mentor.avatar}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-heading font-semibold text-foreground text-sm truncate">{mentor.name}</h3>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+        {/* Suggested Mentors (when no subscriptions) */}
+        {subscriptions.length === 0 && allMentors.length > 0 && (
+          <motion.div
+            className="mt-10"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <h3 className="font-heading font-semibold text-foreground text-base mb-4 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" /> Recommended Mentors
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {allMentors.slice(0, 3).map((mentor, i) => (
+                <motion.div key={mentor.id} variants={fadeUp} custom={i} initial="hidden" animate="show">
+                  <Link to={`/mentor/${mentor.id}`}>
+                    <motion.div
+                      whileHover={{ y: -4, scale: 1.01 }}
+                      className="rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                    >
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-heading font-bold text-xs">
+                          {mentor.avatar}
+                        </div>
+                        <div>
+                          <h4 className="font-heading font-semibold text-sm text-foreground">{mentor.name}</h4>
+                          <span className="text-[11px] text-muted-foreground">{mentor.experience}</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{mentor.bio}</p>
+                      <div className="flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1 text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
-                        <span>${mentor.monthly_price}/mo</span>
+                        <span className="font-medium text-foreground">${mentor.monthly_price}/mo</span>
                       </div>
-                    </div>
-                    <Button variant="outline" size="sm" className="text-xs shrink-0" onClick={(e) => { e.preventDefault(); }}>
-                      <Heart className="h-3.5 w-3.5 fill-pink-400 text-pink-400" />
-                    </Button>
+                    </motion.div>
                   </Link>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
-          {/* Messages Tab */}
-          <TabsContent value="messages">
-            {msgsLoading ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
-            ) : messages.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
-                <p className="text-sm text-muted-foreground">No messages yet. Messages from your mentors will appear here.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`rounded-2xl border bg-card p-4 transition-all ${
-                      msg.is_read ? "border-border" : "border-primary/30 bg-primary/[0.02]"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        {msg.is_read ? (
-                          <MailOpen className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Mail className="h-4 w-4 text-primary" />
-                        )}
-                        <span className="font-heading font-semibold text-sm text-foreground">{msg.sender_name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-muted-foreground">
-                          {new Date(msg.created_at).toLocaleDateString()}
-                        </span>
-                        {!msg.is_read && (
-                          <button
-                            onClick={() => markRead.mutate(msg.id)}
-                            className="text-[10px] text-primary hover:underline"
-                          >
-                            Mark read
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    <h4 className="text-sm font-medium text-foreground mb-1">{msg.subject}</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{msg.body}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-
-        {/* Cancel Confirmation Dialog */}
-        <AlertDialog open={!!confirmCancelSub} onOpenChange={(open) => !open && setConfirmCancelSub(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Cancel Membership</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to cancel your membership with <span className="font-semibold text-foreground">{confirmCancelSub?.mentorName}</span>? You'll lose access to their exclusive content immediately.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Keep Membership</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => confirmCancelSub && cancelSubscription(confirmCancelSub.id)}
-                disabled={!!cancellingSubId}
-              >
-                {cancellingSubId ? "Cancelling..." : "Yes, Cancel"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
       </div>
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={!!confirmCancelSub} onOpenChange={(open) => !open && setConfirmCancelSub(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Membership</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel your membership with <span className="font-semibold text-foreground">{confirmCancelSub?.mentorName}</span>? You'll lose access to their exclusive content immediately.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Membership</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => confirmCancelSub && cancelSubscription(confirmCancelSub.id)}
+              disabled={!!cancellingSubId}
+            >
+              {cancellingSubId ? "Cancelling..." : "Yes, Cancel"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
