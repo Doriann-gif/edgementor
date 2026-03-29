@@ -19,7 +19,7 @@ import {
   Camera, Upload, BookOpen, Plus, GripVertical, Pencil, Trash, X,
   Shield, CalendarDays, Star, Award, CheckCircle2, Mail, Sparkles,
   Eye, EyeOff, BadgeCheck, Activity, Palette, ShieldCheck, Moon, Sun, Monitor,
-  Clock, TrendingUp, Download, Globe,
+  Clock, TrendingUp, Download, Globe, Heart,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
