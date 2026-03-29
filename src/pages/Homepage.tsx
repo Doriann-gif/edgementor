@@ -212,7 +212,7 @@ const Homepage = () => {
                   whileTap={{ scale: 0.97 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <Button size="lg" className="h-14 px-10 font-semibold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 transition-all">
+                  <Button variant="glow" size="lg" className="h-14 px-10 font-semibold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35">
                     Browse Mentors <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
                 </motion.div>
