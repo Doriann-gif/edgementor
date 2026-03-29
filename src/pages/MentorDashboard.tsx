@@ -9,9 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MentorContentManager from "@/components/MentorContentManager";
+import PageTransition from "@/components/PageTransition";
+import { motion } from "framer-motion";
 import {
   ArrowLeft, LogOut, Users, DollarSign, TrendingUp, Edit3, Save,
-  X, Clock, Star, Eye, Tag, Crown,
+  X, Clock, Star, Eye, Tag, Crown, Sparkles, BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,17 +41,27 @@ const MentorDashboard = () => {
   }, [mentor]);
 
   if (authLoading || isLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
+    return <div className="min-h-screen bg-background flex items-center justify-center">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+        <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-muted-foreground text-sm">Loading your dashboard...</p>
+      </motion.div>
+    </div>;
   }
   if (!user) return <Navigate to="/auth" replace />;
   if (!mentor) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground mb-2">No mentor profile found.</p>
-          <p className="text-xs text-muted-foreground mb-4">Your account must be linked to an approved mentor profile.</p>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
+          <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+            <BookOpen className="h-12 w-12 text-primary/20 mx-auto" />
+          </motion.div>
+          <div>
+            <p className="text-foreground font-heading font-semibold mb-1">No mentor profile found</p>
+            <p className="text-xs text-muted-foreground mb-4">Your account must be linked to an approved mentor profile.</p>
+          </div>
           <Link to="/"><Button variant="outline" size="sm">Back to home</Button></Link>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -85,11 +97,13 @@ const MentorDashboard = () => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
-      <div className="fixed inset-0 opacity-[0.03]" style={{
-        backgroundImage: 'linear-gradient(hsl(160 84% 39% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(160 84% 39% / 0.3) 1px, transparent 1px)',
-        backgroundSize: '60px 60px'
-      }} />
+      {/* Ambient */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div className="absolute top-[-80px] left-1/4 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]" animate={{ y: [0, -15, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.div className="absolute bottom-[-60px] right-1/3 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]" animate={{ y: [0, 12, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
+      </div>
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
