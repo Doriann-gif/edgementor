@@ -12,14 +12,26 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import {
   ArrowLeft, User, Lock, Bell, CreditCard, Trash2, Save, LogOut,
   Camera, Upload, BookOpen, Plus, GripVertical, Pencil, Trash, X,
+  Shield, CalendarDays, Star, Award, CheckCircle2, Mail, Sparkles,
+  Eye, EyeOff, BadgeCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 12 },
+  show: (i: number) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.07, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const },
+  }),
+};
 
 const AccountSettings = () => {
-  const { user, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut, isMentor } = useAuth();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get("tab") || "profile";
@@ -40,11 +52,11 @@ const AccountSettings = () => {
     },
   });
 
-  // Mentor profile (to conditionally show My Content tab)
+  // Mentor profile
   const { data: mentorProfile } = useMyMentorProfile();
   const { data: mentorContent = [], isLoading: contentLoading } = useMentorContent(mentorProfile?.id);
 
-  // Subscriptions (billing history)
+  // Subscriptions
   const { data: subscriptions = [] } = useQuery({
     queryKey: ["my-subscriptions-history"],
     enabled: !!user,
@@ -59,12 +71,43 @@ const AccountSettings = () => {
     },
   });
 
+  // Saved mentors count
+  const { data: savedCount = 0 } = useQuery({
+    queryKey: ["saved-mentors-count"],
+    enabled: !!user,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("saved_mentors")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return count || 0;
+    },
+  });
+
+  // Messages count
+  const { data: messageStats = { total: 0, unread: 0 } } = useQuery({
+    queryKey: ["message-stats"],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("id, is_read")
+        .eq("recipient_id", user!.id);
+      if (error) throw error;
+      const total = data?.length || 0;
+      const unread = data?.filter((m) => !m.is_read).length || 0;
+      return { total, unread };
+    },
+  });
+
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   // Content editing state
@@ -78,40 +121,24 @@ const AccountSettings = () => {
 
   const uploadContentFile = async (file: File): Promise<string> => {
     if (!mentorProfile) throw new Error("No mentor profile");
-    const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
     const filePath = `${mentorProfile.id}/${fileName}`;
-
-    const { error } = await supabase.storage
-      .from("mentor-content")
-      .upload(filePath, file, { upsert: true });
+    const { error } = await supabase.storage.from("mentor-content").upload(filePath, file, { upsert: true });
     if (error) throw error;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from("mentor-content")
-      .getPublicUrl(filePath);
+    const { data: { publicUrl } } = supabase.storage.from("mentor-content").getPublicUrl(filePath);
     return publicUrl;
   };
 
   const handleContentFileUpload = async (file: File, target: 'new' | 'edit') => {
-    if (file.size > 50 * 1024 * 1024) {
-      toast.error("File too large. Max 50MB.");
-      return;
-    }
+    if (file.size > 50 * 1024 * 1024) { toast.error("File too large. Max 50MB."); return; }
     setUploadingFile(true);
     try {
       const url = await uploadContentFile(file);
-      if (target === 'new') {
-        setNewContent(prev => ({ ...prev, content_url: url }));
-      } else if (editingContent) {
-        setEditingContent((prev: any) => ({ ...prev, content_url: url }));
-      }
+      if (target === 'new') setNewContent(prev => ({ ...prev, content_url: url }));
+      else if (editingContent) setEditingContent((prev: any) => ({ ...prev, content_url: url }));
       toast.success("File uploaded!");
-    } catch (err: any) {
-      toast.error(err.message || "Upload failed.");
-    } finally {
-      setUploadingFile(false);
-    }
+    } catch (err: any) { toast.error(err.message || "Upload failed."); }
+    finally { setUploadingFile(false); }
   };
 
   useEffect(() => {
@@ -129,51 +156,28 @@ const AccountSettings = () => {
     try {
       const fileExt = file.name.split(".").pop();
       const filePath = `${user.id}/avatar.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file, { upsert: true });
       if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from("avatars")
-        .getPublicUrl(filePath);
-
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
       const url = `${publicUrl}?t=${Date.now()}`;
       setAvatarUrl(url);
-
-      await supabase
-        .from("profiles")
-        .update({ avatar_url: url, updated_at: new Date().toISOString() })
-        .eq("id", user.id);
-
+      await supabase.from("profiles").update({ avatar_url: url, updated_at: new Date().toISOString() }).eq("id", user.id);
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
       toast.success("Profile picture updated!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to upload avatar.");
-    } finally {
-      setUploading(false);
-    }
+    } catch (err: any) { toast.error(err.message || "Failed to upload avatar."); }
+    finally { setUploading(false); }
   };
 
   const updateProfileMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          display_name: displayName,
-          avatar_url: avatarUrl || null,
-          email_notifications: emailNotifications,
-          marketing_emails: marketingEmails,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", user!.id);
+      const { error } = await supabase.from("profiles").update({
+        display_name: displayName, avatar_url: avatarUrl || null,
+        email_notifications: emailNotifications, marketing_emails: marketingEmails,
+        updated_at: new Date().toISOString(),
+      }).eq("id", user!.id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-      toast.success("Profile updated!");
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["my-profile"] }); toast.success("Profile updated!"); },
     onError: () => toast.error("Failed to update profile."),
   });
 
@@ -184,11 +188,7 @@ const AccountSettings = () => {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
     },
-    onSuccess: () => {
-      setNewPassword("");
-      setConfirmPassword("");
-      toast.success("Password updated!");
-    },
+    onSuccess: () => { setNewPassword(""); setConfirmPassword(""); toast.success("Password updated!"); },
     onError: (err: any) => toast.error(err.message || "Failed to change password."),
   });
 
@@ -199,52 +199,37 @@ const AccountSettings = () => {
     },
   });
 
-  // Content management functions
   const addContent = async () => {
     if (!mentorProfile || !newContent.title.trim()) return;
     setSavingContent(true);
     try {
       const { error } = await supabase.from("mentor_content").insert({
-        mentor_id: mentorProfile.id,
-        title: newContent.title,
-        description: newContent.description,
-        content_type: newContent.content_type,
-        content_url: newContent.content_url,
-        display_order: mentorContent.length,
+        mentor_id: mentorProfile.id, title: newContent.title, description: newContent.description,
+        content_type: newContent.content_type, content_url: newContent.content_url, display_order: mentorContent.length,
       });
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["mentor-content"] });
       setNewContent({ title: "", description: "", content_type: "link", content_url: "" });
       setShowAddContent(false);
       toast.success("Content added!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to add content.");
-    } finally {
-      setSavingContent(false);
-    }
+    } catch (err: any) { toast.error(err.message || "Failed to add content."); }
+    finally { setSavingContent(false); }
   };
 
   const updateContent = async () => {
     if (!editingContent) return;
     setSavingContent(true);
     try {
-      const { error } = await supabase.from("mentor_content")
-        .update({
-          title: editingContent.title,
-          description: editingContent.description,
-          content_type: editingContent.content_type,
-          content_url: editingContent.content_url,
-        })
-        .eq("id", editingContent.id);
+      const { error } = await supabase.from("mentor_content").update({
+        title: editingContent.title, description: editingContent.description,
+        content_type: editingContent.content_type, content_url: editingContent.content_url,
+      }).eq("id", editingContent.id);
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["mentor-content"] });
       setEditingContent(null);
       toast.success("Content updated!");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to update content.");
-    } finally {
-      setSavingContent(false);
-    }
+    } catch (err: any) { toast.error(err.message || "Failed to update content."); }
+    finally { setSavingContent(false); }
   };
 
   const deleteContent = async (id: string) => {
@@ -254,9 +239,7 @@ const AccountSettings = () => {
       if (error) throw error;
       queryClient.invalidateQueries({ queryKey: ["mentor-content"] });
       toast.success("Content deleted.");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete.");
-    }
+    } catch (err: any) { toast.error(err.message || "Failed to delete."); }
   };
 
   if (authLoading || profileLoading) {
@@ -264,21 +247,25 @@ const AccountSettings = () => {
   }
   if (!user) return <Navigate to="/auth" replace />;
 
-  const initials = (displayName || user.email || "?")
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+  const initials = (displayName || user.email || "?").split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+  const memberSince = user.created_at ? new Date(user.created_at) : new Date();
+  const daysSinceJoin = Math.floor((Date.now() - memberSince.getTime()) / (1000 * 60 * 60 * 24));
+  const activeSubCount = subscriptions.filter((s: any) => s.status === "active").length;
+
+  // Profile completeness
+  const profileFields = [displayName, avatarUrl, emailNotifications !== undefined];
+  const completeness = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="fixed inset-0 opacity-[0.03]" style={{
-        backgroundImage: 'linear-gradient(hsl(160 84% 39% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(160 84% 39% / 0.3) 1px, transparent 1px)',
-        backgroundSize: '60px 60px'
-      }} />
+      {/* Ambient background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-primary/3 blur-3xl" />
+      </div>
 
-      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 py-8">
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3">
@@ -313,117 +300,257 @@ const AccountSettings = () => {
             )}
           </TabsList>
 
-          {/* Profile */}
-          <TabsContent value="profile">
-            <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
-              {/* Avatar Upload */}
-              <div className="space-y-2">
-                <Label className="text-xs">Profile Picture</Label>
-                <div className="flex items-center gap-4">
-                  <div className="relative group">
-                    <div className="h-20 w-20 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center border-2 border-border">
+          {/* ──────────── PROFILE TAB ──────────── */}
+          <TabsContent value="profile" className="space-y-6">
+            {/* Profile Hero Card */}
+            <motion.div
+              variants={fadeIn} initial="hidden" animate="show" custom={0}
+              className="relative rounded-2xl border border-border bg-card overflow-hidden"
+            >
+              {/* Banner gradient */}
+              <div className="h-28 sm:h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent relative">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,hsl(var(--primary)/0.15),transparent_60%)]" />
+                {isMentor && (
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 px-3 py-1">
+                    <BadgeCheck className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-[11px] font-semibold text-primary">Verified Mentor</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="px-6 pb-6 -mt-12 sm:-mt-14">
+                <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+                  {/* Avatar */}
+                  <div className="relative group shrink-0">
+                    <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-2xl overflow-hidden bg-primary/10 flex items-center justify-center border-4 border-card shadow-xl">
                       {avatarUrl ? (
                         <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
                       ) : (
-                        <span className="text-primary font-heading font-bold text-lg">{initials}</span>
+                        <span className="text-primary font-heading font-bold text-2xl">{initials}</span>
                       )}
                     </div>
                     <button
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
-                      className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                      className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center cursor-pointer"
                     >
-                      <Camera className="h-5 w-5 text-white" />
+                      <Camera className="h-6 w-6 text-white" />
                     </button>
+                    <input
+                      ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.size > 5 * 1024 * 1024) { toast.error("File too large. Max 5MB."); return; }
+                          uploadAvatar(file);
+                        }
+                      }}
+                    />
                   </div>
-                  <div className="flex flex-col gap-1.5">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-xs"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
-                    >
-                      <Upload className="h-3.5 w-3.5 mr-1.5" />
-                      {uploading ? "Uploading..." : "Upload Photo"}
+
+                  {/* Name & Meta */}
+                  <div className="flex-1 min-w-0 pb-1">
+                    <h2 className="font-heading text-xl sm:text-2xl font-bold text-foreground truncate">
+                      {displayName || "Set your name"}
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-3 mt-1.5 text-muted-foreground">
+                      <span className="inline-flex items-center gap-1 text-xs">
+                        <Mail className="h-3 w-3" /> {user.email}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs">
+                        <CalendarDays className="h-3 w-3" /> Joined {memberSince.toLocaleDateString("en-US", { month: "short", year: "numeric" })}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Upload button */}
+                  <div className="flex gap-2 shrink-0">
+                    <Button variant="outline" size="sm" className="text-xs" onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                      <Upload className="h-3.5 w-3.5 mr-1.5" /> {uploading ? "Uploading..." : "Change Photo"}
                     </Button>
                     {avatarUrl && (
-                      <button
-                        onClick={() => {
-                          setAvatarUrl("");
-                          supabase.from("profiles").update({ avatar_url: null, updated_at: new Date().toISOString() }).eq("id", user.id).then(() => {
-                            queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-                            toast.success("Profile picture removed.");
-                          });
-                        }}
-                        className="text-[11px] text-muted-foreground hover:text-destructive transition-colors text-left"
-                      >
-                        Remove photo
-                      </button>
+                      <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-destructive" onClick={() => {
+                        setAvatarUrl("");
+                        supabase.from("profiles").update({ avatar_url: null, updated_at: new Date().toISOString() }).eq("id", user.id).then(() => {
+                          queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+                          toast.success("Profile picture removed.");
+                        });
+                      }}>
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
                     )}
                   </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        if (file.size > 5 * 1024 * 1024) {
-                          toast.error("File too large. Max 5MB.");
-                          return;
-                        }
-                        uploadAvatar(file);
-                      }
-                    }}
-                  />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Stats Grid */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={1} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: "Days Active", value: daysSinceJoin, icon: CalendarDays, color: "text-blue-400 bg-blue-400/10" },
+                { label: "Active Subs", value: activeSubCount, icon: Star, color: "text-amber-400 bg-amber-400/10" },
+                { label: "Saved Mentors", value: savedCount, icon: Award, color: "text-pink-400 bg-pink-400/10" },
+                { label: "Messages", value: messageStats.total, icon: Mail, color: messageStats.unread > 0 ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted" },
+              ].map((stat) => (
+                <div key={stat.label} className="rounded-xl border border-border bg-card p-4 hover:border-primary/30 transition-colors group">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${stat.color} mb-2.5 group-hover:scale-110 transition-transform`}>
+                    <stat.icon className="h-4 w-4" />
+                  </div>
+                  <p className="font-heading text-xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
+                  {stat.label === "Messages" && messageStats.unread > 0 && (
+                    <span className="inline-block mt-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2 py-0.5">
+                      {messageStats.unread} unread
+                    </span>
+                  )}
+                </div>
+              ))}
+            </motion.div>
+
+            {/* Profile Completeness */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={2}
+              className="rounded-xl border border-border bg-card p-5"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-sm text-foreground">Profile Completeness</h3>
+                </div>
+                <span className={`text-xs font-bold ${completeness === 100 ? "text-primary" : "text-muted-foreground"}`}>
+                  {completeness}%
+                </span>
+              </div>
+              <Progress value={completeness} className="h-2 mb-3" />
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { done: !!displayName, label: "Display name" },
+                  { done: !!avatarUrl, label: "Profile photo" },
+                  { done: true, label: "Email verified" },
+                ].map((item) => (
+                  <span key={item.label} className={`inline-flex items-center gap-1 text-[11px] rounded-full px-2.5 py-1 border ${
+                    item.done
+                      ? "border-primary/30 bg-primary/5 text-primary"
+                      : "border-border bg-muted text-muted-foreground"
+                  }`}>
+                    <CheckCircle2 className={`h-3 w-3 ${item.done ? "text-primary" : "text-muted-foreground/40"}`} />
+                    {item.label}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Edit Profile Form */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={3}
+              className="rounded-2xl border border-border bg-card p-6 space-y-5"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <User className="h-4 w-4 text-primary" />
+                <h3 className="font-heading font-semibold text-foreground">Edit Profile</h3>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Display Name</Label>
+                  <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="bg-muted border-border text-sm" placeholder="Your name" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Email Address</Label>
+                  <Input value={user.email || ""} disabled className="bg-muted/50 border-border text-sm text-muted-foreground" />
+                  <p className="text-[10px] text-muted-foreground">Email cannot be changed directly.</p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs">Display Name</Label>
-                <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="bg-muted border-border text-sm" placeholder="Your name" />
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Shield className="h-3.5 w-3.5" />
+                  <span>Your data is securely stored and encrypted</span>
+                </div>
+                <Button onClick={() => updateProfileMutation.mutate()} disabled={updateProfileMutation.isPending} className="text-sm font-semibold">
+                  <Save className="h-3.5 w-3.5 mr-1.5" />
+                  {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs">Email</Label>
-                <Input value={user.email || ""} disabled className="bg-muted/50 border-border text-sm text-muted-foreground" />
-                <p className="text-[11px] text-muted-foreground">Email cannot be changed.</p>
-              </div>
-              <Button onClick={() => updateProfileMutation.mutate()} disabled={updateProfileMutation.isPending} className="text-sm font-semibold">
-                <Save className="h-3.5 w-3.5 mr-1.5" /> Save Changes
-              </Button>
-            </div>
+            </motion.div>
+
+            {/* Quick Actions */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={4}
+              className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+            >
+              <Link to="/mentors" className="rounded-xl border border-border bg-card p-4 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group">
+                <Star className="h-5 w-5 text-amber-400 mb-2 group-hover:scale-110 transition-transform" />
+                <h4 className="font-heading font-semibold text-sm text-foreground">Browse Mentors</h4>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Find your next trading mentor</p>
+              </Link>
+              <Link to="/dashboard" className="rounded-xl border border-border bg-card p-4 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group">
+                <Award className="h-5 w-5 text-primary mb-2 group-hover:scale-110 transition-transform" />
+                <h4 className="font-heading font-semibold text-sm text-foreground">Dashboard</h4>
+                <p className="text-[11px] text-muted-foreground mt-0.5">View your subscriptions & messages</p>
+              </Link>
+              <Link to="/learn" className="rounded-xl border border-border bg-card p-4 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group">
+                <BookOpen className="h-5 w-5 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
+                <h4 className="font-heading font-semibold text-sm text-foreground">Free Content</h4>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Watch free trading tutorials</p>
+              </Link>
+            </motion.div>
           </TabsContent>
 
-          {/* Password */}
+          {/* ──────────── PASSWORD TAB ──────────── */}
           <TabsContent value="password">
             <div className="rounded-2xl border border-border bg-card p-6 space-y-5">
+              <div className="flex items-center gap-2 mb-1">
+                <Lock className="h-4 w-4 text-primary" />
+                <h3 className="font-heading font-semibold text-foreground">Change Password</h3>
+              </div>
               <div className="space-y-2">
                 <Label className="text-xs">New Password</Label>
-                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="bg-muted border-border text-sm" placeholder="••••••••" />
+                <div className="relative">
+                  <Input type={showPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="bg-muted border-border text-sm pr-10" placeholder="••••••••" />
+                  <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-xs">Confirm New Password</Label>
-                <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="bg-muted border-border text-sm" placeholder="••••••••" />
+                <Input type={showPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="bg-muted border-border text-sm" placeholder="••••••••" />
+                {newPassword && confirmPassword && newPassword !== confirmPassword && (
+                  <p className="text-[11px] text-destructive">Passwords don't match</p>
+                )}
               </div>
+              {newPassword && (
+                <div className="flex gap-2">
+                  {["Length (6+)", "Match"].map((rule) => {
+                    const pass = rule === "Length (6+)" ? newPassword.length >= 6 : (newPassword === confirmPassword && confirmPassword.length > 0);
+                    return (
+                      <span key={rule} className={`inline-flex items-center gap-1 text-[11px] rounded-full px-2.5 py-1 border ${pass ? "border-primary/30 bg-primary/5 text-primary" : "border-border bg-muted text-muted-foreground"}`}>
+                        <CheckCircle2 className={`h-3 w-3 ${pass ? "text-primary" : "text-muted-foreground/40"}`} />
+                        {rule}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
               <Button onClick={() => changePasswordMutation.mutate()} disabled={changePasswordMutation.isPending} className="text-sm font-semibold">
                 <Lock className="h-3.5 w-3.5 mr-1.5" /> Update Password
               </Button>
             </div>
           </TabsContent>
 
-          {/* Notifications */}
+          {/* ──────────── NOTIFICATIONS TAB ──────────── */}
           <TabsContent value="notifications">
             <div className="rounded-2xl border border-border bg-card p-6 space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 mb-1">
+                <Bell className="h-4 w-4 text-primary" />
+                <h3 className="font-heading font-semibold text-foreground">Notification Preferences</h3>
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
                 <div>
                   <h3 className="font-heading font-semibold text-foreground text-sm">Email Notifications</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Receive notifications about messages and mentor updates.</p>
                 </div>
                 <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
                 <div>
                   <h3 className="font-heading font-semibold text-foreground text-sm">Marketing Emails</h3>
                   <p className="text-xs text-muted-foreground mt-0.5">Tips, new mentors, and platform updates.</p>
@@ -436,16 +563,19 @@ const AccountSettings = () => {
             </div>
           </TabsContent>
 
-          {/* Billing */}
+          {/* ──────────── BILLING TAB ──────────── */}
           <TabsContent value="billing">
             <div className="rounded-2xl border border-border bg-card p-6">
-              <h3 className="font-heading font-semibold text-foreground mb-4">Subscription History</h3>
+              <div className="flex items-center gap-2 mb-5">
+                <CreditCard className="h-4 w-4 text-primary" />
+                <h3 className="font-heading font-semibold text-foreground">Subscription History</h3>
+              </div>
               {subscriptions.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground text-sm">No subscriptions yet.</div>
               ) : (
                 <div className="space-y-3">
                   {subscriptions.map((sub: any) => (
-                    <div key={sub.id} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-4">
+                    <div key={sub.id} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-4 hover:border-primary/20 transition-colors">
                       <div>
                         <h4 className="font-heading font-semibold text-foreground text-sm">{sub.mentors?.name || "Mentor"}</h4>
                         <span className="text-xs text-muted-foreground">Started {new Date(sub.started_at).toLocaleDateString()}</span>
@@ -463,7 +593,7 @@ const AccountSettings = () => {
             </div>
           </TabsContent>
 
-          {/* My Content (Mentors only) */}
+          {/* ──────────── MY CONTENT TAB ──────────── */}
           {mentorProfile && (
             <TabsContent value="content">
               <div className="rounded-2xl border border-border bg-card p-6">
@@ -477,46 +607,44 @@ const AccountSettings = () => {
                   </Button>
                 </div>
 
-                {/* Add Content Form */}
-                {showAddContent && (
-                  <div className="rounded-xl border border-primary/20 bg-primary/[0.02] p-4 mb-5 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-heading font-semibold text-foreground text-sm">New Content</h4>
-                      <button onClick={() => setShowAddContent(false)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
-                    </div>
-                    <Input placeholder="Title" value={newContent.title} onChange={(e) => setNewContent({ ...newContent, title: e.target.value })} className="bg-muted border-border text-sm" />
-                    <Textarea placeholder="Description (optional)" value={newContent.description} onChange={(e) => setNewContent({ ...newContent, description: e.target.value })} className="bg-muted border-border text-sm min-h-[60px]" />
-                    <div className="flex gap-3">
-                      <Select value={newContent.content_type} onValueChange={(v) => setNewContent({ ...newContent, content_type: v })}>
-                        <SelectTrigger className="w-36 bg-muted border-border text-sm"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="link">Link</SelectItem>
-                          <SelectItem value="video">Video</SelectItem>
-                          <SelectItem value="discord">Discord</SelectItem>
-                          <SelectItem value="call">Call</SelectItem>
-                          <SelectItem value="resource">Resource</SelectItem>
-                          <SelectItem value="file">File Upload</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <div className="flex-1 flex gap-2">
-                        <Input placeholder="URL" value={newContent.content_url} onChange={(e) => setNewContent({ ...newContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" />
-                        <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => contentFileRef.current?.click()} disabled={uploadingFile}>
-                          <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload"}
-                        </Button>
-                        <input ref={contentFileRef} type="file" className="hidden" onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) handleContentFileUpload(f, 'new');
-                          e.target.value = '';
-                        }} />
+                <AnimatePresence>
+                  {showAddContent && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
+                      className="rounded-xl border border-primary/20 bg-primary/[0.02] p-4 mb-5 space-y-3 overflow-hidden"
+                    >
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-heading font-semibold text-foreground text-sm">New Content</h4>
+                        <button onClick={() => setShowAddContent(false)} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
                       </div>
-                    </div>
-                    <Button size="sm" className="text-xs font-semibold" onClick={addContent} disabled={savingContent || !newContent.title.trim()}>
-                      {savingContent ? "Saving..." : "Save Content"}
-                    </Button>
-                  </div>
-                )}
+                      <Input placeholder="Title" value={newContent.title} onChange={(e) => setNewContent({ ...newContent, title: e.target.value })} className="bg-muted border-border text-sm" />
+                      <Textarea placeholder="Description (optional)" value={newContent.description} onChange={(e) => setNewContent({ ...newContent, description: e.target.value })} className="bg-muted border-border text-sm min-h-[60px]" />
+                      <div className="flex gap-3">
+                        <Select value={newContent.content_type} onValueChange={(v) => setNewContent({ ...newContent, content_type: v })}>
+                          <SelectTrigger className="w-36 bg-muted border-border text-sm"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="video">Video</SelectItem>
+                            <SelectItem value="discord">Discord</SelectItem>
+                            <SelectItem value="call">Call</SelectItem>
+                            <SelectItem value="resource">Resource</SelectItem>
+                            <SelectItem value="file">File Upload</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <div className="flex-1 flex gap-2">
+                          <Input placeholder="URL" value={newContent.content_url} onChange={(e) => setNewContent({ ...newContent, content_url: e.target.value })} className="bg-muted border-border text-sm flex-1" />
+                          <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => contentFileRef.current?.click()} disabled={uploadingFile}>
+                            <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload"}
+                          </Button>
+                          <input ref={contentFileRef} type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleContentFileUpload(f, 'new'); e.target.value = ''; }} />
+                        </div>
+                      </div>
+                      <Button size="sm" className="text-xs font-semibold" onClick={addContent} disabled={savingContent || !newContent.title.trim()}>
+                        {savingContent ? "Saving..." : "Save Content"}
+                      </Button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                {/* Content List */}
                 {contentLoading ? (
                   <p className="text-sm text-muted-foreground">Loading...</p>
                 ) : mentorContent.length === 0 ? (
@@ -527,7 +655,7 @@ const AccountSettings = () => {
                 ) : (
                   <div className="space-y-2">
                     {mentorContent.map((item) => (
-                      <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3">
+                      <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border bg-muted/30 p-3 hover:border-primary/20 transition-colors">
                         {editingContent?.id === item.id ? (
                           <div className="flex-1 space-y-2">
                             <Input value={editingContent.title} onChange={(e) => setEditingContent({ ...editingContent, title: e.target.value })} className="bg-muted border-border text-sm" />
@@ -548,11 +676,7 @@ const AccountSettings = () => {
                               <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => editFileRef.current?.click()} disabled={uploadingFile}>
                                 <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload"}
                               </Button>
-                              <input ref={editFileRef} type="file" className="hidden" onChange={(e) => {
-                                const f = e.target.files?.[0];
-                                if (f) handleContentFileUpload(f, 'edit');
-                                e.target.value = '';
-                              }} />
+                              <input ref={editFileRef} type="file" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleContentFileUpload(f, 'edit'); e.target.value = ''; }} />
                             </div>
                             <div className="flex gap-2">
                               <Button size="sm" className="text-xs" onClick={updateContent} disabled={savingContent}>{savingContent ? "Saving..." : "Save"}</Button>
@@ -596,16 +720,9 @@ const AccountSettings = () => {
           <p className="text-sm text-muted-foreground mb-4">
             Deleting your account is permanent. All your data will be removed.
           </p>
-          <Button
-            variant="destructive"
-            size="sm"
-            className="text-xs font-semibold"
-            onClick={() => {
-              if (window.confirm("Are you sure you want to delete your account? This cannot be undone.")) {
-                deleteAccountMutation.mutate();
-              }
-            }}
-          >
+          <Button variant="destructive" size="sm" className="text-xs font-semibold" onClick={() => {
+            if (window.confirm("Are you sure you want to delete your account? This cannot be undone.")) deleteAccountMutation.mutate();
+          }}>
             <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Delete Account
           </Button>
         </div>
