@@ -60,6 +60,16 @@ const MentorApplicationForm = () => {
     }
   }, [showSuccess]);
 
+  const addCustomSession = () => {
+    const trimmed = sessionOtherValue.trim();
+    if (!trimmed) { toast.error("Please enter a session name."); return; }
+    const isDuplicate = SESSIONS.some((s) => s.toLowerCase() === trimmed.toLowerCase());
+    if (isDuplicate) { toast.error(`"${trimmed}" is already in the list.`); return; }
+    setSession(trimmed);
+    setSessionOtherValue("");
+    setShowSessionOther(false);
+  };
+
   const canProceed = () => {
     if (step === 0) return fullName && email;
     if (step === 1) return experience && instruments.length > 0 && concepts.length > 0 && session;
@@ -173,13 +183,13 @@ const MentorApplicationForm = () => {
                       value={sessionOtherValue}
                       onChange={(e) => setSessionOtherValue(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") { e.preventDefault(); if (sessionOtherValue.trim()) { setSession(sessionOtherValue.trim()); setSessionOtherValue(""); setShowSessionOther(false); } }
+                        if (e.key === "Enter") { e.preventDefault(); addCustomSession(); }
                         if (e.key === "Escape") setShowSessionOther(false);
                       }}
                       placeholder="Type session..."
                       className="h-9 w-32 text-sm bg-muted border-border"
                     />
-                    <button type="button" onClick={() => { if (sessionOtherValue.trim()) { setSession(sessionOtherValue.trim()); setSessionOtherValue(""); setShowSessionOther(false); } }} className="rounded-lg border border-primary/50 bg-primary/10 text-primary px-2.5 py-2 text-sm font-medium hover:bg-primary/20 transition-colors">Add</button>
+                    <button type="button" onClick={addCustomSession} className="rounded-lg border border-primary/50 bg-primary/10 text-primary px-2.5 py-2 text-sm font-medium hover:bg-primary/20 transition-colors">Add</button>
                   </div>
                 ) : (
                   <motion.button
