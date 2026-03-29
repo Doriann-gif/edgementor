@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
 import { useAuth } from "@/contexts/AuthContext";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 
 const floatingOrb = {
   animate: { y: [0, -20, 0], scale: [1, 1.05, 1] },
@@ -48,9 +48,8 @@ const Homepage = () => {
   const { data: allMentors = [] } = useMentors();
   const { user, loading } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
-  const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.95]);
+
+
 
   useEffect(() => {
     if (loading) return;
@@ -134,7 +133,7 @@ const Homepage = () => {
 
       <div className="relative">
         {/* Hero */}
-        <motion.section className="py-24 sm:py-32 px-4 sm:px-6 relative" style={{ opacity: heroOpacity, scale: heroScale }}>
+        <motion.section className="py-24 sm:py-32 px-4 sm:px-6 relative">
           {/* Central glow */}
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-r from-primary/[0.08] via-pink-400/[0.06] to-primary/[0.08] rounded-full blur-[120px] pointer-events-none"
