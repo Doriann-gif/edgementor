@@ -295,6 +295,15 @@ const AccountSettings = () => {
             <TabsTrigger value="billing" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
               <CreditCard className="h-3.5 w-3.5 mr-1.5" /> Billing
             </TabsTrigger>
+            <TabsTrigger value="appearance" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
+              <Palette className="h-3.5 w-3.5 mr-1.5" /> Appearance
+            </TabsTrigger>
+            <TabsTrigger value="activity" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
+              <Activity className="h-3.5 w-3.5 mr-1.5" /> Activity
+            </TabsTrigger>
+            <TabsTrigger value="privacy" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
+              <ShieldCheck className="h-3.5 w-3.5 mr-1.5" /> Privacy
+            </TabsTrigger>
             {mentorProfile && (
               <TabsTrigger value="content" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
                 <BookOpen className="h-3.5 w-3.5 mr-1.5" /> My Content
