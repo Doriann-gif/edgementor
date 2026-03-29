@@ -19,6 +19,8 @@ interface Application {
   status: string;
   proof_url: string | null;
   created_at: string;
+  user_id: string | null;
+  email: string | null;
 }
 
 const AdminApplications = () => {
