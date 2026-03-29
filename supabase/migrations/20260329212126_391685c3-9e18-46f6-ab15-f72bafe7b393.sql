@@ -1,0 +1,1 @@
+DELETE FROM mentor_applications WHERE email = 'testother@example.com';
