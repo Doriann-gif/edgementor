@@ -16,11 +16,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import NotificationBell from "@/components/NotificationBell";
-import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "@/contexts/ThemeContext";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 
 const Navbar = () => {
   const { user, isAdmin, isMentor, signOut } = useAuth();
