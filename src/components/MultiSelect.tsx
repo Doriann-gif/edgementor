@@ -2,6 +2,8 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 interface MultiSelectProps {
   label: string;
@@ -26,9 +28,18 @@ const MultiSelect = ({ label, options, selected, onChange }: MultiSelectProps) =
 
   const addOther = () => {
     const trimmed = otherValue.trim();
-    if (trimmed && !selected.includes(trimmed)) {
-      onChange([...selected, trimmed]);
+    if (!trimmed) {
+      toast.error("Please enter a value.");
+      return;
     }
+    const isDuplicate = [...options, ...selected].some(
+      (v) => v.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (isDuplicate) {
+      toast.error(`"${trimmed}" is already in the list.`);
+      return;
+    }
+    onChange([...selected, trimmed]);
     setOtherValue("");
     setShowOtherInput(false);
   };
