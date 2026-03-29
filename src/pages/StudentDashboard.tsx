@@ -182,6 +182,66 @@ const StudentDashboard = () => {
           </motion.div>
         </motion.div>
 
+        {/* Welcome Hero Card */}
+        <motion.div
+          className="relative rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-pink/5 p-5 sm:p-6 mb-8 overflow-hidden"
+          initial={{ opacity: 0, y: 20, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.15, duration: 0.5 }}
+        >
+          <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-pink/5 to-transparent rounded-tr-full pointer-events-none" />
+          
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <motion.div
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  <Flame className="h-5 w-5 text-amber-400" />
+                </motion.div>
+                <span className="font-heading font-bold text-lg text-foreground">
+                  {learningDays > 0 ? `${learningDays} Day Streak!` : "Start Your Streak!"}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground max-w-md">
+                {learningDays > 30
+                  ? "You're on fire! Keep up the incredible consistency."
+                  : learningDays > 0
+                    ? "Great start! Consistency builds champions."
+                    : "Subscribe to a mentor and begin your trading journey today."}
+              </p>
+            </div>
+            
+            {/* Achievement Badges */}
+            <div className="flex items-center gap-2">
+              {[
+                { icon: Target, label: "First Sub", unlocked: subscriptions.length > 0, color: "text-primary" },
+                { icon: CalendarDays, label: "7 Days", unlocked: learningDays >= 7, color: "text-amber-400" },
+                { icon: Award, label: "30 Days", unlocked: learningDays >= 30, color: "text-pink-400" },
+                { icon: Sparkles, label: "100 Days", unlocked: learningDays >= 100, color: "text-blue-400" },
+              ].map((badge, i) => (
+                <motion.div
+                  key={badge.label}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + i * 0.1, type: "spring" }}
+                  className={`flex flex-col items-center gap-1 ${badge.unlocked ? "" : "opacity-30"}`}
+                  title={badge.label}
+                >
+                  <div className={`h-9 w-9 rounded-xl flex items-center justify-center ${
+                    badge.unlocked ? "bg-card border border-border shadow-sm" : "bg-muted/50 border border-border/50"
+                  }`}>
+                    <badge.icon className={`h-4 w-4 ${badge.unlocked ? badge.color : "text-muted-foreground"}`} />
+                  </div>
+                  <span className="text-[9px] text-muted-foreground font-medium">{badge.label}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+
         {/* Stats Cards */}
         <motion.div
           className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8"

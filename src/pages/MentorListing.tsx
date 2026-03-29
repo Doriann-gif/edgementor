@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   TrendingUp, Search, Star, Clock, SlidersHorizontal, X, Crown,
   ArrowUpDown, Users, ChevronRight, Sparkles, Zap, Target,
@@ -297,59 +297,143 @@ const MentorListingPage = () => {
               />
             </div>
 
-            <Popover>
-              <PopoverTrigger asChild>
+            <Sheet>
+              <SheetTrigger asChild>
                 <Button variant="outline" className="relative gap-2 h-11 px-4 rounded-xl border-border/50">
                   <SlidersHorizontal className="h-4 w-4" /> Filters
-                  {activeFilterCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-lg shadow-primary/30">
-                      {activeFilterCount}
-                    </span>
-                  )}
+                  <AnimatePresence>
+                    {activeFilterCount > 0 && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-lg shadow-primary/30"
+                      >
+                        {activeFilterCount}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 space-y-5 rounded-xl" align="end">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-heading font-bold text-foreground">Filters</h4>
-                  {activeFilterCount > 0 && (
-                    <button onClick={clearFilters} className="text-xs text-primary hover:underline flex items-center gap-1 font-medium">
-                      <X className="h-3 w-3" /> Clear all
-                    </button>
-                  )}
-                </div>
-                <div className="space-y-3">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Max Price: ${priceRange[0]}/mo</label>
-                  <Slider value={priceRange} onValueChange={(v) => setPriceRange(v as [number])} min={10} max={500} step={10} />
-                  <div className="flex justify-between text-[10px] text-muted-foreground"><span>$10</span><span>$500</span></div>
-                </div>
-                <div className="space-y-2.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Concepts</label>
-                  <div className="flex flex-wrap gap-2">
-                    {ALL_CONCEPTS.map((c) => (
-                      <button key={c} onClick={() => setActiveConcepts(toggleItem(activeConcepts, c))}
-                        className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${activeConcepts.includes(c)
-                          ? "border-primary/50 bg-primary/15 text-primary shadow-sm shadow-primary/10"
-                          : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:border-border"}`}>
-                        {c}
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 sm:w-96 overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle className="font-heading flex items-center justify-between">
+                    <span>Filters</span>
+                    {activeFilterCount > 0 && (
+                      <button onClick={clearFilters} className="text-xs text-primary hover:underline flex items-center gap-1 font-medium">
+                        <X className="h-3 w-3" /> Clear all ({activeFilterCount})
                       </button>
-                    ))}
+                    )}
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="space-y-8 mt-6">
+                  {/* Price Range */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Max Price: <span className="text-foreground">${priceRange[0]}/mo</span>
+                    </label>
+                    <Slider value={priceRange} onValueChange={(v) => setPriceRange(v as [number])} min={10} max={500} step={10} />
+                    <div className="flex justify-between text-[10px] text-muted-foreground"><span>$10</span><span>$500</span></div>
                   </div>
-                </div>
-                <div className="space-y-2.5">
-                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Instruments</label>
-                  <div className="flex flex-wrap gap-2">
-                    {ALL_INSTRUMENTS.map((inst) => (
-                      <button key={inst} onClick={() => setActiveInstruments(toggleItem(activeInstruments, inst))}
-                        className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${activeInstruments.includes(inst)
-                          ? "border-primary/50 bg-primary/15 text-primary shadow-sm shadow-primary/10"
-                          : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:border-border"}`}>
-                        {inst}
-                      </button>
-                    ))}
+
+                  {/* Concepts */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Concepts</label>
+                    <div className="flex flex-wrap gap-2">
+                      {ALL_CONCEPTS.map((c) => (
+                        <motion.button
+                          key={c}
+                          onClick={() => setActiveConcepts(toggleItem(activeConcepts, c))}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${activeConcepts.includes(c)
+                            ? "border-primary/50 bg-primary/15 text-primary shadow-sm shadow-primary/10"
+                            : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:border-border"}`}
+                        >
+                          {c}
+                        </motion.button>
+                      ))}
+                    </div>
                   </div>
+
+                  {/* Instruments */}
+                  <div className="space-y-3">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Instruments</label>
+                    <div className="flex flex-wrap gap-2">
+                      {ALL_INSTRUMENTS.map((inst) => (
+                        <motion.button
+                          key={inst}
+                          onClick={() => setActiveInstruments(toggleItem(activeInstruments, inst))}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${activeInstruments.includes(inst)
+                            ? "border-primary/50 bg-primary/15 text-primary shadow-sm shadow-primary/10"
+                            : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:border-border"}`}
+                        >
+                          {inst}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Active Filters Summary */}
+                  <AnimatePresence>
+                    {activeFilterCount > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="rounded-xl border border-primary/20 bg-primary/5 p-3"
+                      >
+                        <p className="text-xs text-muted-foreground mb-2">Active filters:</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {activeInstruments.map((i) => (
+                            <motion.span
+                              key={i}
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-2 py-0.5"
+                            >
+                              {i}
+                              <button onClick={() => setActiveInstruments(toggleItem(activeInstruments, i))}>
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </motion.span>
+                          ))}
+                          {activeConcepts.map((c) => (
+                            <motion.span
+                              key={c}
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-2 py-0.5"
+                            >
+                              {c}
+                              <button onClick={() => setActiveConcepts(toggleItem(activeConcepts, c))}>
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </motion.span>
+                          ))}
+                          {priceRange[0] < 500 && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-2 py-0.5"
+                            >
+                              ≤${priceRange[0]}/mo
+                              <button onClick={() => setPriceRange([500])}>
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </motion.span>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              </PopoverContent>
-            </Popover>
+              </SheetContent>
+            </Sheet>
 
             <Link to="/apply" className="hidden lg:block">
               <Button variant="outline" className="h-11 px-4 rounded-xl border-border/50 text-xs font-semibold gap-1.5">

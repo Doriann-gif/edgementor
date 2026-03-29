@@ -15,6 +15,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import NotificationBell from "@/components/NotificationBell";
 
 const Navbar = () => {
   const { user, isAdmin, isMentor, signOut } = useAuth();
@@ -128,6 +129,7 @@ const Navbar = () => {
                   <User className="h-3.5 w-3.5 mr-1" /> Dashboard
                 </Button>
               </Link>
+              <NotificationBell />
               <SettingsDropdown />
             </>
           ) : (
