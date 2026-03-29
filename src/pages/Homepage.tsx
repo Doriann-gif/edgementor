@@ -12,12 +12,6 @@ import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 
-const VIDEOS = [
-  { title: "How I Read Order Flow in Real Time", mentor: "Marcus Chen", duration: "24:15", views: "12.4K", thumbnail: "OF" },
-  { title: "ICT Liquidity Sweeps Explained", mentor: "Sarah Williams", duration: "18:32", views: "8.7K", thumbnail: "ICT" },
-  { title: "Supply & Demand Zones That Actually Work", mentor: "David Okonkwo", duration: "31:08", views: "15.2K", thumbnail: "SD" },
-  { title: "Institutional Order Flow: What Retail Misses", mentor: "Elena Petrova", duration: "42:20", views: "22.1K", thumbnail: "IO" },
-];
 
 const floatingOrb = {
   animate: {
