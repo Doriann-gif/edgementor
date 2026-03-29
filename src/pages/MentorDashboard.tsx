@@ -309,6 +309,7 @@ const MentorDashboard = () => {
         </Tabs>
       </div>
     </div>
+    </PageTransition>
   );
 };
 
