@@ -119,10 +119,6 @@ const Homepage = () => {
           animate={{ y: [0, -15, 0], x: [0, 12, 0] }}
           transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" as const }}
         />
-        <div className="absolute inset-0 opacity-[0.015]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(160 84% 39% / 0.4) 1px, transparent 0)',
-          backgroundSize: '48px 48px'
-        }} />
       </div>
 
       <div className="relative">

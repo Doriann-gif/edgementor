@@ -59,10 +59,6 @@ const Auth = () => {
   return (
     <PageTransition>
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="fixed inset-0 opacity-[0.03]" style={{
-        backgroundImage: 'linear-gradient(hsl(160 84% 39% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(160 84% 39% / 0.3) 1px, transparent 1px)',
-        backgroundSize: '60px 60px'
-      }} />
       <div className="w-full max-w-sm relative">
         <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowLeft className="h-4 w-4" /> Back to home
