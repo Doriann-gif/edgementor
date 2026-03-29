@@ -5,19 +5,13 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  TrendingUp, Star, Users, Play, ArrowRight, Zap,
+  TrendingUp, Star, Users, ArrowRight, Zap,
   Shield, BarChart3, ChevronRight, UserPlus,
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 
-const VIDEOS = [
-  { title: "How I Read Order Flow in Real Time", mentor: "Marcus Chen", duration: "24:15", views: "12.4K", thumbnail: "OF" },
-  { title: "ICT Liquidity Sweeps Explained", mentor: "Sarah Williams", duration: "18:32", views: "8.7K", thumbnail: "ICT" },
-  { title: "Supply & Demand Zones That Actually Work", mentor: "David Okonkwo", duration: "31:08", views: "15.2K", thumbnail: "SD" },
-  { title: "Institutional Order Flow: What Retail Misses", mentor: "Elena Petrova", duration: "42:20", views: "22.1K", thumbnail: "IO" },
-];
 
 const floatingOrb = {
   animate: {
@@ -172,11 +166,6 @@ const Homepage = () => {
                   </Button>
                 </motion.div>
               </Link>
-              <motion.div whileHover={{ scale: 1.04, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
-                <Button variant="outline" size="lg" className="h-12 px-8 font-semibold text-sm border-border/60 hover:border-pink-400/30 hover:shadow-lg hover:shadow-pink-400/5 transition-all">
-                  Watch Free Content
-                </Button>
-              </motion.div>
             </motion.div>
           </motion.div>
         </section>
@@ -274,59 +263,6 @@ const Homepage = () => {
           </div>
         </section>
 
-        {/* Videos */}
-        <section className="py-16 sm:py-20 px-4 sm:px-6 relative">
-          <div className="absolute bottom-0 left-1/3 w-[500px] h-[400px] bg-pink-500/[0.02] rounded-full blur-[120px] pointer-events-none" />
-
-          <div className="max-w-6xl mx-auto relative">
-            <motion.div
-              className="mb-8"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="inline-flex items-center gap-2 rounded-full border border-pink-400/20 bg-pink-400/5 px-3 py-1 text-xs font-medium text-pink-400 mb-3"><Play className="h-3.5 w-3.5" /> Free Content</div>
-              <h2 className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Trading Videos</h2>
-              <p className="text-sm text-muted-foreground mt-1.5">Free educational content from our verified mentors.</p>
-            </motion.div>
-            <motion.div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, margin: "-60px" }}
-              variants={staggerContainer}
-            >
-              {VIDEOS.map((video) => (
-                <motion.div key={video.title} variants={fadeUp}>
-                  <motion.div
-                    className="group rounded-2xl border border-border bg-card/80 backdrop-blur-sm overflow-hidden cursor-pointer transition-colors duration-300 hover:border-pink-400/20"
-                    whileHover={{ y: -6, boxShadow: "0 20px 50px -12px rgba(236,72,153,0.1)" }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    <div className="aspect-video bg-gradient-to-br from-secondary to-secondary/60 flex items-center justify-center relative overflow-hidden">
-                      <span className="font-heading font-bold text-2xl text-muted-foreground/20">{video.thumbnail}</span>
-                      <motion.div
-                        className="absolute inset-0 flex items-center justify-center"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        whileHover={{ opacity: 1, scale: 1 }}
-                      >
-                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-pink-400 flex items-center justify-center shadow-lg shadow-primary/30">
-                          <Play className="h-5 w-5 text-primary-foreground fill-current ml-0.5" />
-                        </div>
-                      </motion.div>
-                      <span className="absolute bottom-2 right-2 bg-background/80 text-foreground text-[10px] font-medium px-1.5 py-0.5 rounded backdrop-blur-sm">{video.duration}</span>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-heading font-semibold text-sm text-foreground leading-snug line-clamp-2 mb-2">{video.title}</h3>
-                      <div className="flex items-center justify-between text-xs text-muted-foreground"><span>{video.mentor}</span><span>{video.views} views</span></div>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
 
         {/* Why Us */}
         <section className="py-16 sm:py-20 px-4 sm:px-6 bg-card/20 relative">
