@@ -208,6 +208,7 @@ const Subscribe = () => {
         </div>
       </div>
     </div>
+    </PageTransition>
   );
 };
 
