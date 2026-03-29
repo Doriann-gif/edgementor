@@ -129,6 +129,7 @@ const Navbar = () => {
                   <User className="h-3.5 w-3.5 mr-1" /> Dashboard
                 </Button>
               </Link>
+              <NotificationBell />
               <SettingsDropdown />
             </>
           ) : (
