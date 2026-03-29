@@ -104,6 +104,9 @@ const Navbar = () => {
           <Link to="/mentors">
             <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Mentors</Button>
           </Link>
+          <Link to="/learn">
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Learn</Button>
+          </Link>
           <Link to="/apply">
             <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">Apply</Button>
           </Link>
@@ -153,6 +156,9 @@ const Navbar = () => {
         <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-sm px-4 py-3 space-y-1">
           <Link to="/mentors" onClick={() => setMobileOpen(false)}>
             <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">Mentors</Button>
+          </Link>
+          <Link to="/learn" onClick={() => setMobileOpen(false)}>
+            <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">Learn</Button>
           </Link>
           <Link to="/apply" onClick={() => setMobileOpen(false)}>
             <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">Apply</Button>
