@@ -230,7 +230,7 @@ const MentorListingPage = () => {
 
   return (
     <PageTransition>
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background border-pink-100 text-pink-50">
       {/* Ambient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px]" />
