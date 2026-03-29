@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 const INSTRUMENTS = ["Futures", "Forex", "Crypto", "Equities"];
 const CONCEPTS = ["ICT", "Order Flow", "Supply & Demand", "Price Action", "SMC"];
 const SESSIONS = ["London", "New York", "Asian"];
+const EXPERIENCE_OPTIONS = ["1-2 years", "3-5 years", "5-8 years", "8-10 years", "10+ years"];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -51,6 +52,7 @@ const MentorApplicationForm = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSessionOther, setShowSessionOther] = useState(false);
   const [sessionOtherValue, setSessionOtherValue] = useState("");
+  const [showExpOther, setShowExpOther] = useState(false);
 
   useEffect(() => {
     if (showSuccess) {
