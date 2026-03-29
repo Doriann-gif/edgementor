@@ -130,3 +130,12 @@
   0%, 100% { background-position: 0% center; }
   50% { background-position: 100% center; }
 }
+
+/* Subtle pink shimmer on interactive cards */
+.card-pink-hover {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-pink-hover:hover {
+  box-shadow: 0 0 30px hsl(var(--pink) / 0.06), 0 0 60px hsl(var(--pink) / 0.03);
+  border-color: hsl(var(--pink) / 0.12);
+}
