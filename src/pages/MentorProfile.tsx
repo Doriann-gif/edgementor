@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight } from "lucide-react";
+import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
 import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
 import { useIsSubscribed } from "@/hooks/use-mentor-content";
@@ -13,19 +13,26 @@ import { motion } from "framer-motion";
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
     {[1, 2, 3, 4, 5].map((s) => (
-      <Star key={s} className={`h-3.5 w-3.5 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+      <motion.div key={s} whileHover={{ scale: 1.3 }} transition={{ type: "spring", stiffness: 400 }}>
+        <Star className={`h-4 w-4 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+      </motion.div>
     ))}
   </div>
 );
 
 const stagger = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.1 } },
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.92 },
+  show: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
 
 const MentorProfile = () => {
@@ -47,14 +54,18 @@ const MentorProfile = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <motion.p
-          className="text-muted-foreground text-sm"
+        <motion.div
+          className="flex flex-col items-center gap-3"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
         >
-          Loading...
-        </motion.p>
+          <motion.div
+            className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+          <p className="text-muted-foreground text-sm">Loading profile...</p>
+        </motion.div>
       </div>
     );
   }
@@ -80,7 +91,7 @@ const MentorProfile = () => {
   return (
     <PageTransition>
     <div className={`min-h-screen ${isElite ? "bg-slate-950" : "bg-background"}`}>
-      {/* Ambient background */}
+      {/* Ambient background with pink corners */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {isElite ? (
           <>
@@ -90,7 +101,7 @@ const MentorProfile = () => {
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute bottom-[-100px] right-1/4 w-[400px] h-[400px] bg-pink/[0.02] rounded-full blur-[100px]"
+              className="absolute bottom-[-100px] right-1/4 w-[400px] h-[400px] bg-pink-400/[0.03] rounded-full blur-[100px]"
               animate={{ y: [0, 15, 0] }}
               transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
             />
@@ -103,9 +114,20 @@ const MentorProfile = () => {
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute bottom-[-100px] left-1/4 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]"
+              className="absolute bottom-[-100px] left-1/4 w-[400px] h-[400px] bg-pink-400/[0.04] rounded-full blur-[100px]"
               animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
               transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
+            {/* Pink corner accents */}
+            <motion.div
+              className="absolute top-[5%] right-[3%] w-[200px] h-[200px] bg-pink-500/[0.06] rounded-full blur-[70px]"
+              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute bottom-[15%] left-[3%] w-[180px] h-[180px] bg-pink-400/[0.05] rounded-full blur-[60px]"
+              animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
           </>
         )}
@@ -117,21 +139,33 @@ const MentorProfile = () => {
         animate="show"
         variants={stagger}
       >
+        {/* Back link */}
         <motion.div variants={fadeUp}>
-          <Link to="/mentors" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
-            <ArrowLeft className="h-4 w-4" /> All Mentors
+          <Link to="/mentors" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors mb-6 group">
+            <motion.div whileHover={{ x: -3 }} transition={{ type: "spring", stiffness: 300 }}>
+              <ArrowLeft className="h-4 w-4" />
+            </motion.div>
+            <span className="group-hover:underline">All Mentors</span>
           </Link>
         </motion.div>
 
         {/* Main Card */}
         <motion.div
-          variants={fadeUp}
-          className={`relative rounded-2xl border p-6 mb-4 ${
+          variants={scaleIn}
+          className={`relative rounded-2xl border p-6 sm:p-8 mb-5 overflow-hidden ${
             isElite
               ? "border-slate-600/50 bg-gradient-to-br from-slate-900 via-slate-800/50 to-slate-900"
-              : "border-border bg-card"
+              : "border-border bg-card hover:border-pink-400/20 transition-colors"
           }`}
         >
+          {/* Pink corner decorations */}
+          {!isElite && (
+            <>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-pink-400/[0.08] to-transparent rounded-bl-full pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-primary/[0.06] to-transparent rounded-tr-full pointer-events-none" />
+            </>
+          )}
+
           {isElite && (
             <>
               <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-slate-400/60 to-transparent" />
@@ -148,43 +182,56 @@ const MentorProfile = () => {
             </>
           )}
 
-          <div className="flex items-start gap-4 mb-5 mt-1">
+          {/* Avatar & Info */}
+          <div className="flex items-start gap-5 mb-6 mt-1">
             <motion.div
-              className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl font-heading font-bold text-lg ${
-                isElite ? "bg-slate-700/50 text-slate-200" : "bg-gradient-to-br from-primary/15 to-pink-400/10 text-primary"
+              className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl font-heading font-bold text-xl shadow-lg ${
+                isElite
+                  ? "bg-slate-700/50 text-slate-200 shadow-slate-900/50"
+                  : "bg-gradient-to-br from-primary/15 via-pink-400/10 to-primary/5 text-primary shadow-primary/10"
               }`}
-              whileHover={{ scale: 1.1, rotate: 5 }}
+              whileHover={{ scale: 1.1, rotate: 6 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
               {mentor.avatar}
             </motion.div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h1 className="font-heading text-xl font-bold text-foreground">{mentor.name}</h1>
+                <h1 className="font-heading text-2xl font-bold text-foreground">{mentor.name}</h1>
                 <TierBadge tier={tier} size="md" showLabel={false} />
               </div>
-              <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex items-center gap-2 mb-2">
                 <TierBadge tier={tier} size="sm" />
               </div>
-              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{mentor.experience}</span>
-                <span className="flex items-center gap-1"><Users className="h-3 w-3" />{mentor.students} students</span>
-                <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{mentor.session} session</span>
+              <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                  <Clock className="h-3.5 w-3.5" />{mentor.experience}
+                </motion.span>
+                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                  <Users className="h-3.5 w-3.5" />{mentor.students} students
+                </motion.span>
+                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                  <MapPin className="h-3.5 w-3.5" />{mentor.session} session
+                </motion.span>
               </div>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-3 mt-3">
                 <StarRating rating={Math.round(mentor.rating)} />
-                <span className="text-xs text-muted-foreground">{mentor.rating}</span>
+                <span className="text-sm font-semibold text-foreground">{mentor.rating}</span>
+                <span className="text-xs text-muted-foreground">({reviews.length} reviews)</span>
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-1.5 mb-5">
+
+          {/* Tags */}
+          <div className="flex flex-wrap gap-2 mb-6">
             {mentor.instruments.map((i, idx) => (
               <motion.span
                 key={i}
-                className={`rounded-md px-2.5 py-1 text-xs font-medium ${isElite ? "bg-slate-700/50 text-slate-300" : "bg-primary/10 text-primary"}`}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium ${isElite ? "bg-slate-700/50 text-slate-300" : "bg-primary/10 text-primary hover:bg-primary/15 transition-colors"}`}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 + idx * 0.05 }}
+                transition={{ delay: 0.3 + idx * 0.05 }}
+                whileHover={{ scale: 1.08, y: -2 }}
               >
                 {i}
               </motion.span>
@@ -192,37 +239,80 @@ const MentorProfile = () => {
             {mentor.concepts.map((c, idx) => (
               <motion.span
                 key={c}
-                className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
+                className="rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground hover:bg-secondary/80 transition-colors"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + idx * 0.05 }}
+                transition={{ delay: 0.4 + idx * 0.05 }}
+                whileHover={{ scale: 1.08, y: -2 }}
               >
                 {c}
               </motion.span>
             ))}
           </div>
+
           <p className="text-sm text-muted-foreground leading-relaxed">{mentor.full_bio}</p>
+        </motion.div>
+
+        {/* Stats Bar */}
+        <motion.div
+          variants={fadeUp}
+          className={`grid grid-cols-3 gap-3 mb-5`}
+        >
+          {[
+            { label: "Students", value: mentor.students, icon: Users, color: "text-primary bg-primary/10" },
+            { label: "Rating", value: mentor.rating, icon: Star, color: "text-amber-400 bg-amber-400/10" },
+            { label: "Experience", value: mentor.experience, icon: Award, color: "text-pink-400 bg-pink-400/10" },
+          ].map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              className={`rounded-2xl border p-4 text-center ${isElite ? "border-slate-600/50 bg-slate-900/80" : "border-border bg-card hover:border-pink-400/20 transition-colors"}`}
+              whileHover={{ y: -4, boxShadow: "0 12px 30px -8px hsl(var(--primary) / 0.1)" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              // @ts-ignore
+              custom={i}
+            >
+              <motion.div
+                className={`flex h-9 w-9 items-center justify-center rounded-xl ${stat.color} mx-auto mb-2`}
+                whileHover={{ scale: 1.2, rotate: -8 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <stat.icon className="h-4 w-4" />
+              </motion.div>
+              <p className="font-heading text-lg font-bold text-foreground">{stat.value}</p>
+              <p className="text-[11px] text-muted-foreground">{stat.label}</p>
+            </motion.div>
+          ))}
         </motion.div>
 
         {/* What's Included */}
         <motion.div
           variants={fadeUp}
-          className={`rounded-2xl border p-6 mb-4 ${isElite ? "border-slate-600/50 bg-slate-900/80" : "border-border bg-card"}`}
+          className={`relative rounded-2xl border p-6 sm:p-8 mb-5 overflow-hidden ${isElite ? "border-slate-600/50 bg-slate-900/80" : "border-border bg-card"}`}
         >
-          <h2 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
-            <TrendingUp className={`h-4 w-4 ${isElite ? "text-slate-300" : "text-primary"}`} /> What's Included
+          {!isElite && <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-pink-400/[0.06] to-transparent rounded-bl-full pointer-events-none" />}
+
+          <h2 className="font-heading text-lg font-semibold text-foreground mb-5 flex items-center gap-2">
+            <motion.div whileHover={{ rotate: 15 }} transition={{ type: "spring", stiffness: 300 }}>
+              <TrendingUp className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
+            </motion.div>
+            What's Included
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {mentor.highlights.map((h, i) => (
               <motion.div
                 key={h}
-                className="flex items-center gap-2.5 text-sm"
-                initial={{ opacity: 0, x: -12 }}
+                className="flex items-center gap-3 text-sm group"
+                initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.06, duration: 0.35 }}
+                transition={{ delay: 0.4 + i * 0.06, duration: 0.4 }}
+                whileHover={{ x: 4 }}
               >
-                <CheckCircle2 className={`h-4 w-4 shrink-0 ${isElite ? "text-slate-300" : "text-primary"}`} />
-                <span className="text-foreground">{h}</span>
+                <motion.div whileHover={{ scale: 1.2 }} transition={{ type: "spring", stiffness: 300 }}>
+                  <CheckCircle2 className={`h-5 w-5 shrink-0 ${isElite ? "text-slate-300" : "text-primary"}`} />
+                </motion.div>
+                <span className="text-foreground group-hover:text-primary transition-colors">{h}</span>
               </motion.div>
             ))}
           </div>
@@ -231,70 +321,103 @@ const MentorProfile = () => {
         {/* Reviews */}
         <motion.div
           variants={fadeUp}
-          className={`rounded-2xl border p-6 mb-4 ${isElite ? "border-slate-600/50 bg-slate-900/80" : "border-border bg-card"}`}
+          className={`relative rounded-2xl border p-6 sm:p-8 mb-5 overflow-hidden ${isElite ? "border-slate-600/50 bg-slate-900/80" : "border-border bg-card"}`}
         >
-          <h2 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
-            <MessageSquare className={`h-4 w-4 ${isElite ? "text-slate-300" : "text-primary"}`} /> Reviews ({reviews.length})
+          {!isElite && <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-pink-400/[0.06] to-transparent rounded-tr-full pointer-events-none" />}
+
+          <h2 className="font-heading text-lg font-semibold text-foreground mb-5 flex items-center gap-2">
+            <motion.div whileHover={{ rotate: -10 }} transition={{ type: "spring", stiffness: 300 }}>
+              <MessageSquare className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
+            </motion.div>
+            Reviews
+            <span className="text-sm font-normal text-muted-foreground">({reviews.length})</span>
           </h2>
-          <div className="space-y-5">
-            {reviews.map((review, idx) => (
-              <motion.div
-                key={review.id}
-                className={idx < reviews.length - 1 ? "pb-5 border-b border-border" : ""}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.06, duration: 0.35 }}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-semibold text-muted-foreground">
-                      {review.reviewer_name.split(" ").map(n => n[0]).join("")}
+
+          {reviews.length === 0 ? (
+            <motion.div
+              className="text-center py-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <Sparkles className="h-8 w-8 text-muted-foreground/20 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No reviews yet. Be the first to subscribe!</p>
+            </motion.div>
+          ) : (
+            <div className="space-y-5">
+              {reviews.map((review, idx) => (
+                <motion.div
+                  key={review.id}
+                  className={`${idx < reviews.length - 1 ? "pb-5 border-b border-border" : ""} group`}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.06, duration: 0.4 }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <motion.div
+                        className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/10 to-pink-400/10 flex items-center justify-center text-[10px] font-bold text-primary"
+                        whileHover={{ scale: 1.15 }}
+                      >
+                        {review.reviewer_name.split(" ").map(n => n[0]).join("")}
+                      </motion.div>
+                      <span className="text-sm font-medium text-foreground">{review.reviewer_name}</span>
                     </div>
-                    <span className="text-sm font-medium text-foreground">{review.reviewer_name}</span>
+                    <span className="text-xs text-muted-foreground">{review.review_date}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">{review.review_date}</span>
-                </div>
-                <StarRating rating={review.rating} />
-                <p className="text-sm text-muted-foreground leading-relaxed mt-2">{review.review_text}</p>
-              </motion.div>
-            ))}
-          </div>
+                  <StarRating rating={review.rating} />
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-2">{review.review_text}</p>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Sticky Subscribe Bar */}
         <motion.div
-          className={`sticky bottom-4 rounded-2xl border backdrop-blur-sm p-4 flex items-center justify-between shadow-xl ${
+          className={`sticky bottom-4 rounded-2xl border backdrop-blur-md p-5 flex items-center justify-between shadow-2xl z-10 ${
             isElite
               ? "border-slate-600/50 bg-slate-900/95 shadow-slate-900/50"
-              : "border-border bg-card/95 shadow-black/30"
+              : "border-border/80 bg-card/95 shadow-black/30 hover:border-pink-400/20 transition-colors"
           }`}
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.5, type: "spring", stiffness: 200 }}
+          transition={{ delay: 0.5, duration: 0.6, type: "spring", stiffness: 200 }}
         >
+          {/* Pink accent on bar */}
+          {!isElite && (
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-400/30 to-transparent" />
+          )}
+
           <div>
-            <span className="font-heading text-2xl font-bold text-foreground">${mentor.monthly_price}</span>
+            <motion.span
+              className="font-heading text-3xl font-bold text-foreground"
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.7, type: "spring" }}
+            >
+              ${mentor.monthly_price}
+            </motion.span>
             <span className="text-sm text-muted-foreground">/month</span>
           </div>
-          <div className="flex items-center gap-2">
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <Button variant="outline" size="icon" className="h-11 w-11" onClick={handleSave} disabled={toggleSave.isPending}>
-                <Heart className={`h-5 w-5 transition-colors ${isSaved ? "fill-pink-400 text-pink-400" : ""}`} />
+          <div className="flex items-center gap-3">
+            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
+              <Button variant="outline" size="icon" className="h-12 w-12 border-pink-400/20 hover:border-pink-400/40 hover:bg-pink-400/5 transition-colors" onClick={handleSave} disabled={toggleSave.isPending}>
+                <Heart className={`h-5 w-5 transition-all ${isSaved ? "fill-pink-400 text-pink-400 scale-110" : "text-muted-foreground hover:text-pink-400"}`} />
               </Button>
             </motion.div>
             {isSubscribed ? (
               <Link to={`/mentorship/${mentor.id}`}>
-                <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
-                  <Button className={`h-11 px-6 font-semibold ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-lg shadow-primary/20"}`}>
+                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
+                  <Button className={`h-12 px-8 font-semibold text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-xl shadow-primary/25"}`}>
                     <Crown className="h-4 w-4 mr-2" /> Access Mentorship
                   </Button>
                 </motion.div>
               </Link>
             ) : (
               <Link to={`/subscribe/${mentor.id}`}>
-                <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
-                  <Button className={`h-11 px-6 font-semibold ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-lg shadow-primary/20"}`}>
+                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
+                  <Button className={`h-12 px-8 font-semibold text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 transition-shadow"}`}>
                     Subscribe Now <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </motion.div>
