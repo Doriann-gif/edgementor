@@ -212,7 +212,7 @@ const Homepage = () => {
                   whileTap={{ scale: 0.97 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
-                  <Button size="lg" className="h-14 px-10 font-semibold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 transition-all">
+                  <Button variant="glow" size="lg" className="h-14 px-10 font-semibold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35">
                     Browse Mentors <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
                 </motion.div>
@@ -556,7 +556,7 @@ const Homepage = () => {
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/mentors">
                 <motion.div whileHover={{ scale: 1.06, y: -3 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
-                  <Button size="lg" className="h-14 px-10 font-semibold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 transition-all">
+                  <Button variant="glow" size="lg" className="h-14 px-10 font-semibold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35">
                     Find a Mentor <ArrowRight className="h-5 w-5 ml-2" />
                   </Button>
                 </motion.div>

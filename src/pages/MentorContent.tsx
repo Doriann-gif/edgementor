@@ -61,7 +61,7 @@ const MentorContent = () => {
             Subscribe to {mentor.name} to unlock their exclusive mentorship content, group links, videos, and scheduled calls.
           </p>
           <Link to={`/subscribe/${id}`}>
-            <Button className="font-semibold">Subscribe for ${mentor.monthly_price}/mo</Button>
+            <Button variant="glow" className="font-semibold">Subscribe for ${mentor.monthly_price}/mo</Button>
           </Link>
         </div>
       </div>
