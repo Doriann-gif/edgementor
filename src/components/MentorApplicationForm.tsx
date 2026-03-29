@@ -49,6 +49,8 @@ const MentorApplicationForm = () => {
   const [bio, setBio] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showSessionOther, setShowSessionOther] = useState(false);
+  const [sessionOtherValue, setSessionOtherValue] = useState("");
 
   useEffect(() => {
     if (showSuccess) {
@@ -132,17 +134,51 @@ const MentorApplicationForm = () => {
             <MultiSelect label="Concepts / Methodologies *" options={CONCEPTS} selected={concepts} onChange={setConcepts} />
             <div className="space-y-2">
               <Label className="text-sm font-medium">Primary Trading Session *</Label>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 {SESSIONS.map((s) => (
                   <motion.button
                     key={s} type="button" onClick={() => setSession(s)}
                     whileHover={{ scale: 1.04, y: -2 }}
                     whileTap={{ scale: 0.97 }}
-                    className={`flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-200 ${session === s ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--primary)/0.2)]" : "border-border bg-secondary text-muted-foreground hover:border-primary/30 hover:text-foreground"}`}
+                    className={`flex-1 min-w-[80px] rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-200 ${session === s ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--primary)/0.2)]" : "border-border bg-secondary text-muted-foreground hover:border-primary/30 hover:text-foreground"}`}
                   >
                     {s}
                   </motion.button>
                 ))}
+                {!SESSIONS.includes(session) && session && (
+                  <motion.button
+                    type="button" onClick={() => setSession(session)}
+                    whileHover={{ scale: 1.04, y: -2 }}
+                    className="flex-1 min-w-[80px] rounded-lg border border-primary/50 bg-primary/10 text-primary px-4 py-2.5 text-sm font-medium shadow-[0_0_20px_hsl(var(--primary)/0.2)]"
+                  >
+                    {session} <span className="ml-1 cursor-pointer" onClick={(e) => { e.stopPropagation(); setSession(""); }}>×</span>
+                  </motion.button>
+                )}
+                {showSessionOther ? (
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      autoFocus
+                      value={sessionOtherValue}
+                      onChange={(e) => setSessionOtherValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") { e.preventDefault(); if (sessionOtherValue.trim()) { setSession(sessionOtherValue.trim()); setSessionOtherValue(""); setShowSessionOther(false); } }
+                        if (e.key === "Escape") setShowSessionOther(false);
+                      }}
+                      placeholder="Type session..."
+                      className="h-9 w-32 text-sm bg-muted border-border"
+                    />
+                    <button type="button" onClick={() => { if (sessionOtherValue.trim()) { setSession(sessionOtherValue.trim()); setSessionOtherValue(""); setShowSessionOther(false); } }} className="rounded-lg border border-primary/50 bg-primary/10 text-primary px-2.5 py-2 text-sm font-medium hover:bg-primary/20 transition-colors">Add</button>
+                  </div>
+                ) : (
+                  <motion.button
+                    type="button" onClick={() => setShowSessionOther(true)}
+                    whileHover={{ scale: 1.04, y: -2 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="rounded-lg border border-dashed border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:border-primary/30 hover:text-foreground transition-all duration-200"
+                  >
+                    + Other
+                  </motion.button>
+                )}
               </div>
             </div>
           </motion.div>

@@ -1,6 +1,7 @@
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface MultiSelectProps {
   label: string;
@@ -10,12 +11,26 @@ interface MultiSelectProps {
 }
 
 const MultiSelect = ({ label, options, selected, onChange }: MultiSelectProps) => {
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  const [otherValue, setOtherValue] = useState("");
+
+  const customValues = selected.filter((s) => !options.includes(s));
+
   const toggle = (option: string) => {
     onChange(
       selected.includes(option)
         ? selected.filter((s) => s !== option)
         : [...selected, option]
     );
+  };
+
+  const addOther = () => {
+    const trimmed = otherValue.trim();
+    if (trimmed && !selected.includes(trimmed)) {
+      onChange([...selected, trimmed]);
+    }
+    setOtherValue("");
+    setShowOtherInput(false);
   };
 
   return (
@@ -41,6 +56,51 @@ const MultiSelect = ({ label, options, selected, onChange }: MultiSelectProps) =
             </button>
           );
         })}
+
+        {/* Custom "Other" values */}
+        {customValues.map((val) => (
+          <button
+            key={val}
+            type="button"
+            onClick={() => toggle(val)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-primary/50 bg-primary/10 text-primary px-3 py-1.5 text-sm font-medium transition-all duration-200 shadow-[var(--glow-primary)]"
+          >
+            {val}
+            <X className="h-3 w-3" />
+          </button>
+        ))}
+
+        {/* Other button / input */}
+        {showOtherInput ? (
+          <div className="inline-flex items-center gap-1.5">
+            <Input
+              autoFocus
+              value={otherValue}
+              onChange={(e) => setOtherValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") { e.preventDefault(); addOther(); }
+                if (e.key === "Escape") setShowOtherInput(false);
+              }}
+              placeholder="Type here..."
+              className="h-8 w-32 text-sm bg-muted border-border"
+            />
+            <button
+              type="button"
+              onClick={addOther}
+              className="rounded-lg border border-primary/50 bg-primary/10 text-primary px-2.5 py-1.5 text-sm font-medium hover:bg-primary/20 transition-colors"
+            >
+              Add
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowOtherInput(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-dashed border-border px-3 py-1.5 text-sm font-medium text-muted-foreground hover:border-primary/30 hover:text-foreground transition-all duration-200"
+          >
+            <Plus className="h-3 w-3" /> Other
+          </button>
+        )}
       </div>
     </div>
   );
