@@ -7,6 +7,7 @@ import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import TierBadge from "@/components/TierBadge";
+import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
 
 const StarRating = ({ rating }: { rating: number }) => (
@@ -77,34 +78,32 @@ const MentorProfile = () => {
   const isElite = tier === "elite";
 
   return (
+    <PageTransition>
     <div className={`min-h-screen ${isElite ? "bg-slate-950" : "bg-background"}`}>
       {/* Ambient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         {isElite ? (
           <>
-            <div className="absolute inset-0 opacity-[0.06]" style={{
-              backgroundImage: 'linear-gradient(hsl(220 20% 40% / 0.4) 1px, transparent 1px), linear-gradient(90deg, hsl(220 20% 40% / 0.4) 1px, transparent 1px)',
-              backgroundSize: '60px 60px'
-            }} />
             <motion.div
               className="absolute top-[-100px] left-1/3 w-[500px] h-[500px] bg-slate-400/[0.03] rounded-full blur-[120px]"
               animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
+            <motion.div
+              className="absolute bottom-[-100px] right-1/4 w-[400px] h-[400px] bg-pink/[0.02] rounded-full blur-[100px]"
+              animate={{ y: [0, 15, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
           </>
         ) : (
           <>
-            <div className="absolute inset-0 opacity-[0.02]" style={{
-              backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(160 84% 39% / 0.3) 1px, transparent 0)',
-              backgroundSize: '48px 48px'
-            }} />
             <motion.div
               className="absolute top-[-100px] right-1/4 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]"
               animate={{ y: [0, -15, 0] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute bottom-[-100px] left-1/4 w-[400px] h-[400px] bg-pink-400/[0.025] rounded-full blur-[100px]"
+              className="absolute bottom-[-100px] left-1/4 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]"
               animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
               transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
             />
@@ -305,6 +304,7 @@ const MentorProfile = () => {
         </motion.div>
       </motion.div>
     </div>
+    </PageTransition>
   );
 };
 

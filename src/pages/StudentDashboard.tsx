@@ -137,17 +137,13 @@ const StudentDashboard = () => {
     <div className="min-h-screen bg-background">
       {/* Ambient Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(160 84% 39% / 0.3) 1px, transparent 0)',
-          backgroundSize: '48px 48px',
-        }} />
         <motion.div
           className="absolute top-[-80px] right-1/4 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]"
           animate={{ y: [0, -20, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-[-60px] left-1/3 w-[400px] h-[400px] bg-pink-400/[0.025] rounded-full blur-[100px]"
+          className="absolute bottom-[-60px] left-1/3 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]"
           animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -164,7 +160,7 @@ const StudentDashboard = () => {
             </motion.div>
             <motion.h1 variants={fadeUp} custom={1} className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
               {getGreeting()},{" "}
-              <span className="bg-gradient-to-r from-primary via-pink-400 to-primary bg-clip-text text-transparent">{displayName}</span>
+              <span className="bg-gradient-to-r from-primary via-pink to-primary bg-clip-text text-transparent">{displayName}</span>
             </motion.h1>
             <motion.p variants={fadeUp} custom={2} className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
               <Sparkles className="h-3.5 w-3.5 text-primary" /> Your trading journey at a glance

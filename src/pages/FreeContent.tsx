@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Play, Clock, Eye, Star, Search, TrendingUp, BookOpen, BarChart3, Zap } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import PageTransition from "@/components/PageTransition";
 
 const CATEGORIES = ["All", "Price Action", "ICT / SMC", "Order Flow", "Risk Management", "Psychology", "Crypto"];
 
@@ -105,20 +106,17 @@ const FreeContent = () => {
   });
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       {/* Ambient */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(160 84% 39% / 0.3) 1px, transparent 0)',
-          backgroundSize: '48px 48px',
-        }} />
         <motion.div
           className="absolute top-[-100px] left-1/3 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]"
           animate={{ y: [0, -20, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
         />
         <motion.div
-          className="absolute bottom-[-80px] right-1/4 w-[400px] h-[400px] bg-pink-400/[0.025] rounded-full blur-[100px]"
+          className="absolute bottom-[-80px] right-1/4 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]"
           animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -200,7 +198,7 @@ const FreeContent = () => {
               animate="show"
               whileHover={{ y: -4, scale: 1.01 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="group rounded-2xl border border-border bg-card overflow-hidden shadow-lg shadow-black/10 hover:border-primary/30 hover:shadow-primary/10 transition-all duration-300"
+              className="group rounded-2xl border border-border bg-card overflow-hidden shadow-lg shadow-black/10 hover:border-primary/30 hover:shadow-primary/10 transition-all duration-300 card-pink-hover"
             >
               {/* Thumbnail / Player */}
               <div className="relative aspect-video bg-muted">
@@ -290,6 +288,7 @@ const FreeContent = () => {
         </motion.div>
       </div>
     </div>
+    </PageTransition>
   );
 };
 

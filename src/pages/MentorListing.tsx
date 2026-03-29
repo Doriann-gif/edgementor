@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import { useMentors } from "@/hooks/use-mentors";
 import TierBadge from "@/components/TierBadge";
+import PageTransition from "@/components/PageTransition";
 import type { Mentor, MentorTier } from "@/types/mentor";
 
 const ALL_INSTRUMENTS = ["Futures", "Forex", "Crypto", "Options"];
@@ -56,7 +57,7 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className={`relative rounded-2xl border p-5 transition-all duration-500 hover:-translate-y-1 ${
+        className={`relative rounded-2xl border p-5 transition-all duration-500 hover:-translate-y-1 card-pink-hover ${
           isElite
             ? "border-slate-600/50 bg-gradient-to-br from-slate-900 via-card to-slate-800/60 hover:border-slate-400/50 hover:shadow-[0_20px_60px_-15px_rgba(148,163,184,0.15)]"
             : "border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-[0_20px_60px_-15px_hsl(160_84%_39%/0.12)]"
@@ -228,15 +229,12 @@ const MentorListingPage = () => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       {/* Ambient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(160 84% 39% / 0.3) 1px, transparent 0)',
-          backgroundSize: '40px 40px'
-        }} />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-pink/[0.025] rounded-full blur-[100px]" />
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
@@ -452,6 +450,7 @@ const MentorListingPage = () => {
         )}
       </div>
     </div>
+    </PageTransition>
   );
 };
 
