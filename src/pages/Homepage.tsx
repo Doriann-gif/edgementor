@@ -356,18 +356,46 @@ const Homepage = () => {
                         <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-pink-400/[0.08] to-transparent rounded-bl-full pointer-events-none" />
                         <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-primary/[0.05] to-transparent rounded-tr-full pointer-events-none" />
 
-                        {/* Rank badge */}
-                        {idx < 3 && (
-                          <motion.div
-                            className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary"
-                            initial={{ opacity: 0, scale: 0 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.3 + idx * 0.1, type: "spring" }}
-                          >
-                            #{idx + 1}
-                          </motion.div>
-                        )}
+                        {/* Animated badges */}
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                          {idx === 0 && (
+                            <motion.div
+                              className="relative flex items-center gap-1 rounded-full bg-gradient-to-r from-pink-500/20 to-pink-400/10 border border-pink-400/30 px-2.5 py-0.5 text-[10px] font-bold text-pink-400 overflow-hidden"
+                              initial={{ opacity: 0, scale: 0, rotate: -12 }}
+                              whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: 0.3, type: "spring", stiffness: 400 }}
+                              animate={{ boxShadow: ["0 0 0 0 hsl(var(--pink) / 0)", "0 0 14px 2px hsl(var(--pink) / 0.15)", "0 0 0 0 hsl(var(--pink) / 0)"] }}
+                            >
+                              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[btn-shimmer_2s_ease-in-out_infinite]" />
+                              <TrendingUp className="h-3 w-3" /> Most Popular
+                            </motion.div>
+                          )}
+                          {idx === 2 && (
+                            <motion.div
+                              className="relative flex items-center gap-1 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 px-2.5 py-0.5 text-[10px] font-bold text-primary overflow-hidden"
+                              initial={{ opacity: 0, scale: 0, rotate: 12 }}
+                              whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: 0.5, type: "spring", stiffness: 400 }}
+                              animate={{ scale: [1, 1.05, 1] }}
+                            >
+                              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-[btn-shimmer_2.5s_ease-in-out_infinite]" />
+                              <Sparkles className="h-3 w-3" /> New
+                            </motion.div>
+                          )}
+                          {idx < 3 && (
+                            <motion.div
+                              className="flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary"
+                              initial={{ opacity: 0, scale: 0 }}
+                              whileInView={{ opacity: 1, scale: 1 }}
+                              viewport={{ once: true }}
+                              transition={{ delay: 0.3 + idx * 0.1, type: "spring" }}
+                            >
+                              #{idx + 1}
+                            </motion.div>
+                          )}
+                        </div>
 
                         <div className="flex items-start gap-4 mb-5">
                           <motion.div
