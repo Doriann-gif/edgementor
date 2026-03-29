@@ -198,7 +198,7 @@ const Subscribe = () => {
         </div>
 
         {/* Subscribe Button */}
-        <Button className="w-full h-12 font-semibold text-sm" onClick={handleSubscribe} disabled={subscribing}>
+        <Button variant="glow" className="w-full h-12 font-semibold text-sm" onClick={handleSubscribe} disabled={subscribing}>
           {subscribing ? "Processing..." : `Subscribe for $${finalPrice}/mo`}
         </Button>
 
