@@ -94,7 +94,7 @@ const fadeUp = {
 const FreeContent = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  
 
   const filtered = VIDEOS.filter((v) => {
     const matchCat = category === "All" || v.category === category;
