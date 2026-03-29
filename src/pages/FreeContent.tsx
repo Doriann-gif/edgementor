@@ -94,7 +94,7 @@ const fadeUp = {
 const FreeContent = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  
 
   const filtered = VIDEOS.filter((v) => {
     const matchCat = category === "All" || v.category === category;
@@ -201,40 +201,23 @@ const FreeContent = () => {
               className="group rounded-2xl border border-border bg-card overflow-hidden shadow-lg shadow-black/10 hover:border-primary/30 hover:shadow-primary/10 transition-all duration-300 card-pink-hover"
             >
               {/* Thumbnail / Player */}
-              <div className="relative aspect-video bg-muted">
-                {playingId === video.id ? (
-                  <iframe
-                    src={`https://www.youtube.com/embed/${video.id}?autoplay=1&rel=0`}
-                    title={video.title}
-                    allow="autoplay; encrypted-media"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                  />
-                ) : (
-                  <>
-                    <img
-                      src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
-                      alt={video.title}
-                      className="absolute inset-0 w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
-                    <motion.button
-                      onClick={() => setPlayingId(video.id)}
-                      className="absolute inset-0 flex items-center justify-center"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                    >
-                      <div className="h-14 w-14 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-xl shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-                        <Play className="h-6 w-6 text-primary-foreground fill-current ml-1" />
-                      </div>
-                    </motion.button>
-                    <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm flex items-center gap-1">
-                      <Clock className="h-3 w-3" /> {video.duration}
-                    </span>
-                  </>
-                )}
-              </div>
+              <a href={`https://www.youtube.com/watch?v=${video.id}`} target="_blank" rel="noopener noreferrer" className="relative aspect-video bg-muted block">
+                <img
+                  src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
+                  alt={video.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-14 w-14 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-xl shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
+                    <Play className="h-6 w-6 text-primary-foreground fill-current ml-1" />
+                  </div>
+                </div>
+                <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm flex items-center gap-1">
+                  <Clock className="h-3 w-3" /> {video.duration}
+                </span>
+              </a>
 
               {/* Info */}
               <div className="p-4">
