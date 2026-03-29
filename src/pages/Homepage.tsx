@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
 import { useAuth } from "@/contexts/AuthContext";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 
 const floatingOrb = {
   animate: { y: [0, -20, 0], scale: [1, 1.05, 1] },
