@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 const INSTRUMENTS = ["Futures", "Forex", "Crypto", "Equities"];
 const CONCEPTS = ["ICT", "Order Flow", "Supply & Demand", "Price Action", "SMC"];
 const SESSIONS = ["London", "New York", "Asian"];
+const EXPERIENCE_OPTIONS = ["1-2 years", "3-5 years", "5-8 years", "8-10 years", "10+ years"];
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -51,6 +52,7 @@ const MentorApplicationForm = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSessionOther, setShowSessionOther] = useState(false);
   const [sessionOtherValue, setSessionOtherValue] = useState("");
+  const [showExpOther, setShowExpOther] = useState(false);
 
   useEffect(() => {
     if (showSuccess) {
@@ -123,12 +125,22 @@ const MentorApplicationForm = () => {
           <motion.div key="step1" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.35 }} className="space-y-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-2"><TrendingUp className="h-3.5 w-3.5 text-primary" /> Years of Trading Experience *</Label>
-              <Select value={experience} onValueChange={setExperience}>
+              <Select value={EXPERIENCE_OPTIONS.includes(experience) ? experience : "__other__"} onValueChange={(val) => { if (val === "__other__") { setShowExpOther(true); setExperience(""); } else { setShowExpOther(false); setExperience(val); } }}>
                 <SelectTrigger className="bg-muted border-border focus:border-primary/50"><SelectValue placeholder="Select experience" /></SelectTrigger>
                 <SelectContent>
-                  {["1-2 years", "3-5 years", "5-8 years", "8-10 years", "10+ years"].map((yr) => <SelectItem key={yr} value={yr}>{yr}</SelectItem>)}
+                  {EXPERIENCE_OPTIONS.map((yr) => <SelectItem key={yr} value={yr}>{yr}</SelectItem>)}
+                  <SelectItem value="__other__">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {showExpOther && (
+                <Input
+                  autoFocus
+                  placeholder="e.g. 15 years, self-taught..."
+                  value={experience}
+                  onChange={(e) => setExperience(e.target.value)}
+                  className="bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]"
+                />
+              )}
             </div>
             <MultiSelect label="Instruments Traded *" options={INSTRUMENTS} selected={instruments} onChange={setInstruments} />
             <MultiSelect label="Concepts / Methodologies *" options={CONCEPTS} selected={concepts} onChange={setConcepts} />
