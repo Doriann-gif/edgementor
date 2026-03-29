@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Zap, ArrowLeft, CheckCircle2 } from "lucide-react";
 import confetti from "canvas-confetti";
+import PageTransition from "@/components/PageTransition";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -56,6 +57,7 @@ const Auth = () => {
   };
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="fixed inset-0 opacity-[0.03]" style={{
         backgroundImage: 'linear-gradient(hsl(160 84% 39% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(160 84% 39% / 0.3) 1px, transparent 1px)',
@@ -152,6 +154,7 @@ const Auth = () => {
         </DialogContent>
       </Dialog>
     </div>
+    </PageTransition>
   );
 };
 

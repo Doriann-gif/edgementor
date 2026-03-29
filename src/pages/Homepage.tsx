@@ -106,18 +106,18 @@ const Homepage = () => {
           {...floatingOrb}
         />
         <motion.div
-          className="absolute top-[30%] right-[-100px] w-[500px] h-[500px] bg-pink-500/[0.035] rounded-full blur-[130px]"
+          className="absolute top-[30%] right-[-100px] w-[500px] h-[500px] bg-pink/[0.04] rounded-full blur-[130px]"
           {...floatingOrbSlow}
         />
         <motion.div
           className="absolute bottom-[-150px] left-[-100px] w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px]"
           animate={{ y: [0, 20, 0], scale: [1, 1.03, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" as const }}
         />
         <motion.div
-          className="absolute bottom-[20%] right-1/3 w-[400px] h-[400px] bg-pink-400/[0.03] rounded-full blur-[100px]"
+          className="absolute bottom-[20%] right-1/3 w-[400px] h-[400px] bg-pink/[0.035] rounded-full blur-[100px]"
           animate={{ y: [0, -15, 0], x: [0, 12, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" as const }}
         />
         <div className="absolute inset-0 opacity-[0.015]" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(160 84% 39% / 0.4) 1px, transparent 0)',
@@ -129,7 +129,7 @@ const Homepage = () => {
 
         {/* Hero */}
         <section className="py-20 sm:py-28 px-4 sm:px-6 relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-r from-primary/[0.06] via-pink-500/[0.04] to-primary/[0.06] rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] bg-gradient-to-r from-primary/[0.06] via-pink/[0.04] to-primary/[0.06] rounded-full blur-[100px] pointer-events-none" />
 
           <motion.div
             className="max-w-4xl mx-auto text-center relative"

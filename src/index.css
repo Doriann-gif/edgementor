@@ -39,6 +39,10 @@
     --font-heading: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
 
+    --pink: 330 80% 60%;
+    --pink-glow: 0 0 60px hsl(330 80% 60% / 0.08);
+    --pink-glow-strong: 0 0 100px hsl(330 80% 60% / 0.12);
+
     --glow-primary: 0 0 20px hsl(160 84% 39% / 0.15);
     --glow-primary-strong: 0 0 40px hsl(160 84% 39% / 0.2);
 
@@ -81,6 +85,10 @@
     --input: 220 14% 86%;
     --ring: 160 84% 32%;
 
+    --pink: 330 70% 55%;
+    --pink-glow: 0 0 60px hsl(330 70% 55% / 0.06);
+    --pink-glow-strong: 0 0 100px hsl(330 70% 55% / 0.08);
+
     --glow-primary: 0 0 20px hsl(160 84% 32% / 0.1);
     --glow-primary-strong: 0 0 40px hsl(160 84% 32% / 0.15);
 
@@ -121,4 +129,13 @@
 @keyframes gradient-shift {
   0%, 100% { background-position: 0% center; }
   50% { background-position: 100% center; }
+}
+
+/* Subtle pink shimmer on interactive cards */
+.card-pink-hover {
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-pink-hover:hover {
+  box-shadow: 0 0 30px hsl(var(--pink) / 0.06), 0 0 60px hsl(var(--pink) / 0.03);
+  border-color: hsl(var(--pink) / 0.12);
 }

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Zap, ArrowLeft } from "lucide-react";
+import PageTransition from "@/components/PageTransition";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -15,16 +16,10 @@ const ResetPassword = () => {
 
   useEffect(() => {
     const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
-      setIsRecovery(true);
-    }
-
+    if (hash.includes("type=recovery")) setIsRecovery(true);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setIsRecovery(true);
-      }
+      if (event === "PASSWORD_RECOVERY") setIsRecovery(true);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -45,42 +40,45 @@ const ResetPassword = () => {
 
   if (!isRecovery) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="w-full max-w-sm text-center space-y-4">
-          <Zap className="h-6 w-6 text-primary mx-auto" />
-          <h1 className="font-heading text-xl font-bold text-foreground">Invalid or expired link</h1>
-          <p className="text-sm text-muted-foreground">Please request a new password reset.</p>
-          <Link to="/auth">
-            <Button variant="outline" size="sm"><ArrowLeft className="h-4 w-4 mr-1" /> Back to sign in</Button>
-          </Link>
+      <PageTransition>
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+          <div className="w-full max-w-sm text-center space-y-4">
+            <Zap className="h-6 w-6 text-primary mx-auto" />
+            <h1 className="font-heading text-xl font-bold text-foreground">Invalid or expired link</h1>
+            <p className="text-sm text-muted-foreground">Please request a new password reset.</p>
+            <Link to="/auth">
+              <Button variant="outline" size="sm"><ArrowLeft className="h-4 w-4 mr-1" /> Back to sign in</Button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </PageTransition>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Zap className="h-6 w-6 text-primary" />
-            <span className="font-heading font-bold text-xl text-foreground">EdgeMentor</span>
+    <PageTransition>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Zap className="h-6 w-6 text-primary" />
+              <span className="font-heading font-bold text-xl text-foreground">EdgeMentor</span>
+            </div>
+            <h1 className="font-heading text-2xl font-bold text-foreground">Set New Password</h1>
+            <p className="text-sm text-muted-foreground mt-1">Enter your new password below.</p>
           </div>
-          <h1 className="font-heading text-2xl font-bold text-foreground">Set New Password</h1>
-          <p className="text-sm text-muted-foreground mt-1">Enter your new password below.</p>
+          <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-card p-6 space-y-4 shadow-xl shadow-black/20">
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm">New Password</Label>
+              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted border-border" required minLength={6} />
+            </div>
+            <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
+              {loading ? "Updating..." : "Update Password"}
+            </Button>
+          </form>
         </div>
-
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-border bg-card p-6 space-y-4 shadow-xl shadow-black/20">
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm">New Password</Label>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted border-border" required minLength={6} />
-          </div>
-          <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
-            {loading ? "Updating..." : "Update Password"}
-          </Button>
-        </form>
       </div>
-    </div>
+    </PageTransition>
   );
 };
 

@@ -93,7 +93,8 @@ const Navbar = () => {
   );
 
   return (
-    <nav className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50">
+    <nav className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-50 relative">
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink/20 to-transparent" />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         <Link to="/" className="font-heading font-bold text-lg text-foreground flex items-center gap-2">
           <Zap className="h-5 w-5 text-primary" /> EdgeMentor
