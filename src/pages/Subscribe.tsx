@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, Star, CheckCircle2, Shield, Zap, Tag,
 } from "lucide-react";
+import PageTransition from "@/components/PageTransition";
 
 const Subscribe = () => {
   const { id } = useParams<{ id: string }>();
@@ -102,6 +103,7 @@ const Subscribe = () => {
   const finalPrice = discount > 0 ? Math.round(originalPrice * (1 - discount / 100)) : originalPrice;
 
   return (
+    <PageTransition>
     <div className="min-h-screen bg-background">
       <div className="fixed inset-0 opacity-[0.03]" style={{
         backgroundImage: 'linear-gradient(hsl(160 84% 39% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(160 84% 39% / 0.3) 1px, transparent 1px)',
