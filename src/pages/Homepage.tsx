@@ -48,9 +48,8 @@ const Homepage = () => {
   const { data: allMentors = [] } = useMentors();
   const { user, loading } = useAuth();
   const [showWelcome, setShowWelcome] = useState(false);
-  const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.95]);
+
+
 
   useEffect(() => {
     if (loading) return;
