@@ -74,13 +74,8 @@ const AdminApplications = () => {
     },
     onError: () => toast.error("Failed to approve application."),
   });
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
-      queryClient.invalidateQueries({ queryKey: ["mentors"] });
-      toast.success("Application approved! Mentor is now live.");
-    },
-    onError: () => toast.error("Failed to approve application."),
-  });
+
+
 
   const rejectMutation = useMutation({
     mutationFn: async (id: string) => {
