@@ -132,6 +132,7 @@ export type Database = {
           session: string
           social_link: string | null
           status: string
+          user_id: string | null
         }
         Insert: {
           bio: string
@@ -147,6 +148,7 @@ export type Database = {
           session: string
           social_link?: string | null
           status?: string
+          user_id?: string | null
         }
         Update: {
           bio?: string
@@ -162,6 +164,7 @@ export type Database = {
           session?: string
           social_link?: string | null
           status?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -472,6 +475,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      lookup_user_id_by_email: { Args: { _email: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

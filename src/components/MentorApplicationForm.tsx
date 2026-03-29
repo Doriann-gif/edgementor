@@ -71,6 +71,7 @@ const MentorApplicationForm = () => {
     }
     setSubmitting(true);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase.from("mentor_applications").insert({
         full_name: fullName,
         email,
@@ -81,6 +82,7 @@ const MentorApplicationForm = () => {
         session,
         monthly_price: parseInt(monthlyPrice, 10),
         bio,
+        user_id: user?.id || null,
       });
       if (error) throw error;
       setShowSuccess(true);
