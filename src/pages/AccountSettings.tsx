@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMyMentorProfile } from "@/hooks/use-mentor-dashboard";
 import { useMentorContent } from "@/hooks/use-mentor-content";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +18,8 @@ import {
   ArrowLeft, User, Lock, Bell, CreditCard, Trash2, Save, LogOut,
   Camera, Upload, BookOpen, Plus, GripVertical, Pencil, Trash, X,
   Shield, CalendarDays, Star, Award, CheckCircle2, Mail, Sparkles,
-  Eye, EyeOff, BadgeCheck,
+  Eye, EyeOff, BadgeCheck, Activity, Palette, ShieldCheck, Moon, Sun, Monitor,
+  Clock, TrendingUp, Download, Globe,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
