@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { X, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
 
 interface MultiSelectProps {
   label: string;
