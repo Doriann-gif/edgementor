@@ -39,6 +39,10 @@
     --font-heading: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
 
+    --pink: 330 80% 60%;
+    --pink-glow: 0 0 60px hsl(330 80% 60% / 0.08);
+    --pink-glow-strong: 0 0 100px hsl(330 80% 60% / 0.12);
+
     --glow-primary: 0 0 20px hsl(160 84% 39% / 0.15);
     --glow-primary-strong: 0 0 40px hsl(160 84% 39% / 0.2);
 
@@ -80,6 +84,10 @@
     --border: 220 14% 86%;
     --input: 220 14% 86%;
     --ring: 160 84% 32%;
+
+    --pink: 330 70% 55%;
+    --pink-glow: 0 0 60px hsl(330 70% 55% / 0.06);
+    --pink-glow-strong: 0 0 100px hsl(330 70% 55% / 0.08);
 
     --glow-primary: 0 0 20px hsl(160 84% 32% / 0.1);
     --glow-primary-strong: 0 0 40px hsl(160 84% 32% / 0.15);
