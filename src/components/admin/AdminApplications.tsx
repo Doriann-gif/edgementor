@@ -40,6 +40,13 @@ const AdminApplications = () => {
 
   const approveMutation = useMutation({
     mutationFn: async (app: Application) => {
+      // Resolve user_id: use stored one, or look up by email
+      let userId = app.user_id;
+      if (!userId && app.email) {
+        const { data: lookupData } = await supabase.rpc("lookup_user_id_by_email", { _email: app.email });
+        if (lookupData) userId = lookupData;
+      }
+
       const { error: insertError } = await supabase.from("mentors").insert({
         name: app.full_name,
         avatar: app.full_name.split(" ").map((n) => n[0]).join("").toUpperCase(),
@@ -51,6 +58,7 @@ const AdminApplications = () => {
         session: app.session,
         monthly_price: app.monthly_price,
         status: "approved",
+        user_id: userId || null,
       });
       if (insertError) throw insertError;
       const { error: updateError } = await supabase
@@ -59,6 +67,13 @@ const AdminApplications = () => {
         .eq("id", app.id);
       if (updateError) throw updateError;
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
+      queryClient.invalidateQueries({ queryKey: ["mentors"] });
+      toast.success("Application approved! Mentor is now live.");
+    },
+    onError: () => toast.error("Failed to approve application."),
+  });
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-applications"] });
       queryClient.invalidateQueries({ queryKey: ["mentors"] });
