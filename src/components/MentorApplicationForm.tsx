@@ -60,6 +60,16 @@ const MentorApplicationForm = () => {
     }
   }, [showSuccess]);
 
+  const addCustomSession = () => {
+    const trimmed = sessionOtherValue.trim();
+    if (!trimmed) { toast.error("Please enter a session name."); return; }
+    const isDuplicate = SESSIONS.some((s) => s.toLowerCase() === trimmed.toLowerCase());
+    if (isDuplicate) { toast.error(`"${trimmed}" is already in the list.`); return; }
+    setSession(trimmed);
+    setSessionOtherValue("");
+    setShowSessionOther(false);
+  };
+
   const canProceed = () => {
     if (step === 0) return fullName && email;
     if (step === 1) return experience && instruments.length > 0 && concepts.length > 0 && session;
