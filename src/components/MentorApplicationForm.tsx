@@ -52,7 +52,7 @@ const MentorApplicationForm = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [showSessionOther, setShowSessionOther] = useState(false);
   const [sessionOtherValue, setSessionOtherValue] = useState("");
-  const [showExpOther, setShowExpOther] = useState(false);
+  const [expOtherMode, setExpOtherMode] = useState(false);
 
   useEffect(() => {
     if (showSuccess) {
