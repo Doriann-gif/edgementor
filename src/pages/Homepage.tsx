@@ -133,7 +133,7 @@ const Homepage = () => {
 
       <div className="relative">
         {/* Hero */}
-        <motion.section className="py-24 sm:py-32 px-4 sm:px-6 relative" style={{ opacity: heroOpacity, scale: heroScale }}>
+        <motion.section className="py-24 sm:py-32 px-4 sm:px-6 relative">
           {/* Central glow */}
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-r from-primary/[0.08] via-pink-400/[0.06] to-primary/[0.08] rounded-full blur-[120px] pointer-events-none"
