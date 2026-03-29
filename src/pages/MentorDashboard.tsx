@@ -129,22 +129,30 @@ const MentorDashboard = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <motion.div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.06 } } }}>
           {[
-            { icon: Users, label: "Active Students", value: earnings?.activeStudents ?? 0, color: "text-primary" },
-            { icon: DollarSign, label: "Monthly Revenue", value: `$${earnings?.monthlyRevenue ?? 0}`, color: "text-primary" },
-            { icon: Star, label: "Rating", value: mentor.rating, color: "text-amber-400" },
-            { icon: TrendingUp, label: "Total Subscribers", value: earnings?.allTimeSubs ?? 0, color: "text-primary" },
+            { icon: Users, label: "Active Students", value: earnings?.activeStudents ?? 0, color: "text-primary", bg: "bg-primary/10" },
+            { icon: DollarSign, label: "Monthly Revenue", value: `$${earnings?.monthlyRevenue ?? 0}`, color: "text-primary", bg: "bg-primary/10" },
+            { icon: Star, label: "Rating", value: mentor.rating, color: "text-amber-400", bg: "bg-amber-400/10" },
+            { icon: TrendingUp, label: "Total Subscribers", value: earnings?.allTimeSubs ?? 0, color: "text-pink", bg: "bg-pink/10" },
           ].map((stat) => (
-            <div key={stat.label} className="rounded-2xl border border-border bg-card p-4">
+            <motion.div
+              key={stat.label}
+              variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
+              whileHover={{ y: -4, scale: 1.02 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="rounded-2xl border border-border bg-card p-4 card-pink-hover cursor-default"
+            >
               <div className="flex items-center gap-2 mb-2">
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                <div className={`h-8 w-8 rounded-lg ${stat.bg} flex items-center justify-center`}>
+                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                </div>
                 <span className="text-xs text-muted-foreground">{stat.label}</span>
               </div>
               <span className="font-heading text-2xl font-bold text-foreground">{stat.value}</span>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Tabbed Content */}
         <Tabs defaultValue="profile" className="space-y-6">
@@ -279,9 +287,13 @@ const MentorDashboard = () => {
               <Users className="h-4 w-4 text-primary" /> Your Students ({students.length})
             </h2>
             {students.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
-                <p className="text-sm text-muted-foreground">No active students yet. They'll appear here once someone subscribes.</p>
-              </div>
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
+                <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+                  <Users className="h-10 w-10 text-primary/20 mx-auto mb-4" />
+                </motion.div>
+                <p className="text-sm text-foreground font-medium mb-1">No active students yet</p>
+                <p className="text-xs text-muted-foreground">They'll appear here once someone subscribes to your mentorship.</p>
+              </motion.div>
             ) : (
               <div className="space-y-3">
                 {students.map((sub: any) => {
