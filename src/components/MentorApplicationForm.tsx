@@ -173,13 +173,13 @@ const MentorApplicationForm = () => {
                       value={sessionOtherValue}
                       onChange={(e) => setSessionOtherValue(e.target.value)}
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") { e.preventDefault(); if (sessionOtherValue.trim()) { setSession(sessionOtherValue.trim()); setSessionOtherValue(""); setShowSessionOther(false); } }
+                        if (e.key === "Enter") { e.preventDefault(); addCustomSession(); }
                         if (e.key === "Escape") setShowSessionOther(false);
                       }}
                       placeholder="Type session..."
                       className="h-9 w-32 text-sm bg-muted border-border"
                     />
-                    <button type="button" onClick={() => { if (sessionOtherValue.trim()) { setSession(sessionOtherValue.trim()); setSessionOtherValue(""); setShowSessionOther(false); } }} className="rounded-lg border border-primary/50 bg-primary/10 text-primary px-2.5 py-2 text-sm font-medium hover:bg-primary/20 transition-colors">Add</button>
+                    <button type="button" onClick={addCustomSession} className="rounded-lg border border-primary/50 bg-primary/10 text-primary px-2.5 py-2 text-sm font-medium hover:bg-primary/20 transition-colors">Add</button>
                   </div>
                 ) : (
                   <motion.button
