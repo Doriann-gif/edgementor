@@ -21,6 +21,7 @@ import Terms from "./pages/Terms.tsx";
 import MentorContentPage from "./pages/MentorContent.tsx";
 import Navbar from "./components/Navbar";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
+import FreeContent from "./pages/FreeContent.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/mentor/:id" element={<MentorProfile />} />
             <Route path="/subscribe/:id" element={<Subscribe />} />
             <Route path="/apply" element={<Index />} />
+            <Route path="/learn" element={<FreeContent />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/dashboard" element={<StudentDashboard />} />
