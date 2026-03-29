@@ -117,7 +117,7 @@ const Auth = () => {
             </div>
             <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted border-border" required minLength={6} />
           </div>
-          <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
+          <Button type="submit" variant="glow" className="w-full h-11 font-semibold" disabled={loading}>
             {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
           </Button>
           <p className="text-center text-xs text-muted-foreground">
