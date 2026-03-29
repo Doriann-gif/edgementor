@@ -604,6 +604,210 @@ const AccountSettings = () => {
             </div>
           </TabsContent>
 
+          {/* ──────────── APPEARANCE TAB ──────────── */}
+          <TabsContent value="appearance">
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Palette className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-foreground">Theme</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: "dark", label: "Dark", icon: Moon, desc: "Easy on the eyes" },
+                    { value: "light", label: "Light", icon: Sun, desc: "Classic look" },
+                    { value: "system", label: "System", icon: Monitor, desc: "Match device" },
+                  ].map((opt) => {
+                    const currentTheme = localStorage.getItem("edgementor-theme") || "dark";
+                    const isActive = currentTheme === opt.value;
+                    return (
+                      <motion.button
+                        key={opt.value}
+                        className={`rounded-xl border p-4 text-left transition-all ${
+                          isActive
+                            ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
+                            : "border-border bg-muted/30 hover:border-primary/30"
+                        }`}
+                        whileHover={{ y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => {
+                          if (opt.value === "system") {
+                            const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+                            localStorage.setItem("edgementor-theme", sys);
+                            document.documentElement.classList.remove("light", "dark");
+                            document.documentElement.classList.add(sys);
+                          } else {
+                            localStorage.setItem("edgementor-theme", opt.value);
+                            document.documentElement.classList.remove("light", "dark");
+                            document.documentElement.classList.add(opt.value);
+                          }
+                          window.location.reload();
+                        }}
+                      >
+                        <opt.icon className={`h-5 w-5 mb-2 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                        <p className="font-heading font-semibold text-sm text-foreground">{opt.label}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{opt.desc}</p>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-foreground">Display Preferences</h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
+                    <div>
+                      <h4 className="font-heading font-semibold text-foreground text-sm">Compact Mode</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">Reduce spacing for more content density</p>
+                    </div>
+                    <Switch defaultChecked={false} />
+                  </div>
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
+                    <div>
+                      <h4 className="font-heading font-semibold text-foreground text-sm">Animations</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">Enable smooth transitions and effects</p>
+                    </div>
+                    <Switch defaultChecked={true} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ──────────── ACTIVITY TAB ──────────── */}
+          <TabsContent value="activity">
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Activity className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-foreground">Recent Activity</h3>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { action: "Logged in", time: "Just now", icon: User, color: "text-primary bg-primary/10" },
+                    { action: `Joined EdgeMentor`, time: memberSince.toLocaleDateString(), icon: Award, color: "text-pink-400 bg-pink-400/10" },
+                    ...(activeSubCount > 0 ? [{ action: `${activeSubCount} active subscription(s)`, time: "Current", icon: Star, color: "text-amber-400 bg-amber-400/10" }] : []),
+                    ...(savedCount > 0 ? [{ action: `${savedCount} mentor(s) saved`, time: "Total", icon: Heart, color: "text-pink-400 bg-pink-400/10" }] : []),
+                    ...(messageStats.total > 0 ? [{ action: `${messageStats.total} message(s) received`, time: `${messageStats.unread} unread`, icon: Mail, color: "text-blue-400 bg-blue-400/10" }] : []),
+                  ].map((item, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border hover:border-primary/20 transition-colors"
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.06 }}
+                    >
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${item.color} shrink-0`}>
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-foreground">{item.action}</p>
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0">{item.time}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-foreground">Account Summary</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: "Member Since", value: memberSince.toLocaleDateString("en-US", { month: "long", year: "numeric" }), icon: CalendarDays },
+                    { label: "Days Active", value: String(daysSinceJoin), icon: Clock },
+                    { label: "Subscriptions", value: String(subscriptions.length), icon: Star },
+                    { label: "Account Type", value: isMentor ? "Mentor" : "Student", icon: User },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-xl border border-border bg-muted/30 p-4">
+                      <item.icon className="h-4 w-4 text-primary mb-2" />
+                      <p className="font-heading font-bold text-foreground">{item.value}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* ──────────── PRIVACY TAB ──────────── */}
+          <TabsContent value="privacy">
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-foreground">Privacy Settings</h3>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
+                    <div>
+                      <h4 className="font-heading font-semibold text-foreground text-sm">Profile Visibility</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">Allow other users to see your profile info</p>
+                    </div>
+                    <Switch defaultChecked={true} />
+                  </div>
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
+                    <div>
+                      <h4 className="font-heading font-semibold text-foreground text-sm">Show Online Status</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">Let mentors see when you're online</p>
+                    </div>
+                    <Switch defaultChecked={true} />
+                  </div>
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
+                    <div>
+                      <h4 className="font-heading font-semibold text-foreground text-sm">Share Activity</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">Share your learning activity with your mentor</p>
+                    </div>
+                    <Switch defaultChecked={false} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Download className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-foreground">Data & Export</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Download a copy of your account data including profile info, subscriptions, and activity.
+                </p>
+                <Button variant="outline" size="sm" className="text-xs font-semibold" onClick={() => toast.info("Data export requested. You'll receive an email when ready.")}>
+                  <Download className="h-3.5 w-3.5 mr-1.5" /> Request Data Export
+                </Button>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-card p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-foreground">Security</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Email verified</p>
+                      <p className="text-[11px] text-muted-foreground">{user?.email}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/30 border border-border">
+                    <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Password</p>
+                      <p className="text-[11px] text-muted-foreground">Last changed: —</p>
+                    </div>
+                    <Link to="/settings?tab=password" className="ml-auto text-xs text-primary hover:underline">Change</Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+
           {/* ──────────── MY CONTENT TAB ──────────── */}
           {mentorProfile && (
             <TabsContent value="content">
