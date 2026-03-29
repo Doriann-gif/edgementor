@@ -125,14 +125,14 @@ const MentorApplicationForm = () => {
           <motion.div key="step1" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.35 }} className="space-y-6">
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-2"><TrendingUp className="h-3.5 w-3.5 text-primary" /> Years of Trading Experience *</Label>
-              <Select value={EXPERIENCE_OPTIONS.includes(experience) ? experience : "__other__"} onValueChange={(val) => { if (val === "__other__") { setShowExpOther(true); setExperience(""); } else { setShowExpOther(false); setExperience(val); } }}>
+              <Select value={expOtherMode ? "__other__" : experience} onValueChange={(val) => { if (val === "__other__") { setExpOtherMode(true); setExperience(""); } else { setExpOtherMode(false); setExperience(val); } }}>
                 <SelectTrigger className="bg-muted border-border focus:border-primary/50"><SelectValue placeholder="Select experience" /></SelectTrigger>
                 <SelectContent>
                   {EXPERIENCE_OPTIONS.map((yr) => <SelectItem key={yr} value={yr}>{yr}</SelectItem>)}
                   <SelectItem value="__other__">Other</SelectItem>
                 </SelectContent>
               </Select>
-              {showExpOther && (
+              {expOtherMode && (
                 <Input
                   autoFocus
                   placeholder="e.g. 15 years, self-taught..."
