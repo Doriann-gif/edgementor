@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -230,6 +231,22 @@ const MentorListingPage = () => {
 
   return (
     <PageTransition>
+    <Helmet>
+      <title>Browse Trading Mentors — EdgeMentor</title>
+      <meta name="description" content="Explore verified trading mentors specializing in futures, forex, crypto & options. Filter by instrument, concept, and price to find your perfect mentor." />
+      <link rel="canonical" href="https://edgementor.lovable.app/mentors" />
+      <meta property="og:title" content="Browse Trading Mentors — EdgeMentor" />
+      <meta property="og:description" content="Explore verified trading mentors specializing in futures, forex, crypto & options." />
+      <meta property="og:url" content="https://edgementor.lovable.app/mentors" />
+      <script type="application/ld+json">{JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "Trading Mentors",
+        "description": "Browse and connect with elite trading mentors.",
+        "url": "https://edgementor.lovable.app/mentors",
+        "isPartOf": { "@type": "WebSite", "name": "EdgeMentor", "url": "https://edgementor.lovable.app" }
+      })}</script>
+    </Helmet>
     <div className="min-h-screen bg-background border-pink-100 text-pink-50">
       {/* Ambient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
