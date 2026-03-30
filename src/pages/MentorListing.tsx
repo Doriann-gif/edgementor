@@ -58,7 +58,8 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className={`relative rounded-2xl border p-5 transition-all duration-500 hover:-translate-y-1 card-pink-hover ${
+        whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
+        className={`relative rounded-2xl border p-5 transition-colors duration-300 card-pink-hover ${
           isElite
             ? "border-slate-600/50 bg-gradient-to-br from-slate-900 via-card to-slate-800/60 hover:border-slate-400/50 hover:shadow-[0_20px_60px_-15px_rgba(148,163,184,0.15)]"
             : "border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-[0_20px_60px_-15px_hsl(160_84%_39%/0.12)]"
@@ -492,20 +493,31 @@ const MentorListingPage = () => {
         {/* Mentor Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="rounded-2xl border border-border bg-card/50 p-5 animate-pulse">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="relative rounded-2xl border border-border bg-card/50 p-5 overflow-hidden">
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-muted-foreground/5 to-transparent" />
                 <div className="flex gap-4 mb-4">
-                  <div className="h-14 w-14 rounded-xl bg-muted" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 w-32 bg-muted rounded" />
-                    <div className="h-3 w-48 bg-muted rounded" />
+                  <div className="h-14 w-14 rounded-xl bg-muted animate-pulse" />
+                  <div className="flex-1 space-y-2.5">
+                    <div className="h-4 w-36 bg-muted rounded-md animate-pulse" />
+                    <div className="flex gap-3">
+                      <div className="h-3 w-20 bg-muted rounded-md animate-pulse" />
+                      <div className="h-3 w-14 bg-muted rounded-md animate-pulse" />
+                    </div>
                   </div>
                 </div>
-                <div className="h-3 w-full bg-muted rounded mb-2" />
-                <div className="h-3 w-3/4 bg-muted rounded mb-4" />
-                <div className="flex gap-2">
-                  <div className="h-6 w-16 bg-muted rounded-lg" />
-                  <div className="h-6 w-16 bg-muted rounded-lg" />
+                <div className="space-y-2 mb-4">
+                  <div className="h-3 w-full bg-muted rounded-md animate-pulse" />
+                  <div className="h-3 w-4/5 bg-muted rounded-md animate-pulse" />
+                </div>
+                <div className="flex gap-2 mb-5">
+                  <div className="h-6 w-16 bg-muted rounded-lg animate-pulse" />
+                  <div className="h-6 w-16 bg-muted rounded-lg animate-pulse" />
+                  <div className="h-6 w-20 bg-muted rounded-lg animate-pulse" />
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                  <div className="h-6 w-20 bg-muted rounded-md animate-pulse" />
+                  <div className="h-8 w-28 bg-muted rounded-lg animate-pulse" />
                 </div>
               </div>
             ))}
