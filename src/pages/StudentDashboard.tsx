@@ -276,7 +276,103 @@ const StudentDashboard = () => {
           ))}
         </motion.div>
 
-        {/* Quick Actions */}
+        {/* Weekly Activity Chart */}
+        <motion.div
+          className="rounded-2xl border border-border bg-card p-5 mb-8"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <BarChart3 className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-heading font-semibold text-sm text-foreground">Weekly Activity</h3>
+                <p className="text-[11px] text-muted-foreground">Your learning engagement over the past 7 days</p>
+              </div>
+            </div>
+          </div>
+          <div className="h-48">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={(() => {
+                  const days = [];
+                  for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    const dayLabel = d.toLocaleDateString("en-US", { weekday: "short" });
+                    const dayStr = d.toISOString().split("T")[0];
+                    const msgsOnDay = messages.filter(
+                      (m) => m.created_at.split("T")[0] === dayStr
+                    ).length;
+                    const hasActiveSub = subscriptions.some(
+                      (s: any) => new Date(s.started_at) <= d && (!s.expires_at || new Date(s.expires_at) >= d)
+                    );
+                    days.push({
+                      day: dayLabel,
+                      messages: msgsOnDay,
+                      activity: hasActiveSub ? Math.max(1, msgsOnDay + (i === 0 ? 1 : 0)) : msgsOnDay,
+                    });
+                  }
+                  return days;
+                })()}
+                margin={{ top: 5, right: 5, left: -20, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="activityGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis
+                  dataKey="day"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.75rem",
+                    fontSize: "12px",
+                    color: "hsl(var(--foreground))",
+                  }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="activity"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  fill="url(#activityGradient)"
+                  name="Activity"
+                  dot={{ r: 3, fill: "hsl(var(--primary))", strokeWidth: 0 }}
+                  activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="messages"
+                  stroke="hsl(var(--pink, 330 80% 60%))"
+                  strokeWidth={2}
+                  fill="none"
+                  name="Messages"
+                  dot={{ r: 3, fill: "hsl(var(--pink, 330 80% 60%))", strokeWidth: 0 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+
+
         <motion.div
           className="flex flex-wrap gap-2 mb-8"
           initial={{ opacity: 0, y: 12 }}
