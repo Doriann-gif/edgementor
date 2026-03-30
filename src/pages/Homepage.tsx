@@ -65,6 +65,23 @@ const Homepage = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden relative">
+      <Helmet>
+        <title>EdgeMentor — Find Your Trading Mentor</title>
+        <meta name="description" content="Connect with elite trading mentors in futures, forex, crypto & options. Get personalized 1-on-1 mentorship to accelerate your trading journey." />
+        <link rel="canonical" href="https://edgementor.lovable.app/" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "EdgeMentor",
+          "url": "https://edgementor.lovable.app",
+          "description": "Connect with elite trading mentors in futures, forex, crypto & options.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://edgementor.lovable.app/mentors?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        })}</script>
+      </Helmet>
       {/* Top-right light effect */}
       <div className="pointer-events-none absolute -top-20 -right-20 w-[500px] h-[500px] z-0" aria-hidden>
         <motion.div
