@@ -54,10 +54,10 @@ const Homepage = () => {
 
   useEffect(() => {
     if (loading) return;
-    if (!user && !sessionStorage.getItem("welcomed")) {
+    if (!user && !localStorage.getItem("edgementor_welcomed")) {
       const timer = setTimeout(() => {
         setShowWelcome(true);
-        sessionStorage.setItem("welcomed", "1");
+        localStorage.setItem("edgementor_welcomed", "1");
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -628,20 +628,49 @@ const Homepage = () => {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-border/50 py-10 px-4 sm:px-6">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <motion.div
-              className="font-heading font-bold text-sm text-foreground flex items-center gap-2"
-              whileHover={{ scale: 1.05 }}
-            >
-              <Zap className="h-4 w-4 text-primary" /> EdgeMentor
-            </motion.div>
-            <div className="flex items-center gap-6">
-              <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
-              <Link to="/learn" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Learn</Link>
-              <Link to="/mentors" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Mentors</Link>
+        <footer className="border-t border-border/50 py-12 px-4 sm:px-6">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+              {/* Brand */}
+              <div>
+                <motion.div className="font-heading font-bold text-lg text-foreground flex items-center gap-2 mb-3" whileHover={{ scale: 1.03 }}>
+                  <Zap className="h-5 w-5 text-primary" /> EdgeMentor
+                </motion.div>
+                <p className="text-sm text-muted-foreground leading-relaxed">Connect with elite trading mentors and accelerate your journey.</p>
+              </div>
+
+              {/* Links */}
+              <div>
+                <h4 className="font-heading font-semibold text-sm text-foreground mb-3">Platform</h4>
+                <div className="flex flex-col gap-2">
+                  <Link to="/mentors" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Browse Mentors</Link>
+                  <Link to="/learn" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Free Content</Link>
+                  <Link to="/apply" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Become a Mentor</Link>
+                  <Link to="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms &amp; Conditions</Link>
+                </div>
+              </div>
+
+              {/* Social */}
+              <div>
+                <h4 className="font-heading font-semibold text-sm text-foreground mb-3">Connect</h4>
+                <div className="flex items-center gap-3">
+                  <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
+                    <Globe className="h-4 w-4" />
+                  </a>
+                  <a href="https://discord.com" target="_blank" rel="noopener noreferrer" className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
+                    <Users className="h-4 w-4" />
+                  </a>
+                  <a href="mailto:support@edgementor.com" className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">© 2026 EdgeMentor. All rights reserved.</p>
+
+            <div className="border-t border-border/40 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} EdgeMentor. All rights reserved.</p>
+              <p className="text-xs text-muted-foreground">Built for traders, by traders.</p>
+            </div>
           </div>
         </footer>
       </div>
