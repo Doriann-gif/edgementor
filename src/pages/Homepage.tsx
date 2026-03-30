@@ -63,7 +63,16 @@ const Homepage = () => {
   }, [user, loading]);
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden relative">
+      {/* Top-right light effect */}
+      <div className="pointer-events-none absolute -top-20 -right-20 w-[500px] h-[500px] z-0" aria-hidden>
+        <motion.div
+          className="w-full h-full rounded-full blur-[100px]"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.18), hsl(var(--pink) / 0.08), transparent 70%)" }}
+          animate={{ scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
       {/* Welcome Dialog */}
       <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
         <DialogContent className="sm:max-w-sm text-center border-pink-500/20">
