@@ -19,7 +19,10 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     const activateSubscription = async () => {
-      if (!user || !mentorId) return;
+      if (!user || !mentorId) {
+        setActivating(false);
+        return;
+      }
       try {
         const { data: existing } = await supabase
           .from("subscriptions").select("id")
@@ -70,7 +73,24 @@ const PaymentSuccess = () => {
               </div>
             </motion.div>
           ) : (
-            <p className="text-destructive">Something went wrong. Please contact support.</p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+              <div className="flex justify-center">
+                <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <CheckCircle2 className="h-8 w-8 text-destructive" />
+                </div>
+              </div>
+              <h1 className="font-heading text-2xl font-bold text-foreground">
+                {!mentorId ? "Payment Received" : "Something went wrong"}
+              </h1>
+              <p className="text-muted-foreground text-sm">
+                {!mentorId
+                  ? "Your payment was successful but we couldn't link it to a mentor. Please check your dashboard."
+                  : "There was an issue activating your subscription. Please contact support."}
+              </p>
+              <Link to="/dashboard">
+                <Button variant="outline" className="w-full">Go to Dashboard</Button>
+              </Link>
+            </motion.div>
           )}
         </div>
       </div>
