@@ -19,7 +19,10 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     const activateSubscription = async () => {
-      if (!user || !mentorId) return;
+      if (!user || !mentorId) {
+        setActivating(false);
+        return;
+      }
       try {
         const { data: existing } = await supabase
           .from("subscriptions").select("id")
