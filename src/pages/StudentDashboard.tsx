@@ -14,7 +14,9 @@ import {
   ArrowLeft, Star, Clock, BookOpen, Heart, MessageSquare,
   Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard, MoreVertical,
   XCircle, ExternalLink, TrendingUp, Sparkles, CalendarDays, Search, Flame, Target, Award,
+  BarChart3,
 } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
