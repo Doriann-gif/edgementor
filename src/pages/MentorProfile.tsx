@@ -344,13 +344,9 @@ const MentorProfile = () => {
               // @ts-ignore
               custom={i}
             >
-              <motion.div
-                className={`flex h-9 w-9 items-center justify-center rounded-xl ${stat.color} mx-auto mb-2`}
-                whileHover={{ scale: 1.2, rotate: -8 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
+              <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${stat.color} mx-auto mb-2`}>
                 <stat.icon className="h-4 w-4" />
-              </motion.div>
+              </div>
               <p className="font-heading text-lg font-bold text-foreground">{stat.value}</p>
               <p className="text-[11px] text-muted-foreground">{stat.label}</p>
             </motion.div>
