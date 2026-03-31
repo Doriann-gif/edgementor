@@ -338,7 +338,6 @@ const MentorProfile = () => {
             <motion.div
               key={stat.label}
               className={`rounded-2xl border p-4 text-center ${isElite ? "border-slate-600/50 bg-slate-900/80" : "border-border bg-card hover:border-pink-400/20 transition-colors"}`}
-              whileHover={{ y: -4, boxShadow: "0 12px 30px -8px hsl(var(--primary) / 0.1)" }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
