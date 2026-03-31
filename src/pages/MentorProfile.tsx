@@ -372,11 +372,8 @@ const MentorProfile = () => {
                 initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 + i * 0.06, duration: 0.4 }}
-                whileHover={{ x: 4 }}
               >
-                <motion.div whileHover={{ scale: 1.2 }} transition={{ type: "spring", stiffness: 300 }}>
-                  <CheckCircle2 className={`h-5 w-5 shrink-0 ${isElite ? "text-slate-300" : "text-primary"}`} />
-                </motion.div>
+                <CheckCircle2 className={`h-5 w-5 shrink-0 ${isElite ? "text-slate-300" : "text-primary"}`} />
                 <span className="text-foreground group-hover:text-primary transition-colors">{h}</span>
               </motion.div>
             ))}
