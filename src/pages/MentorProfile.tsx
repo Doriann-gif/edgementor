@@ -265,7 +265,6 @@ const MentorProfile = () => {
                   ? "bg-slate-700/50 text-slate-200 shadow-slate-900/50"
                   : "bg-gradient-to-br from-primary/15 via-pink-400/10 to-primary/5 text-primary shadow-primary/10"
               }`}
-              whileHover={{ scale: 1.1, rotate: 6 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
               {mentor.avatar}
