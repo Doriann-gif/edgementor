@@ -388,9 +388,7 @@ const MentorProfile = () => {
           {!isElite && <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-pink-400/[0.06] to-transparent rounded-tr-full pointer-events-none" />}
 
           <h2 className="font-heading text-lg font-semibold text-foreground mb-5 flex items-center gap-2">
-            <motion.div whileHover={{ rotate: -10 }} transition={{ type: "spring", stiffness: 300 }}>
-              <MessageSquare className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
-            </motion.div>
+            <MessageSquare className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
             Reviews
             <span className="text-sm font-normal text-muted-foreground">({reviews.length})</span>
           </h2>
