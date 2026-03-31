@@ -415,12 +415,9 @@ const MentorProfile = () => {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <motion.div
-                        className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/10 to-pink-400/10 flex items-center justify-center text-[10px] font-bold text-primary"
-                        whileHover={{ scale: 1.15 }}
-                      >
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/10 to-pink-400/10 flex items-center justify-center text-[10px] font-bold text-primary">
                         {review.reviewer_name.split(" ").map(n => n[0]).join("")}
-                      </motion.div>
+                      </div>
                       <span className="text-sm font-medium text-foreground">{review.reviewer_name}</span>
                     </div>
                     <span className="text-xs text-muted-foreground">{review.review_date}</span>
