@@ -458,11 +458,9 @@ const MentorProfile = () => {
             <span className="text-sm text-muted-foreground">/month</span>
           </div>
           <div className="flex items-center gap-3">
-            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
-              <Button variant="outline" size="icon" className="h-12 w-12 border-pink-400/20 hover:border-pink-400/40 hover:bg-pink-400/5 transition-colors" onClick={handleSave} disabled={toggleSave.isPending}>
-                <Heart className={`h-5 w-5 transition-all ${isSaved ? "fill-pink-400 text-pink-400 scale-110" : "text-muted-foreground hover:text-pink-400"}`} />
-              </Button>
-            </motion.div>
+            <Button variant="outline" size="icon" className="h-12 w-12 border-pink-400/20 hover:border-pink-400/40 hover:bg-pink-400/5 transition-colors" onClick={handleSave} disabled={toggleSave.isPending}>
+              <Heart className={`h-5 w-5 transition-all ${isSaved ? "fill-pink-400 text-pink-400 scale-110" : "text-muted-foreground hover:text-pink-400"}`} />
+            </Button>
             {isSubscribed ? (
               <Link to={`/mentorship/${mentor.id}`}>
                 <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
