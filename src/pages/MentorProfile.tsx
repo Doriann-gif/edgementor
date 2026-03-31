@@ -361,9 +361,7 @@ const MentorProfile = () => {
           {!isElite && <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-pink-400/[0.06] to-transparent rounded-bl-full pointer-events-none" />}
 
           <h2 className="font-heading text-lg font-semibold text-foreground mb-5 flex items-center gap-2">
-            <motion.div whileHover={{ rotate: 15 }} transition={{ type: "spring", stiffness: 300 }}>
-              <TrendingUp className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
-            </motion.div>
+            <TrendingUp className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
             What's Included
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
