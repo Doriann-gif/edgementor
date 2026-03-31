@@ -219,9 +219,7 @@ const MentorProfile = () => {
         {/* Back link */}
         <motion.div variants={fadeUp}>
           <Link to="/mentors" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors mb-6 group">
-            <motion.div whileHover={{ x: -3 }} transition={{ type: "spring", stiffness: 300 }}>
-              <ArrowLeft className="h-4 w-4" />
-            </motion.div>
+            <ArrowLeft className="h-4 w-4" />
             <span className="group-hover:underline">All Mentors</span>
           </Link>
         </motion.div>
