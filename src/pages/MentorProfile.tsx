@@ -13,9 +13,9 @@ import { motion } from "framer-motion";
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
     {[1, 2, 3, 4, 5].map((s) => (
-      <motion.div key={s} whileHover={{ scale: 1.3 }} transition={{ type: "spring", stiffness: 400 }}>
+      <div key={s}>
         <Star className={`h-4 w-4 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
-      </motion.div>
+      </div>
     ))}
   </div>
 );
