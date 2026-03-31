@@ -13,9 +13,9 @@ import { motion } from "framer-motion";
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
     {[1, 2, 3, 4, 5].map((s) => (
-      <motion.div key={s} whileHover={{ scale: 1.3 }} transition={{ type: "spring", stiffness: 400 }}>
+      <div key={s}>
         <Star className={`h-4 w-4 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
-      </motion.div>
+      </div>
     ))}
   </div>
 );
@@ -219,9 +219,7 @@ const MentorProfile = () => {
         {/* Back link */}
         <motion.div variants={fadeUp}>
           <Link to="/mentors" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors mb-6 group">
-            <motion.div whileHover={{ x: -3 }} transition={{ type: "spring", stiffness: 300 }}>
-              <ArrowLeft className="h-4 w-4" />
-            </motion.div>
+            <ArrowLeft className="h-4 w-4" />
             <span className="group-hover:underline">All Mentors</span>
           </Link>
         </motion.div>
@@ -267,7 +265,6 @@ const MentorProfile = () => {
                   ? "bg-slate-700/50 text-slate-200 shadow-slate-900/50"
                   : "bg-gradient-to-br from-primary/15 via-pink-400/10 to-primary/5 text-primary shadow-primary/10"
               }`}
-              whileHover={{ scale: 1.1, rotate: 6 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
               {mentor.avatar}
@@ -281,15 +278,15 @@ const MentorProfile = () => {
                 <TierBadge tier={tier} size="sm" />
               </div>
               <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                <span className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                   <Clock className="h-3.5 w-3.5" />{mentor.experience}
-                </motion.span>
-                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                </span>
+                <span className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                   <Users className="h-3.5 w-3.5" />{mentor.students} students
-                </motion.span>
-                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                </span>
+                <span className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                   <MapPin className="h-3.5 w-3.5" />{mentor.session} session
-                </motion.span>
+                </span>
               </div>
               <div className="flex items-center gap-3 mt-3">
                 <StarRating rating={Math.round(mentor.rating)} />
@@ -308,7 +305,6 @@ const MentorProfile = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 + idx * 0.05 }}
-                whileHover={{ scale: 1.08, y: -2 }}
               >
                 {i}
               </motion.span>
@@ -320,7 +316,6 @@ const MentorProfile = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + idx * 0.05 }}
-                whileHover={{ scale: 1.08, y: -2 }}
               >
                 {c}
               </motion.span>
@@ -343,20 +338,15 @@ const MentorProfile = () => {
             <motion.div
               key={stat.label}
               className={`rounded-2xl border p-4 text-center ${isElite ? "border-slate-600/50 bg-slate-900/80" : "border-border bg-card hover:border-pink-400/20 transition-colors"}`}
-              whileHover={{ y: -4, boxShadow: "0 12px 30px -8px hsl(var(--primary) / 0.1)" }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               // @ts-ignore
               custom={i}
             >
-              <motion.div
-                className={`flex h-9 w-9 items-center justify-center rounded-xl ${stat.color} mx-auto mb-2`}
-                whileHover={{ scale: 1.2, rotate: -8 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
+              <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${stat.color} mx-auto mb-2`}>
                 <stat.icon className="h-4 w-4" />
-              </motion.div>
+              </div>
               <p className="font-heading text-lg font-bold text-foreground">{stat.value}</p>
               <p className="text-[11px] text-muted-foreground">{stat.label}</p>
             </motion.div>
@@ -371,9 +361,7 @@ const MentorProfile = () => {
           {!isElite && <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-pink-400/[0.06] to-transparent rounded-bl-full pointer-events-none" />}
 
           <h2 className="font-heading text-lg font-semibold text-foreground mb-5 flex items-center gap-2">
-            <motion.div whileHover={{ rotate: 15 }} transition={{ type: "spring", stiffness: 300 }}>
-              <TrendingUp className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
-            </motion.div>
+            <TrendingUp className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
             What's Included
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -384,11 +372,8 @@ const MentorProfile = () => {
                 initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 + i * 0.06, duration: 0.4 }}
-                whileHover={{ x: 4 }}
               >
-                <motion.div whileHover={{ scale: 1.2 }} transition={{ type: "spring", stiffness: 300 }}>
-                  <CheckCircle2 className={`h-5 w-5 shrink-0 ${isElite ? "text-slate-300" : "text-primary"}`} />
-                </motion.div>
+                <CheckCircle2 className={`h-5 w-5 shrink-0 ${isElite ? "text-slate-300" : "text-primary"}`} />
                 <span className="text-foreground group-hover:text-primary transition-colors">{h}</span>
               </motion.div>
             ))}
@@ -403,9 +388,7 @@ const MentorProfile = () => {
           {!isElite && <div className="absolute bottom-0 left-0 w-20 h-20 bg-gradient-to-tr from-pink-400/[0.06] to-transparent rounded-tr-full pointer-events-none" />}
 
           <h2 className="font-heading text-lg font-semibold text-foreground mb-5 flex items-center gap-2">
-            <motion.div whileHover={{ rotate: -10 }} transition={{ type: "spring", stiffness: 300 }}>
-              <MessageSquare className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
-            </motion.div>
+            <MessageSquare className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
             Reviews
             <span className="text-sm font-normal text-muted-foreground">({reviews.length})</span>
           </h2>
@@ -432,12 +415,9 @@ const MentorProfile = () => {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <motion.div
-                        className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/10 to-pink-400/10 flex items-center justify-center text-[10px] font-bold text-primary"
-                        whileHover={{ scale: 1.15 }}
-                      >
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary/10 to-pink-400/10 flex items-center justify-center text-[10px] font-bold text-primary">
                         {review.reviewer_name.split(" ").map(n => n[0]).join("")}
-                      </motion.div>
+                      </div>
                       <span className="text-sm font-medium text-foreground">{review.reviewer_name}</span>
                     </div>
                     <span className="text-xs text-muted-foreground">{review.review_date}</span>
@@ -478,26 +458,20 @@ const MentorProfile = () => {
             <span className="text-sm text-muted-foreground">/month</span>
           </div>
           <div className="flex items-center gap-3">
-            <motion.div whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.85 }}>
-              <Button variant="outline" size="icon" className="h-12 w-12 border-pink-400/20 hover:border-pink-400/40 hover:bg-pink-400/5 transition-colors" onClick={handleSave} disabled={toggleSave.isPending}>
-                <Heart className={`h-5 w-5 transition-all ${isSaved ? "fill-pink-400 text-pink-400 scale-110" : "text-muted-foreground hover:text-pink-400"}`} />
-              </Button>
-            </motion.div>
+            <Button variant="outline" size="icon" className="h-12 w-12 border-pink-400/20 hover:border-pink-400/40 hover:bg-pink-400/5 transition-colors" onClick={handleSave} disabled={toggleSave.isPending}>
+              <Heart className={`h-5 w-5 transition-all ${isSaved ? "fill-pink-400 text-pink-400 scale-110" : "text-muted-foreground hover:text-pink-400"}`} />
+            </Button>
             {isSubscribed ? (
               <Link to={`/mentorship/${mentor.id}`}>
-                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
-                  <Button variant="glow" className={`h-12 px-8 font-semibold text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-xl shadow-primary/25"}`}>
-                    <Crown className="h-4 w-4 mr-2" /> Access Mentorship
-                  </Button>
-                </motion.div>
+                <Button variant="glow" className={`h-12 px-8 font-semibold text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-xl shadow-primary/25"}`}>
+                  <Crown className="h-4 w-4 mr-2" /> Access Mentorship
+                </Button>
               </Link>
             ) : (
               <Link to={`/subscribe/${mentor.id}`}>
-                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
-                  <Button variant="glow" className={`h-12 px-8 font-semibold text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35"}`}>
-                    Subscribe Now <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </motion.div>
+                <Button variant="glow" className={`h-12 px-8 font-semibold text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35"}`}>
+                  Subscribe Now <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
               </Link>
             )}
           </div>
