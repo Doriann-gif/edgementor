@@ -278,15 +278,15 @@ const MentorProfile = () => {
                 <TierBadge tier={tier} size="sm" />
               </div>
               <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                <span className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                   <Clock className="h-3.5 w-3.5" />{mentor.experience}
-                </motion.span>
-                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                </span>
+                <span className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                   <Users className="h-3.5 w-3.5" />{mentor.students} students
-                </motion.span>
-                <motion.span className="flex items-center gap-1.5 hover:text-foreground transition-colors" whileHover={{ scale: 1.05 }}>
+                </span>
+                <span className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                   <MapPin className="h-3.5 w-3.5" />{mentor.session} session
-                </motion.span>
+                </span>
               </div>
               <div className="flex items-center gap-3 mt-3">
                 <StarRating rating={Math.round(mentor.rating)} />
