@@ -305,7 +305,6 @@ const MentorProfile = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 + idx * 0.05 }}
-                whileHover={{ scale: 1.08, y: -2 }}
               >
                 {i}
               </motion.span>
@@ -317,7 +316,6 @@ const MentorProfile = () => {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + idx * 0.05 }}
-                whileHover={{ scale: 1.08, y: -2 }}
               >
                 {c}
               </motion.span>
