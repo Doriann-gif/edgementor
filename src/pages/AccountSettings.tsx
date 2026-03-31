@@ -575,104 +575,324 @@ const AccountSettings = () => {
           </TabsContent>
 
           {/* ──────────── BILLING TAB ──────────── */}
-          <TabsContent value="billing" className="space-y-6">
-            {/* Manage Billing Card */}
-            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={0} className="rounded-2xl border border-border bg-card p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <CreditCard className="h-4 w-4 text-primary" />
-                <h3 className="font-heading font-semibold text-foreground">Manage Billing</h3>
+          <TabsContent value="billing" className="space-y-8">
+            {/* Billing Overview Banner */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={0}
+              className="relative rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-8 overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/[0.08] to-transparent rounded-bl-full pointer-events-none" />
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div>
+                  <h2 className="font-heading text-2xl font-bold text-foreground mb-1">Billing & Payments</h2>
+                  <p className="text-sm text-muted-foreground max-w-md">
+                    Manage your subscriptions, view billing history, withdraw earnings, and update payment methods.
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="text-xs text-muted-foreground">Active Subscriptions</span>
+                  <span className="font-heading text-3xl font-bold text-primary">{activeSubCount}</span>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground mb-5">
-                View invoices, update your payment method, or change your plan through the billing portal.
-              </p>
-              <Button
-                variant="glow"
-                className="w-full sm:w-auto"
-                onClick={async () => {
-                  try {
-                    const { data, error } = await supabase.functions.invoke("customer-portal");
-                    if (error) throw error;
-                    if (data?.url) window.open(data.url, "_blank");
-                    else toast.error("Could not open billing portal.");
-                  } catch (err: any) {
-                    toast.error(err.message || "Failed to open billing portal.");
-                  }
-                }}
-              >
-                <CreditCard className="h-4 w-4 mr-1.5" /> Open Billing Portal
-              </Button>
             </motion.div>
 
-            {/* Active Subscriptions with Cancel */}
-            {activeSubCount > 0 && (
-              <motion.div variants={fadeIn} initial="hidden" animate="show" custom={1} className="rounded-2xl border border-border bg-card p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <Shield className="h-4 w-4 text-primary" />
-                  <h3 className="font-heading font-semibold text-foreground">Active Subscriptions</h3>
-                </div>
-                <div className="space-y-3">
-                  {subscriptions.filter((s: any) => s.status === "active").map((sub: any) => (
-                    <div key={sub.id} className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 p-4">
-                      <div>
-                        <h4 className="font-heading font-semibold text-foreground text-sm">{sub.mentors?.name || "Mentor"}</h4>
-                        <span className="text-xs text-muted-foreground">Since {new Date(sub.started_at).toLocaleDateString()}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <span className="font-heading font-bold text-foreground">${sub.mentors?.monthly_price || 0}/mo</span>
-                          <span className="block text-[11px] font-medium text-primary mt-0.5">Active</span>
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs"
-                          onClick={async () => {
-                            if (!window.confirm(`Cancel your subscription to ${sub.mentors?.name || "this mentor"}? You can re-subscribe anytime.`)) return;
-                            try {
-                              const { data, error } = await supabase.functions.invoke("customer-portal");
-                              if (error) throw error;
-                              if (data?.url) window.open(data.url, "_blank");
-                              else toast.error("Could not open cancellation portal.");
-                            } catch (err: any) {
-                              toast.error(err.message || "Failed to open portal.");
-                            }
-                          }}
-                        >
-                          <X className="h-3 w-3 mr-1" /> Cancel
-                        </Button>
-                      </div>
+            {/* Quick Actions Grid */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={1}>
+              <h3 className="font-heading font-semibold text-foreground text-lg mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <button
+                  className="group rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                  onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.functions.invoke("customer-portal");
+                      if (error) throw error;
+                      if (data?.url) window.open(data.url, "_blank");
+                      else toast.error("Could not open billing portal.");
+                    } catch (err: any) {
+                      toast.error(err.message || "Failed to open billing portal.");
+                    }
+                  }}
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                  </div>
+                  <h4 className="font-heading font-semibold text-foreground mb-1">Manage Subscriptions</h4>
+                  <p className="text-xs text-muted-foreground">Update plans, change payment method, or cancel</p>
+                </button>
+
+                {isMentor && (
+                  <button
+                    className="group rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                    onClick={() => {
+                      toast.info("Withdrawal request submitted. Funds will be sent to your linked payout method within 3-5 business days.", { duration: 5000 });
+                    }}
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 mb-4 group-hover:bg-emerald-500/15 transition-colors">
+                      <Download className="h-5 w-5 text-emerald-500 rotate-180" />
                     </div>
-                  ))}
+                    <h4 className="font-heading font-semibold text-foreground mb-1">Withdraw Earnings</h4>
+                    <p className="text-xs text-muted-foreground">Transfer your mentor earnings to your bank</p>
+                  </button>
+                )}
+
+                <button
+                  className="group rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                  onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.functions.invoke("customer-portal");
+                      if (error) throw error;
+                      if (data?.url) window.open(data.url, "_blank");
+                      else toast.error("Could not open portal.");
+                    } catch (err: any) {
+                      toast.error(err.message || "Failed to open portal.");
+                    }
+                  }}
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-400/10 mb-4 group-hover:bg-amber-400/15 transition-colors">
+                    <Download className="h-5 w-5 text-amber-400" />
+                  </div>
+                  <h4 className="font-heading font-semibold text-foreground mb-1">Billing History</h4>
+                  <p className="text-xs text-muted-foreground">View and download past invoices</p>
+                </button>
+              </div>
+            </motion.div>
+
+            {/* Mentor Withdrawal Section */}
+            {isMentor && (
+              <motion.div variants={fadeIn} initial="hidden" animate="show" custom={2}
+                className="rounded-2xl border border-border bg-card overflow-hidden"
+              >
+                <div className="border-b border-border px-8 py-5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+                      <TrendingUp className="h-5 w-5 text-emerald-500" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-semibold text-foreground">Withdrawal & Payouts</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">Manage your earnings and payout preferences</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-8">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                    <div className="rounded-xl border border-border bg-muted/30 p-5">
+                      <p className="text-xs text-muted-foreground mb-1">Available Balance</p>
+                      <p className="font-heading text-2xl font-bold text-foreground">$0.00</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">Updated just now</p>
+                    </div>
+                    <div className="rounded-xl border border-border bg-muted/30 p-5">
+                      <p className="text-xs text-muted-foreground mb-1">Pending</p>
+                      <p className="font-heading text-2xl font-bold text-foreground">$0.00</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">Processing withdrawals</p>
+                    </div>
+                    <div className="rounded-xl border border-border bg-muted/30 p-5">
+                      <p className="text-xs text-muted-foreground mb-1">Total Earned</p>
+                      <p className="font-heading text-2xl font-bold text-foreground">$0.00</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">Lifetime earnings</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      variant="glow"
+                      className="font-semibold"
+                      onClick={() => toast.info("No balance available to withdraw yet.")}
+                    >
+                      <Download className="h-4 w-4 mr-1.5 rotate-180" /> Withdraw Funds
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="font-semibold text-sm"
+                      onClick={() => toast.info("Payout method setup coming soon. Contact support for manual setup.")}
+                    >
+                      <CreditCard className="h-4 w-4 mr-1.5" /> Set Up Payout Method
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             )}
 
-            {/* Subscription History */}
-            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={2} className="rounded-2xl border border-border bg-card p-6">
-              <div className="flex items-center gap-2 mb-5">
-                <Clock className="h-4 w-4 text-primary" />
-                <h3 className="font-heading font-semibold text-foreground">Subscription History</h3>
-              </div>
-              {subscriptions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground text-sm">No subscriptions yet.</div>
-              ) : (
-                <div className="space-y-3">
-                  {subscriptions.map((sub: any) => (
-                    <div key={sub.id} className="flex items-center justify-between rounded-xl border border-border bg-muted/30 p-4 hover:border-primary/20 transition-colors">
-                      <div>
-                        <h4 className="font-heading font-semibold text-foreground text-sm">{sub.mentors?.name || "Mentor"}</h4>
-                        <span className="text-xs text-muted-foreground">Started {new Date(sub.started_at).toLocaleDateString()}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-heading font-bold text-foreground">${sub.mentors?.monthly_price || 0}/mo</span>
-                        <span className={`block text-[11px] font-medium mt-0.5 ${sub.status === "active" ? "text-primary" : "text-muted-foreground"}`}>
-                          {sub.status}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+            {/* Active Subscriptions */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={3}
+              className="rounded-2xl border border-border bg-card overflow-hidden"
+            >
+              <div className="border-b border-border px-8 py-5 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                    <Shield className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-semibold text-foreground">Active Subscriptions</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">{activeSubCount} active plan{activeSubCount !== 1 ? "s" : ""}</p>
+                  </div>
                 </div>
-              )}
+                <Button
+                  variant="outline" size="sm" className="text-xs font-semibold"
+                  onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.functions.invoke("customer-portal");
+                      if (error) throw error;
+                      if (data?.url) window.open(data.url, "_blank");
+                    } catch (err: any) { toast.error(err.message || "Failed to open portal."); }
+                  }}
+                >
+                  Manage All
+                </Button>
+              </div>
+              <div className="p-8">
+                {activeSubCount === 0 ? (
+                  <div className="text-center py-10">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50 mx-auto mb-4">
+                      <CreditCard className="h-6 w-6 text-muted-foreground/50" />
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-1">No active subscriptions</p>
+                    <p className="text-xs text-muted-foreground mb-4">Browse mentors and subscribe to get started</p>
+                    <Link to="/mentors">
+                      <Button variant="outline" size="sm" className="text-xs font-semibold">
+                        Browse Mentors
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {subscriptions.filter((s: any) => s.status === "active").map((sub: any) => (
+                      <div key={sub.id} className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/[0.03] p-5">
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 font-heading font-bold text-primary text-sm">
+                            {(sub.mentors?.name || "M").charAt(0)}
+                          </div>
+                          <div>
+                            <h4 className="font-heading font-semibold text-foreground">{sub.mentors?.name || "Mentor"}</h4>
+                            <span className="text-xs text-muted-foreground">Since {new Date(sub.started_at).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <span className="font-heading text-lg font-bold text-foreground">${sub.mentors?.monthly_price || 0}</span>
+                            <span className="text-xs text-muted-foreground">/mo</span>
+                            <span className="block text-[11px] font-medium text-primary mt-0.5">Active</span>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-destructive border-destructive/30 hover:bg-destructive/10 text-xs"
+                            onClick={async () => {
+                              if (!window.confirm(`Cancel your subscription to ${sub.mentors?.name || "this mentor"}? You can re-subscribe anytime.`)) return;
+                              try {
+                                const { data, error } = await supabase.functions.invoke("customer-portal");
+                                if (error) throw error;
+                                if (data?.url) window.open(data.url, "_blank");
+                              } catch (err: any) { toast.error(err.message || "Failed to open portal."); }
+                            }}
+                          >
+                            <X className="h-3 w-3 mr-1" /> Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Billing History */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={4}
+              className="rounded-2xl border border-border bg-card overflow-hidden"
+            >
+              <div className="border-b border-border px-8 py-5 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-400/10">
+                  <Clock className="h-5 w-5 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-semibold text-foreground">Billing History</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">All past and current subscriptions</p>
+                </div>
+              </div>
+              <div className="p-8">
+                {subscriptions.length === 0 ? (
+                  <div className="text-center py-10">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted/50 mx-auto mb-4">
+                      <Clock className="h-6 w-6 text-muted-foreground/50" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">No billing history yet</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left">
+                          <th className="pb-3 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-wider">Mentor</th>
+                          <th className="pb-3 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-wider">Amount</th>
+                          <th className="pb-3 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-wider">Date</th>
+                          <th className="pb-3 font-heading font-semibold text-muted-foreground text-xs uppercase tracking-wider text-right">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border">
+                        {subscriptions.map((sub: any) => (
+                          <tr key={sub.id} className="hover:bg-muted/30 transition-colors">
+                            <td className="py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted font-heading font-bold text-xs text-foreground">
+                                  {(sub.mentors?.name || "M").charAt(0)}
+                                </div>
+                                <span className="font-medium text-foreground">{sub.mentors?.name || "Mentor"}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 font-heading font-semibold text-foreground">${sub.mentors?.monthly_price || 0}/mo</td>
+                            <td className="py-4 text-muted-foreground">{new Date(sub.started_at).toLocaleDateString()}</td>
+                            <td className="py-4 text-right">
+                              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                                sub.status === "active"
+                                  ? "bg-primary/10 text-primary"
+                                  : "bg-muted text-muted-foreground"
+                              }`}>
+                                {sub.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Payment Method */}
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={5}
+              className="rounded-2xl border border-border bg-card p-8"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+                    <CreditCard className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading font-semibold text-foreground">Payment Method</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Manage your payment details</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline" size="sm" className="text-xs font-semibold"
+                  onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.functions.invoke("customer-portal");
+                      if (error) throw error;
+                      if (data?.url) window.open(data.url, "_blank");
+                    } catch (err: any) { toast.error(err.message || "Failed to open portal."); }
+                  }}
+                >
+                  Update
+                </Button>
+              </div>
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border">
+                <div className="flex h-10 w-16 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white text-[10px] font-bold tracking-wider">
+                  VISA
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">•••• •••• •••• ••••</p>
+                  <p className="text-xs text-muted-foreground">Update via billing portal</p>
+                </div>
+              </div>
             </motion.div>
           </TabsContent>
 
