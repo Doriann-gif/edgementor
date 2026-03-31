@@ -463,11 +463,9 @@ const MentorProfile = () => {
             </Button>
             {isSubscribed ? (
               <Link to={`/mentorship/${mentor.id}`}>
-                <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 17 }}>
-                  <Button variant="glow" className={`h-12 px-8 font-semibold text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-xl shadow-primary/25"}`}>
-                    <Crown className="h-4 w-4 mr-2" /> Access Mentorship
-                  </Button>
-                </motion.div>
+                <Button variant="glow" className={`h-12 px-8 font-semibold text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : "shadow-xl shadow-primary/25"}`}>
+                  <Crown className="h-4 w-4 mr-2" /> Access Mentorship
+                </Button>
               </Link>
             ) : (
               <Link to={`/subscribe/${mentor.id}`}>
