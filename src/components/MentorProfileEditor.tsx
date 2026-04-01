@@ -29,7 +29,7 @@ const StarRating = ({ rating }: { rating: number }) => (
 
 const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailability }: MentorProfileEditorProps) => {
   const { data: reviews = [] } = useMentorReviews(mentor.id);
-  const queryClient = useQueryClient();
+  
   const tier = mentor.tier || "verified";
 
   const [editing, setEditing] = useState(false);
