@@ -406,20 +406,8 @@ const MentorDashboard = () => {
   const { data: mentor, isLoading } = useMyMentorProfile();
   const updateProfile = useUpdateMentorProfile();
 
-  const [editBio, setEditBio] = useState("");
-  const [editFullBio, setEditFullBio] = useState("");
 
   const { data: students = [] } = useMentorStudents(mentor?.id);
-  const { data: earnings } = useMentorEarnings(mentor?.id, mentor?.monthly_price ?? 0);
-
-  useEffect(() => {
-    if (mentor) {
-      setEditBio(mentor.bio);
-      setEditFullBio(mentor.full_bio);
-      setEditPrice(String(mentor.monthly_price));
-      setEditHighlights(mentor.highlights.join("\n"));
-    }
-  }, [mentor]);
 
   if (authLoading || isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
