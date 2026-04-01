@@ -379,13 +379,6 @@ const StudentDashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <Link to="/mentors">
-            <motion.div whileHover={{ scale: 1.05, y: -1 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="outline" size="sm" className="text-xs gap-1.5 rounded-full border-primary/20 hover:border-primary/40 hover:bg-primary/5">
-                <Search className="h-3.5 w-3.5" /> Browse Mentors
-              </Button>
-            </motion.div>
-          </Link>
           <Link to="/learn">
             <motion.div whileHover={{ scale: 1.05, y: -1 }} whileTap={{ scale: 0.95 }}>
               <Button variant="outline" size="sm" className="text-xs gap-1.5 rounded-full border-pink-400/20 hover:border-pink-400/40 hover:bg-pink-400/5">
