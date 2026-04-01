@@ -598,7 +598,7 @@ const Homepage = () => {
               </motion.div>
             </motion.div>
 
-            <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-5">
+            <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-6">
               Ready to{" "}
               <span className="bg-gradient-to-r from-primary via-pink-400 to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease_infinite]">
                 level up
