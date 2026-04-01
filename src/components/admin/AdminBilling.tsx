@@ -44,6 +44,35 @@ const AdminBilling = () => {
     },
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: async (subId: string) => {
+      const { error } = await supabase
+        .from("subscriptions")
+        .update({ status: "canceled", expires_at: new Date().toISOString() })
+        .eq("id", subId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-billing-subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-subscriptions"] });
+      toast.success("Subscription canceled");
+    },
+    onError: () => toast.error("Failed to cancel subscription"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (subId: string) => {
+      const { error } = await supabase.from("subscriptions").delete().eq("id", subId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-billing-subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-subscriptions"] });
+      toast.success("Subscription removed");
+    },
+    onError: () => toast.error("Failed to remove subscription"),
+  });
+
   const profileMap = new Map(profiles.map((p) => [p.id, p.display_name || "Unknown"]));
 
   // Compute stats
