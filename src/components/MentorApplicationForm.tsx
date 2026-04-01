@@ -96,6 +96,7 @@ const MentorApplicationForm = () => {
         concepts,
         session,
         monthly_price: parseInt(monthlyPrice, 10),
+        payment_type: paymentType,
         bio,
         user_id: user?.id || null,
       });
