@@ -130,6 +130,8 @@ const AccountSettings = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [bannerColor, setBannerColor] = useState("");
+  const [showBannerPicker, setShowBannerPicker] = useState(false);
 
   // Content editing state
   const [editingContent, setEditingContent] = useState<any | null>(null);
