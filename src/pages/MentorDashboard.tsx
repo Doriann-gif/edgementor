@@ -18,7 +18,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import {
   ArrowLeft, LogOut, Users, DollarSign, TrendingUp, Edit3, Save,
   X, Clock, Star, Eye, Tag, Crown, Sparkles, BookOpen, Wallet,
-  ChevronDown, ChevronUp, Banknote, ArrowDownToLine, RefreshCw, ExternalLink, BarChart3,
+  ChevronDown, ChevronUp, Banknote, ArrowDownToLine, RefreshCw, ExternalLink, BarChart3, History,
 } from "lucide-react";
 import { toast } from "sonner";
 
