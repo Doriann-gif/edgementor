@@ -47,6 +47,32 @@ const MentorProfile = () => {
   const { data: isSubscribed } = useIsSubscribed(id);
   const toggleSave = useToggleSaveMentor();
   const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
+  const queryClient = useQueryClient();
+
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [pickerColor, setPickerColor] = useState("#6d28d9");
+  const [savingColor, setSavingColor] = useState(false);
+
+  const isOwner = !!user && !!mentor && mentor.user_id === user.id;
+
+  const handleSaveBannerColor = async (color: string) => {
+    if (!mentor) return;
+    setSavingColor(true);
+    try {
+      const { error } = await supabase
+        .from("mentors")
+        .update({ banner_color: color })
+        .eq("id", mentor.id);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["mentor", id] });
+      toast.success("Banner color updated!");
+      setShowColorPicker(false);
+    } catch {
+      toast.error("Failed to update banner color.");
+    } finally {
+      setSavingColor(false);
+    }
+  };
 
   const handleSave = () => {
     if (!user) { toast.error("Sign in to save mentors"); return; }
