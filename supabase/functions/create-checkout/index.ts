@@ -67,7 +67,7 @@ serve(async (req) => {
 
     const unitAmount = Math.round(mentor.monthly_price * 100 * (1 - discountPercent / 100));
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
@@ -91,7 +91,21 @@ serve(async (req) => {
         mentor_id: mentorId,
         user_id: user.id,
       },
-    });
+    };
+
+    // Split payments to mentor's Connect account (platform keeps 20%)
+    if (mentor.stripe_connect_account_id) {
+      const applicationFeePercent = 20;
+      sessionParams.subscription_data = {
+        transfer_data: {
+          destination: mentor.stripe_connect_account_id,
+        },
+        application_fee_percent: applicationFeePercent,
+      };
+      console.log(`[CREATE-CHECKOUT] Splitting payments to Connect account ${mentor.stripe_connect_account_id}, platform fee: ${applicationFeePercent}%`);
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionParams);
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
