@@ -654,7 +654,13 @@ const AccountSettings = () => {
                         toast.success(data?.message || "Withdrawal initiated!");
                         queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
                       } catch (err: any) {
-                        toast.error(err.message || "Failed to withdraw.");
+                        const msg = err.message?.toLowerCase() || "";
+                        if (msg.includes("connect account not set up") || msg.includes("non-2xx"))
+                          toast.info("Set up your payout account first to withdraw earnings.");
+                        else if (msg.includes("no available balance") || msg.includes("insufficient"))
+                          toast.info("No funds available to withdraw right now.");
+                        else
+                          toast.error(err.message || "Failed to withdraw.");
                       }
                     }}
                   >
