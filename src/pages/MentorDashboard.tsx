@@ -139,7 +139,7 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
             <RefreshCw className="h-3.5 w-3.5 mr-1" /> Refresh
           </Button>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4 mb-5">
           <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 text-center">
             <DollarSign className="h-5 w-5 text-primary mx-auto mb-1" />
             <p className="font-heading text-2xl font-bold text-foreground">${balance.available.toFixed(2)}</p>
@@ -154,6 +154,40 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
             <TrendingUp className="h-5 w-5 text-pink mx-auto mb-1" />
             <p className="font-heading text-2xl font-bold text-foreground">${balance.total_earned.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">Total Earned</p>
+          </div>
+        </div>
+
+        {/* Revenue Breakdown */}
+        <div className="rounded-xl bg-muted/30 border border-border/50 p-4">
+          <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">Revenue Breakdown</p>
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-foreground">Gross Revenue</span>
+              <span className="text-sm font-semibold text-foreground">${(balance.total_earned / 0.8).toFixed(2)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-destructive/60" />
+                Platform Fee (20%)
+              </span>
+              <span className="text-sm text-destructive/80">−${(balance.total_earned / 0.8 * 0.2).toFixed(2)}</span>
+            </div>
+            <div className="border-t border-border/50 pt-2.5 flex items-center justify-between">
+              <span className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-primary" />
+                Net Earnings (80%)
+              </span>
+              <span className="text-sm font-bold text-primary">${balance.total_earned.toFixed(2)}</span>
+            </div>
+          </div>
+          {/* Visual bar */}
+          <div className="mt-3 flex h-2 rounded-full overflow-hidden bg-muted">
+            <div className="bg-primary rounded-l-full" style={{ width: "80%" }} />
+            <div className="bg-destructive/40 rounded-r-full" style={{ width: "20%" }} />
+          </div>
+          <div className="flex justify-between mt-1.5">
+            <span className="text-[10px] text-muted-foreground">Your earnings — 80%</span>
+            <span className="text-[10px] text-muted-foreground">Platform — 20%</span>
           </div>
         </div>
       </motion.div>
