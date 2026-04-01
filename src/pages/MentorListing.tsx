@@ -302,7 +302,7 @@ const MentorListingPage = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
-          className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-4 mb-14 shadow-lg shadow-background/50"
+          className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-4 mb-20 shadow-lg shadow-background/50"
         >
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
