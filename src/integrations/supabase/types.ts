@@ -255,6 +255,7 @@ export type Database = {
           auto_payout: boolean
           available: boolean
           avatar: string
+          banner_color: string
           bio: string
           concepts: string[]
           created_at: string
@@ -279,6 +280,7 @@ export type Database = {
           auto_payout?: boolean
           available?: boolean
           avatar: string
+          banner_color?: string
           bio: string
           concepts?: string[]
           created_at?: string
@@ -303,6 +305,7 @@ export type Database = {
           auto_payout?: boolean
           available?: boolean
           avatar?: string
+          banner_color?: string
           bio?: string
           concepts?: string[]
           created_at?: string

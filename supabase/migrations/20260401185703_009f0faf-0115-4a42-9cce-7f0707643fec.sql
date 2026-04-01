@@ -1,0 +1,1 @@
+ALTER TABLE public.mentors ADD COLUMN banner_color text NOT NULL DEFAULT '#6d28d9';
