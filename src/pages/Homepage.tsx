@@ -630,7 +630,7 @@ const Homepage = () => {
         {/* Footer */}
         <footer className="border-t border-border/30 py-16 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 mb-10">
               {/* Brand */}
               <div>
                 <motion.div className="font-heading font-bold text-lg text-foreground flex items-center gap-2 mb-3" whileHover={{ scale: 1.03 }}>
