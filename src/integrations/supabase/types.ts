@@ -250,6 +250,41 @@ export type Database = {
           },
         ]
       }
+      mentor_showcase_images: {
+        Row: {
+          caption: string
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string
+          mentor_id: string
+        }
+        Insert: {
+          caption?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url: string
+          mentor_id: string
+        }
+        Update: {
+          caption?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string
+          mentor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_showcase_images_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentors: {
         Row: {
           auto_payout: boolean
