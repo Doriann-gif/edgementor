@@ -280,7 +280,7 @@ const FreeContent = () => {
           ))}
         </div>
 
-        {filtered.length === 0 && (
+        {sorted.length === 0 && (
           <motion.div
             className="text-center py-16"
             initial={{ opacity: 0 }}
