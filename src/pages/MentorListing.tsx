@@ -255,7 +255,7 @@ const MentorListingPage = () => {
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-pink/[0.025] rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: -20 }}
