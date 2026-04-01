@@ -534,7 +534,7 @@ const MentorListingPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
             {sorted.map((mentor, i) => (
               <MentorCard key={mentor.id} mentor={mentor} index={i} />
             ))}
