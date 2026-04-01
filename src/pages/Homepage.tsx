@@ -194,7 +194,7 @@ const Homepage = () => {
             {/* Main heading with letter animation */}
             <motion.h1
               variants={fadeUp}
-              className="font-heading text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground tracking-tight leading-[1.05] mb-6"
+              className="font-heading text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground tracking-tight leading-[1.08] mb-8"
             >
               <motion.span
                 className="block"
