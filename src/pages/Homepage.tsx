@@ -493,7 +493,7 @@ const Homepage = () => {
         </section>
 
         {/* Why Us — Interactive cards */}
-        <section className="py-20 sm:py-24 px-4 sm:px-6 bg-card/20 relative overflow-hidden">
+        <section className="py-28 sm:py-36 px-4 sm:px-6 bg-card/10 relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-r from-primary/[0.04] via-pink-500/[0.04] to-primary/[0.04] rounded-full blur-[120px] pointer-events-none" />
 
           <div className="max-w-5xl mx-auto relative">
