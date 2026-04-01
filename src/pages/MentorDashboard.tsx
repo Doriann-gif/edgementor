@@ -254,6 +254,7 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
   );
 };
 
+const MentorDashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { data: mentor, isLoading } = useMyMentorProfile();
   const updateProfile = useUpdateMentorProfile();
