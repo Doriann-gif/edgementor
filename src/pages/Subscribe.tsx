@@ -118,9 +118,11 @@ const Subscribe = () => {
 
         <div className="text-center mb-8">
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-            Subscribe to {mentor.name}
+            {isOneTime ? "Purchase from" : "Subscribe to"} {mentor.name}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1.5">Get full access to mentorship, resources, and community.</p>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            {isOneTime ? "Get lifetime access to mentorship resources." : "Get full access to mentorship, resources, and community."}
+          </p>
         </div>
 
         {/* Mentor Summary */}
