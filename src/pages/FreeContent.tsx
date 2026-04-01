@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Play, Clock, Eye, Star, Search, TrendingUp, BookOpen, BarChart3, Zap } from "lucide-react";
+import { Play, Clock, Eye, Star, Search, TrendingUp, BookOpen, BarChart3, Zap, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageTransition from "@/components/PageTransition";
 
 const CATEGORIES = ["All", "Price Action", "ICT / SMC", "Order Flow", "Risk Management", "Psychology", "Crypto"];
@@ -83,7 +84,20 @@ const fadeUp = {
 const FreeContent = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
-  
+  const [sortBy, setSortBy] = useState("default");
+
+  const parseViews = (v: string) => {
+    const num = parseFloat(v);
+    if (v.endsWith("M")) return num * 1_000_000;
+    if (v.endsWith("K")) return num * 1_000;
+    return num;
+  };
+
+  const parseDuration = (d: string) => {
+    const parts = d.split(":").map(Number);
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return parts[0] * 60 + parts[1];
+  };
 
   const filtered = VIDEOS.filter((v) => {
     const matchCat = category === "All" || v.category === category;
@@ -92,6 +106,13 @@ const FreeContent = () => {
       v.title.toLowerCase().includes(search.toLowerCase()) ||
       v.channel.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "views") return parseViews(b.views) - parseViews(a.views);
+    if (sortBy === "duration") return parseDuration(b.duration) - parseDuration(a.duration);
+    if (sortBy === "shortest") return parseDuration(a.duration) - parseDuration(b.duration);
+    return 0;
   });
 
   return (
@@ -176,25 +197,39 @@ const FreeContent = () => {
               className="pl-10 bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {CATEGORIES.map((cat) => (
-              <motion.div key={cat} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant={category === cat ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCategory(cat)}
-                  className={`whitespace-nowrap text-xs ${category === cat ? "shadow-lg shadow-primary/20" : ""}`}
-                >
-                  {cat}
-                </Button>
-              </motion.div>
-            ))}
+          <div className="flex gap-2 items-center">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {CATEGORIES.map((cat) => (
+                <motion.div key={cat} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant={category === cat ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCategory(cat)}
+                    className={`whitespace-nowrap text-xs ${category === cat ? "shadow-lg shadow-primary/20" : ""}`}
+                  >
+                    {cat}
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[140px] h-9 text-xs bg-muted border-border shrink-0">
+                <ArrowUpDown className="h-3 w-3 mr-1" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="views">Most Views</SelectItem>
+                <SelectItem value="duration">Longest</SelectItem>
+                <SelectItem value="shortest">Shortest</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </motion.div>
 
         {/* Video Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((video, i) => (
+          {sorted.map((video, i) => (
             <motion.div
               key={video.id}
               variants={fadeUp}
@@ -245,7 +280,7 @@ const FreeContent = () => {
           ))}
         </div>
 
-        {filtered.length === 0 && (
+        {sorted.length === 0 && (
           <motion.div
             className="text-center py-16"
             initial={{ opacity: 0 }}
