@@ -19,7 +19,7 @@ import {
   Camera, Upload, BookOpen, Plus, GripVertical, Pencil, Trash, X,
   Shield, CalendarDays, Star, Award, CheckCircle2, Mail, Sparkles,
   Eye, EyeOff, BadgeCheck, Activity, Palette, ShieldCheck, Moon, Sun, Monitor,
-  Clock, TrendingUp, Download, Globe, Heart,
+  Clock, TrendingUp, Download, Globe, Heart, Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -38,6 +38,7 @@ const AccountSettings = () => {
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get("tab") || "profile";
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [connectLoading, setConnectLoading] = useState(false);
 
   // Profile data
   const { data: profile, isLoading: profileLoading } = useQuery({
@@ -725,7 +726,9 @@ const AccountSettings = () => {
                       <Button
                         variant="glow"
                         className="font-semibold"
+                        disabled={connectLoading}
                         onClick={async () => {
+                          setConnectLoading(true);
                           try {
                             const { data, error } = await supabase.functions.invoke("create-connect-account");
                             if (error) throw error;
@@ -738,10 +741,17 @@ const AccountSettings = () => {
                               toast.error("Unable to set up payouts right now. Please try again later.");
                             else
                               toast.error(err.message || "Failed to start onboarding.");
+                          } finally {
+                            setConnectLoading(false);
                           }
                         }}
                       >
-                        <CreditCard className="h-4 w-4 mr-1.5" /> Set Up Payout Account
+                        {connectLoading ? (
+                          <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                        ) : (
+                          <CreditCard className="h-4 w-4 mr-1.5" />
+                        )}
+                        {connectLoading ? "Setting up…" : "Set Up Payout Account"}
                       </Button>
                     </div>
                   ) : (
