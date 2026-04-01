@@ -550,7 +550,7 @@ const MentorListingPage = () => {
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex flex-col items-center gap-4 rounded-2xl border border-border bg-card/50 backdrop-blur-sm px-8 py-8">
+            <div className="inline-flex flex-col items-center gap-5 rounded-2xl border border-border bg-card/50 backdrop-blur-sm px-12 py-10">
               <h3 className="font-heading font-bold text-foreground text-lg">Are you a profitable trader?</h3>
               <p className="text-sm text-muted-foreground max-w-sm">Share your knowledge, build your community, and earn recurring revenue.</p>
               <Link to="/apply">
