@@ -185,18 +185,18 @@ const Subscribe = () => {
         {/* Pricing Summary */}
         <div className="rounded-2xl border border-primary/30 bg-card p-5 mb-6">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-muted-foreground">Monthly mentorship</span>
-            <span className={`text-sm ${discount > 0 ? "line-through text-muted-foreground" : "text-foreground font-semibold"}`}>${originalPrice}/mo</span>
+            <span className="text-sm text-muted-foreground">{isOneTime ? "One-time mentorship" : "Monthly mentorship"}</span>
+            <span className={`text-sm ${discount > 0 ? "line-through text-muted-foreground" : "text-foreground font-semibold"}`}>${originalPrice}{isOneTime ? "" : "/mo"}</span>
           </div>
           {discount > 0 && (
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-primary font-medium">Discount ({discount}%)</span>
-              <span className="text-sm text-primary font-semibold">−${originalPrice - finalPrice}/mo</span>
+              <span className="text-sm text-primary font-semibold">−${originalPrice - finalPrice}{isOneTime ? "" : "/mo"}</span>
             </div>
           )}
           <div className="border-t border-border pt-3 flex items-center justify-between">
             <span className="font-heading font-semibold text-foreground">Total</span>
-            <span className="font-heading text-2xl font-bold text-foreground">${finalPrice}<span className="text-sm text-muted-foreground font-normal">/mo</span></span>
+            <span className="font-heading text-2xl font-bold text-foreground">${finalPrice}{!isOneTime && <span className="text-sm text-muted-foreground font-normal">/mo</span>}</span>
           </div>
         </div>
 
