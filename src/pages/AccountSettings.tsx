@@ -775,7 +775,13 @@ const AccountSettings = () => {
                                 const { data, error } = await supabase.functions.invoke("create-connect-account");
                                 if (error) throw error;
                                 if (data?.url) window.open(data.url, "_blank");
-                              } catch (err: any) { toast.error(err.message || "Failed."); }
+                              } catch (err: any) {
+                                const msg = err.message?.toLowerCase() || "";
+                                if (msg.includes("non-2xx"))
+                                  toast.error("Unable to connect right now. Please try again later.");
+                                else
+                                  toast.error(err.message || "Failed to complete verification.");
+                              }
                             }}
                           >
                             Complete Verification
