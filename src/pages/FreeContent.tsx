@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Play, Clock, Eye, Star, Search, TrendingUp, BookOpen, BarChart3, Zap, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageTransition from "@/components/PageTransition";
 
 const CATEGORIES = ["All", "Price Action", "ICT / SMC", "Order Flow", "Risk Management", "Psychology", "Crypto"];
