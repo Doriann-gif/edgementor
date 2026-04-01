@@ -624,9 +624,13 @@ const AccountSettings = () => {
                       const { data, error } = await supabase.functions.invoke("customer-portal");
                       if (error) throw error;
                       if (data?.url) window.open(data.url, "_blank");
-                      else toast.error("Could not open billing portal.");
+                      else toast.info("No active subscriptions yet. Subscribe to a mentor first to manage billing.");
                     } catch (err: any) {
-                      toast.error(err.message || "Failed to open billing portal.");
+                      const msg = err.message?.toLowerCase() || "";
+                      if (msg.includes("no stripe customer") || msg.includes("non-2xx"))
+                        toast.info("No billing account found. Subscribe to a mentor first to manage your subscriptions.");
+                      else
+                        toast.error(err.message || "Failed to open billing portal.");
                     }
                   }}
                 >
