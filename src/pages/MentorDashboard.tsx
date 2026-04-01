@@ -406,11 +406,8 @@ const MentorDashboard = () => {
   const { data: mentor, isLoading } = useMyMentorProfile();
   const updateProfile = useUpdateMentorProfile();
 
-  const [editing, setEditing] = useState(false);
   const [editBio, setEditBio] = useState("");
   const [editFullBio, setEditFullBio] = useState("");
-  const [editPrice, setEditPrice] = useState("");
-  const [editHighlights, setEditHighlights] = useState("");
 
   const { data: students = [] } = useMentorStudents(mentor?.id);
   const { data: earnings } = useMentorEarnings(mentor?.id, mentor?.monthly_price ?? 0);
