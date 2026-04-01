@@ -17,6 +17,8 @@ export interface Mentor {
   highlights: string[];
   status: string;
   tier: MentorTier;
+  banner_color: string;
+  user_id?: string | null;
 }
 
 export interface MentorReview {
