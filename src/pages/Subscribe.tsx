@@ -99,6 +99,7 @@ const Subscribe = () => {
     );
   }
 
+  const isOneTime = (mentor as any).payment_type === "one_time";
   const originalPrice = mentor.monthly_price;
   const finalPrice = discount > 0 ? Math.round(originalPrice * (1 - discount / 100)) : originalPrice;
 
