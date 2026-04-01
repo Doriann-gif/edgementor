@@ -379,20 +379,34 @@ const AccountSettings = () => {
                     initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
                     className="overflow-hidden border-b border-border"
                   >
-                    <div className="px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                      <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">Banner Color</Label>
+                    <div className="px-6 py-4 flex flex-col gap-3">
+                      <Label className="text-xs font-medium text-muted-foreground">Banner Color</Label>
+                      {/* Hue slider */}
                       <input
                         type="range" min={0} max={360} value={parseInt(bannerColor.replace(/[^\d]/g, '') || '270')}
                         onChange={(e) => {
                           const h = Number(e.target.value);
                           setBannerColor(`hsl(${h}, 60%, 30%)`);
                         }}
-                        className="flex-1 w-full h-3 rounded-full appearance-none cursor-pointer"
+                        className="w-full h-3 rounded-full appearance-none cursor-pointer"
                         style={{
                           background: `linear-gradient(to right, hsl(0,60%,30%), hsl(60,60%,30%), hsl(120,60%,30%), hsl(180,60%,30%), hsl(240,60%,30%), hsl(300,60%,30%), hsl(360,60%,30%))`,
                         }}
                       />
-                      <div className="flex gap-2">
+                      {/* Grayscale presets */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-muted-foreground mr-1">Neutrals</span>
+                        {["#ffffff", "#e5e5e5", "#a3a3a3", "#737373", "#525252", "#404040", "#262626", "#171717", "#000000"].map((c) => (
+                          <button
+                            key={c}
+                            onClick={(ev) => { ev.stopPropagation(); setBannerColor(c); }}
+                            className={`h-6 w-6 rounded-md border transition-transform hover:scale-110 ${bannerColor === c ? "ring-2 ring-primary ring-offset-1 ring-offset-background" : "border-border"}`}
+                            style={{ background: c }}
+                          />
+                        ))}
+                      </div>
+                      {/* Preview & Save */}
+                      <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg border border-border" style={{ background: bannerColor }} />
                         <Button
                           size="sm" variant="outline" className="text-xs"
