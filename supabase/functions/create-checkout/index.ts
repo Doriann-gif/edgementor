@@ -33,7 +33,7 @@ serve(async (req) => {
     // Fetch mentor details
     const { data: mentor, error: mentorError } = await supabaseClient
       .from("mentors")
-      .select("id, name, monthly_price")
+      .select("id, name, monthly_price, stripe_connect_account_id")
       .eq("id", mentorId)
       .single();
     if (mentorError || !mentor) throw new Error("Mentor not found");
