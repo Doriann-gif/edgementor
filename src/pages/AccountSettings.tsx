@@ -701,10 +701,126 @@ const AccountSettings = () => {
                   </div>
                 </div>
                 <div className="p-8">
-                  {(() => {
-                    // We'll use inline query here
-                    return <ConnectPayoutSection queryClient={queryClient} />;
-                  })()}
+                  {!connectBalance?.onboarded ? (
+                    <div className="text-center py-8">
+                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 mx-auto mb-4">
+                        <TrendingUp className="h-6 w-6 text-emerald-500" />
+                      </div>
+                      <p className="text-sm text-foreground font-medium mb-1">Set up your payout account</p>
+                      <p className="text-xs text-muted-foreground mb-5 max-w-sm mx-auto">Connect your bank account to start receiving payouts from your mentorship subscriptions.</p>
+                      <Button
+                        variant="glow"
+                        className="font-semibold"
+                        onClick={async () => {
+                          try {
+                            const { data, error } = await supabase.functions.invoke("create-connect-account");
+                            if (error) throw error;
+                            if (data?.error) throw new Error(data.error);
+                            if (data?.url) window.open(data.url, "_blank");
+                            else toast.error("Could not start onboarding.");
+                          } catch (err: any) { toast.error(err.message || "Failed to start onboarding."); }
+                        }}
+                      >
+                        <CreditCard className="h-4 w-4 mr-1.5" /> Set Up Payout Account
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+                        <div className="rounded-xl border border-border bg-muted/30 p-5">
+                          <p className="text-xs text-muted-foreground mb-1">Available Balance</p>
+                          <p className="font-heading text-2xl font-bold text-foreground">${(connectBalance.available ?? 0).toFixed(2)}</p>
+                          <p className="text-[11px] text-muted-foreground mt-1">Ready to withdraw</p>
+                        </div>
+                        <div className="rounded-xl border border-border bg-muted/30 p-5">
+                          <p className="text-xs text-muted-foreground mb-1">Pending</p>
+                          <p className="font-heading text-2xl font-bold text-foreground">${(connectBalance.pending ?? 0).toFixed(2)}</p>
+                          <p className="text-[11px] text-muted-foreground mt-1">Processing payments</p>
+                        </div>
+                        <div className="rounded-xl border border-border bg-muted/30 p-5">
+                          <p className="text-xs text-muted-foreground mb-1">Total Earned</p>
+                          <p className="font-heading text-2xl font-bold text-foreground">${(connectBalance.total_earned ?? 0).toFixed(2)}</p>
+                          <p className="text-[11px] text-muted-foreground mt-1">Lifetime earnings</p>
+                        </div>
+                      </div>
+
+                      {!connectBalance.payouts_enabled && (
+                        <div className="rounded-xl border border-amber-400/30 bg-amber-400/5 p-4 mb-6">
+                          <p className="text-sm text-foreground font-medium mb-1">⚠️ Onboarding Incomplete</p>
+                          <p className="text-xs text-muted-foreground mb-3">Complete your account verification to enable payouts.</p>
+                          <Button
+                            variant="outline" size="sm" className="text-xs font-semibold"
+                            onClick={async () => {
+                              try {
+                                const { data, error } = await supabase.functions.invoke("create-connect-account");
+                                if (error) throw error;
+                                if (data?.url) window.open(data.url, "_blank");
+                              } catch (err: any) { toast.error(err.message || "Failed."); }
+                            }}
+                          >
+                            Complete Verification
+                          </Button>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                        <div className="flex gap-3">
+                          <Button
+                            variant="glow"
+                            className="font-semibold"
+                            disabled={!connectBalance.payouts_enabled || (connectBalance.available ?? 0) <= 0}
+                            onClick={async () => {
+                              try {
+                                const { data, error } = await supabase.functions.invoke("process-withdrawal", {
+                                  body: { action: "withdraw" },
+                                });
+                                if (error) throw error;
+                                if (data?.error) throw new Error(data.error);
+                                toast.success(data?.message || "Withdrawal initiated!");
+                                queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
+                              } catch (err: any) { toast.error(err.message || "Failed to withdraw."); }
+                            }}
+                          >
+                            <Download className="h-4 w-4 mr-1.5 rotate-180" /> Withdraw Funds
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="font-semibold text-sm"
+                            onClick={async () => {
+                              try {
+                                const { data, error } = await supabase.functions.invoke("create-connect-account");
+                                if (error) throw error;
+                                if (data?.url) window.open(data.url, "_blank");
+                              } catch (err: any) { toast.error(err.message || "Failed."); }
+                            }}
+                          >
+                            <CreditCard className="h-4 w-4 mr-1.5" /> Update Payout Method
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center gap-3 ml-auto p-3 rounded-xl bg-muted/30 border border-border">
+                          <div>
+                            <p className="text-xs font-medium text-foreground">Auto Payout</p>
+                            <p className="text-[10px] text-muted-foreground">Monthly automatic transfers</p>
+                          </div>
+                          <Switch
+                            checked={connectBalance.auto_payout ?? false}
+                            onCheckedChange={async () => {
+                              try {
+                                const { data, error } = await supabase.functions.invoke("process-withdrawal", {
+                                  body: { action: "toggle_auto_payout" },
+                                });
+                                if (error) throw error;
+                                if (data?.error) throw new Error(data.error);
+                                toast.success(data?.message || "Payout preference updated!");
+                                queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
+                              } catch (err: any) { toast.error(err.message || "Failed to update."); }
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </motion.div>
             )}
