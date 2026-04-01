@@ -14,10 +14,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import MentorContentManager from "@/components/MentorContentManager";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import {
   ArrowLeft, LogOut, Users, DollarSign, TrendingUp, Edit3, Save,
   X, Clock, Star, Eye, Tag, Crown, Sparkles, BookOpen, Wallet,
-  ChevronDown, ChevronUp, Banknote, ArrowDownToLine, RefreshCw, ExternalLink,
+  ChevronDown, ChevronUp, Banknote, ArrowDownToLine, RefreshCw, ExternalLink, BarChart3,
 } from "lucide-react";
 import { toast } from "sonner";
 
