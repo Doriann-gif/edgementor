@@ -404,7 +404,9 @@ const AccountSettings = () => {
                             style={{ background: c }}
                           />
                         ))}
-                      <div className="flex gap-2">
+                      </div>
+                      {/* Preview & Save */}
+                      <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-lg border border-border" style={{ background: bannerColor }} />
                         <Button
                           size="sm" variant="outline" className="text-xs"
