@@ -436,22 +436,8 @@ const MentorDashboard = () => {
     );
   }
 
-  const handleSaveProfile = async () => {
-    try {
-      await updateProfile.mutateAsync({
-        id: mentor.id,
-        updates: {
-          bio: editBio,
-          full_bio: editFullBio,
-          monthly_price: parseInt(editPrice, 10),
-          highlights: editHighlights.split("\n").map((h) => h.trim()).filter(Boolean),
-        },
-      });
-      setEditing(false);
-      toast.success("Profile updated!");
-    } catch {
-      toast.error("Failed to update profile.");
-    }
+  const handleSaveProfile = async (updates: any) => {
+    await updateProfile.mutateAsync({ id: mentor.id, updates });
   };
 
   const handleToggleAvailability = async () => {
