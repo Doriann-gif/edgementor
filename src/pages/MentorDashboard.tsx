@@ -160,15 +160,18 @@ const MentorDashboard = () => {
 
         {/* Tabbed Content */}
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="w-full grid grid-cols-3 h-11">
+          <TabsList className="w-full grid grid-cols-4 h-11">
             <TabsTrigger value="profile" className="text-xs font-semibold">
               <Edit3 className="h-3.5 w-3.5 mr-1.5" /> Profile
             </TabsTrigger>
             <TabsTrigger value="content" className="text-xs font-semibold">
-              <Crown className="h-3.5 w-3.5 mr-1.5" /> Exclusive Content
+              <Crown className="h-3.5 w-3.5 mr-1.5" /> Content
             </TabsTrigger>
             <TabsTrigger value="students" className="text-xs font-semibold">
               <Users className="h-3.5 w-3.5 mr-1.5" /> Students
+            </TabsTrigger>
+            <TabsTrigger value="income" className="text-xs font-semibold">
+              <Wallet className="h-3.5 w-3.5 mr-1.5" /> Income
             </TabsTrigger>
           </TabsList>
 
@@ -321,6 +324,10 @@ const MentorDashboard = () => {
                 })}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="income">
+            <IncomeTab mentorId={mentor.id} />
           </TabsContent>
         </Tabs>
       </div>
