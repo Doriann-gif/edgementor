@@ -38,6 +38,7 @@ const AccountSettings = () => {
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get("tab") || "profile";
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [connectLoading, setConnectLoading] = useState(false);
 
   // Profile data
   const { data: profile, isLoading: profileLoading } = useQuery({
