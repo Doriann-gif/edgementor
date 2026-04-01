@@ -228,28 +228,50 @@ const AdminBilling = () => {
             </div>
           ) : platformBalance ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="rounded-xl bg-muted/40 p-4">
-                  <p className="text-xs text-muted-foreground mb-1">Available</p>
-                  <p className="text-2xl font-heading font-bold text-foreground">
-                    ${platformBalance.available.toFixed(2)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Ready to withdraw</p>
-                </div>
-                <div className="rounded-xl bg-muted/40 p-4">
-                  <p className="text-xs text-muted-foreground mb-1">Pending</p>
-                  <p className="text-2xl font-heading font-bold text-foreground">
-                    ${platformBalance.pending.toFixed(2)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Processing by Stripe</p>
-                </div>
-                <div className="rounded-xl bg-muted/40 p-4">
-                  <p className="text-xs text-muted-foreground mb-1">Total</p>
-                  <p className="text-2xl font-heading font-bold text-foreground">
-                    ${(platformBalance.available + platformBalance.pending).toFixed(2)}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-1">Available + pending</p>
-                </div>
+             {/* Per-currency breakdown */}
+              <div className="space-y-3">
+                {(() => {
+                  const currencies = new Set([
+                    ...(platformBalance.breakdown?.available || []).map(b => b.currency),
+                    ...(platformBalance.breakdown?.pending || []).map(b => b.currency),
+                  ]);
+                  const currencySymbol = (c: string) => {
+                    const symbols: Record<string, string> = { usd: "$", eur: "€", gbp: "£" };
+                    return symbols[c] || c.toUpperCase() + " ";
+                  };
+                  return Array.from(currencies).map(currency => {
+                    const avail = platformBalance.breakdown?.available?.find(b => b.currency === currency)?.amount || 0;
+                    const pend = platformBalance.breakdown?.pending?.find(b => b.currency === currency)?.amount || 0;
+                    return (
+                      <div key={currency}>
+                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">{currency}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="rounded-xl bg-muted/40 p-4">
+                            <p className="text-xs text-muted-foreground mb-1">Available</p>
+                            <p className="text-2xl font-heading font-bold text-foreground">
+                              {currencySymbol(currency)}{avail.toFixed(2)}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground mt-1">Ready to withdraw</p>
+                          </div>
+                          <div className="rounded-xl bg-muted/40 p-4">
+                            <p className="text-xs text-muted-foreground mb-1">Pending</p>
+                            <p className="text-2xl font-heading font-bold text-foreground">
+                              {currencySymbol(currency)}{pend.toFixed(2)}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground mt-1">Processing by Stripe</p>
+                          </div>
+                          <div className="rounded-xl bg-muted/40 p-4">
+                            <p className="text-xs text-muted-foreground mb-1">Total</p>
+                            <p className="text-2xl font-heading font-bold text-foreground">
+                              {currencySymbol(currency)}{(avail + pend).toFixed(2)}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground mt-1">Available + pending</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </div>
 
               <div className="flex items-center gap-3">
