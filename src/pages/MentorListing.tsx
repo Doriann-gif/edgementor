@@ -255,9 +255,9 @@ const MentorListingPage = () => {
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-pink/[0.025] rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32">
         <motion.div
-          className="text-center mb-20"
+          className="text-center mb-28"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -302,7 +302,7 @@ const MentorListingPage = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
-          className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-4 mb-14 shadow-lg shadow-background/50"
+          className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-4 mb-20 shadow-lg shadow-background/50"
         >
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
@@ -492,7 +492,7 @@ const MentorListingPage = () => {
 
         {/* Mentor Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="relative rounded-2xl border border-border bg-card/50 p-5 overflow-hidden">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-muted-foreground/5 to-transparent" />
@@ -534,7 +534,7 @@ const MentorListingPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {sorted.map((mentor, i) => (
               <MentorCard key={mentor.id} mentor={mentor} index={i} />
             ))}
