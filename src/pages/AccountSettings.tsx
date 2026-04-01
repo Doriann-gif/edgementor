@@ -130,6 +130,8 @@ const AccountSettings = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [bannerColor, setBannerColor] = useState("");
+  const [showBannerPicker, setShowBannerPicker] = useState(false);
 
   // Content editing state
   const [editingContent, setEditingContent] = useState<any | null>(null);
@@ -170,6 +172,12 @@ const AccountSettings = () => {
       setMarketingEmails(profile.marketing_emails ?? false);
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (mentorProfile) {
+      setBannerColor((mentorProfile as any).banner_color || "#6d28d9");
+    }
+  }, [mentorProfile]);
 
   const uploadAvatar = async (file: File) => {
     if (!user) return;
@@ -337,8 +345,24 @@ const AccountSettings = () => {
               variants={fadeIn} initial="hidden" animate="show" custom={0}
               className="relative rounded-2xl border border-border bg-card overflow-hidden"
             >
-              {/* Banner gradient */}
-              <div className="h-28 sm:h-32 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent relative">
+              {/* Banner */}
+              <div
+                className="h-28 sm:h-32 relative cursor-pointer group/banner"
+                style={isMentor && bannerColor ? { background: bannerColor } : undefined}
+                onClick={() => isMentor && setShowBannerPicker(!showBannerPicker)}
+              >
+                {!isMentor && (
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-transparent pointer-events-none" />
+                {isMentor && (
+                  <>
+                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-sm px-3 py-1 opacity-0 group-hover/banner:opacity-100 transition-opacity">
+                      <Palette className="h-3 w-3 text-white" />
+                      <span className="text-[11px] text-white font-medium">Change Banner</span>
+                    </div>
+                  </>
+                )}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,hsl(var(--primary)/0.15),transparent_60%)]" />
                 {isMentor && (
                   <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 px-3 py-1">
@@ -347,6 +371,47 @@ const AccountSettings = () => {
                   </div>
                 )}
               </div>
+
+              {/* Banner Color Picker */}
+              <AnimatePresence>
+                {showBannerPicker && isMentor && mentorProfile && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden border-b border-border"
+                  >
+                    <div className="px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      <Label className="text-xs font-medium text-muted-foreground whitespace-nowrap">Banner Color</Label>
+                      <input
+                        type="range" min={0} max={360} value={parseInt(bannerColor.replace(/[^\d]/g, '') || '270')}
+                        onChange={(e) => {
+                          const h = Number(e.target.value);
+                          setBannerColor(`hsl(${h}, 60%, 30%)`);
+                        }}
+                        className="flex-1 w-full h-3 rounded-full appearance-none cursor-pointer"
+                        style={{
+                          background: `linear-gradient(to right, hsl(0,60%,30%), hsl(60,60%,30%), hsl(120,60%,30%), hsl(180,60%,30%), hsl(240,60%,30%), hsl(300,60%,30%), hsl(360,60%,30%))`,
+                        }}
+                      />
+                      <div className="flex gap-2">
+                        <div className="w-8 h-8 rounded-lg border border-border" style={{ background: bannerColor }} />
+                        <Button
+                          size="sm" variant="outline" className="text-xs"
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const { error } = await supabase.from("mentors").update({ banner_color: bannerColor }).eq("id", mentorProfile.id);
+                            if (error) { toast.error("Failed to save banner color."); return; }
+                            queryClient.invalidateQueries({ queryKey: ["my-mentor-profile"] });
+                            setShowBannerPicker(false);
+                            toast.success("Banner color saved!");
+                          }}
+                        >
+                          <Save className="h-3 w-3 mr-1" /> Save
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="px-6 pb-6 -mt-12 sm:-mt-14">
                 <div className="flex flex-col sm:flex-row sm:items-end gap-4">
