@@ -329,7 +329,7 @@ const Homepage = () => {
 
           <div className="max-w-6xl mx-auto relative">
             <motion.div
-              className="flex items-end justify-between mb-10"
+              className="flex items-end justify-between mb-14"
               initial="hidden"
               whileInView="show"
               viewport={{ once: true }}
