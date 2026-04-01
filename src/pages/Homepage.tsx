@@ -323,7 +323,7 @@ const Homepage = () => {
         </section>
 
         {/* Featured Mentors — Enhanced */}
-        <section className="py-20 sm:py-24 px-4 sm:px-6 relative">
+        <section className="py-28 sm:py-36 px-4 sm:px-6 relative">
           <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-pink-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] bg-primary/[0.03] rounded-full blur-[100px] pointer-events-none" />
 
