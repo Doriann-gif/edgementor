@@ -408,6 +408,7 @@ const MentorDashboard = () => {
 
 
   const { data: students = [] } = useMentorStudents(mentor?.id);
+  const { data: earnings } = useMentorEarnings(mentor?.id, mentor?.monthly_price ?? 0);
 
   if (authLoading || isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
