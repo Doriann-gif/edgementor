@@ -73,6 +73,24 @@ const AccountSettings = () => {
     },
   });
 
+  // Connect balance for mentors
+  const { data: connectBalance } = useQuery({
+    queryKey: ["connect-balance"],
+    enabled: !!user && !!isMentor,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("connect-balance");
+      if (error) throw error;
+      return data as {
+        onboarded: boolean;
+        available: number;
+        pending: number;
+        total_earned: number;
+        payouts_enabled: boolean;
+        auto_payout: boolean;
+      };
+    },
+  });
+
   // Saved mentors count
   const { data: savedCount = 0 } = useQuery({
     queryKey: ["saved-mentors-count"],
