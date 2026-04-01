@@ -18,6 +18,8 @@ const AdminBilling = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "price">("date");
+  const queryClient = useQueryClient();
+
 
   // Fetch all subscriptions with mentor details
   const { data: subscriptions = [], isLoading } = useQuery({
