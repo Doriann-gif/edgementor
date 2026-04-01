@@ -774,23 +774,35 @@ const AccountSettings = () => {
 
                 <button
                   className="group rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                  disabled={connectLoading}
                   onClick={async () => {
+                    setConnectLoading(true);
                     try {
                       const { data, error } = await supabase.functions.invoke("customer-portal");
                       if (error) throw error;
+                      if (data?.error) {
+                        if (data.error === "no_customer" || data.message?.includes("No billing account"))
+                          toast.info(data.message || "No billing history yet. Subscribe to a mentor first.");
+                        else
+                          throw new Error(data.error);
+                        return;
+                      }
                       if (data?.url) window.open(data.url, "_blank");
                       else toast.info("No billing history yet. Your invoices will appear here after your first subscription.");
                     } catch (err: any) {
-                      const msg = err.message?.toLowerCase() || "";
-                      if (msg.includes("no stripe customer") || msg.includes("non-2xx"))
+                      const msg = err?.message || String(err);
+                      const lower = msg.toLowerCase();
+                      if (lower.includes("no stripe customer") || lower.includes("no_customer") || lower.includes("no billing") || lower.includes("non-2xx"))
                         toast.info("No billing history yet. Subscribe to a mentor first to view invoices.");
                       else
-                        toast.error(err.message || "Failed to open portal.");
+                        toast.error(msg || "Failed to open portal.");
+                    } finally {
+                      setConnectLoading(false);
                     }
                   }}
                 >
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-400/10 mb-4 group-hover:bg-amber-400/15 transition-colors">
-                    <Download className="h-5 w-5 text-amber-400" />
+                    {connectLoading ? <Loader2 className="h-5 w-5 text-amber-400 animate-spin" /> : <Download className="h-5 w-5 text-amber-400" />}
                   </div>
                   <h4 className="font-heading font-semibold text-foreground mb-1">Billing History</h4>
                   <p className="text-xs text-muted-foreground">View and download past invoices</p>
