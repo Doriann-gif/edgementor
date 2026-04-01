@@ -197,19 +197,33 @@ const FreeContent = () => {
               className="pl-10 bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]"
             />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {CATEGORIES.map((cat) => (
-              <motion.div key={cat} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  variant={category === cat ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCategory(cat)}
-                  className={`whitespace-nowrap text-xs ${category === cat ? "shadow-lg shadow-primary/20" : ""}`}
-                >
-                  {cat}
-                </Button>
-              </motion.div>
-            ))}
+          <div className="flex gap-2 items-center">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {CATEGORIES.map((cat) => (
+                <motion.div key={cat} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    variant={category === cat ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCategory(cat)}
+                    className={`whitespace-nowrap text-xs ${category === cat ? "shadow-lg shadow-primary/20" : ""}`}
+                  >
+                    {cat}
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[140px] h-9 text-xs bg-muted border-border shrink-0">
+                <ArrowUpDown className="h-3 w-3 mr-1" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default</SelectItem>
+                <SelectItem value="views">Most Views</SelectItem>
+                <SelectItem value="duration">Longest</SelectItem>
+                <SelectItem value="shortest">Shortest</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </motion.div>
 
