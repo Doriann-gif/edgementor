@@ -140,6 +140,22 @@ const FreeContent = () => {
               </div>
             ))}
           </motion.div>
+
+          {/* Featured Creators */}
+          <motion.div variants={fadeUp} custom={4} className="flex flex-wrap items-center justify-center gap-2 mt-5">
+            <span className="text-xs text-muted-foreground mr-1">
+              <Star className="h-3 w-3 inline mr-1" />Featured:
+            </span>
+            {FEATURED_CREATORS.map((c) => (
+              <button
+                key={c.name}
+                onClick={() => { setSearch(c.channel); setCategory("All"); }}
+                className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-foreground hover:border-primary/40 hover:bg-primary/10 transition-colors"
+              >
+                {c.name}
+              </button>
+            ))}
+          </motion.div>
         </motion.div>
 
         {/* Search & Filters */}
