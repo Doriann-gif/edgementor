@@ -624,9 +624,13 @@ const AccountSettings = () => {
                       const { data, error } = await supabase.functions.invoke("customer-portal");
                       if (error) throw error;
                       if (data?.url) window.open(data.url, "_blank");
-                      else toast.error("Could not open billing portal.");
+                      else toast.info("No active subscriptions yet. Subscribe to a mentor first to manage billing.");
                     } catch (err: any) {
-                      toast.error(err.message || "Failed to open billing portal.");
+                      const msg = err.message?.toLowerCase() || "";
+                      if (msg.includes("no stripe customer") || msg.includes("non-2xx"))
+                        toast.info("No billing account found. Subscribe to a mentor first to manage your subscriptions.");
+                      else
+                        toast.error(err.message || "Failed to open billing portal.");
                     }
                   }}
                 >
@@ -650,7 +654,13 @@ const AccountSettings = () => {
                         toast.success(data?.message || "Withdrawal initiated!");
                         queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
                       } catch (err: any) {
-                        toast.error(err.message || "Failed to withdraw.");
+                        const msg = err.message?.toLowerCase() || "";
+                        if (msg.includes("connect account not set up") || msg.includes("non-2xx"))
+                          toast.info("Set up your payout account first to withdraw earnings.");
+                        else if (msg.includes("no available balance") || msg.includes("insufficient"))
+                          toast.info("No funds available to withdraw right now.");
+                        else
+                          toast.error(err.message || "Failed to withdraw.");
                       }
                     }}
                   >
@@ -669,9 +679,13 @@ const AccountSettings = () => {
                       const { data, error } = await supabase.functions.invoke("customer-portal");
                       if (error) throw error;
                       if (data?.url) window.open(data.url, "_blank");
-                      else toast.error("Could not open portal.");
+                      else toast.info("No billing history yet. Your invoices will appear here after your first subscription.");
                     } catch (err: any) {
-                      toast.error(err.message || "Failed to open portal.");
+                      const msg = err.message?.toLowerCase() || "";
+                      if (msg.includes("no stripe customer") || msg.includes("non-2xx"))
+                        toast.info("No billing history yet. Subscribe to a mentor first to view invoices.");
+                      else
+                        toast.error(err.message || "Failed to open portal.");
                     }
                   }}
                 >
@@ -717,8 +731,14 @@ const AccountSettings = () => {
                             if (error) throw error;
                             if (data?.error) throw new Error(data.error);
                             if (data?.url) window.open(data.url, "_blank");
-                            else toast.error("Could not start onboarding.");
-                          } catch (err: any) { toast.error(err.message || "Failed to start onboarding."); }
+                            else toast.error("Could not start onboarding. Please try again.");
+                          } catch (err: any) {
+                            const msg = err.message?.toLowerCase() || "";
+                            if (msg.includes("non-2xx"))
+                              toast.error("Unable to set up payouts right now. Please try again later.");
+                            else
+                              toast.error(err.message || "Failed to start onboarding.");
+                          }
                         }}
                       >
                         <CreditCard className="h-4 w-4 mr-1.5" /> Set Up Payout Account
@@ -755,7 +775,13 @@ const AccountSettings = () => {
                                 const { data, error } = await supabase.functions.invoke("create-connect-account");
                                 if (error) throw error;
                                 if (data?.url) window.open(data.url, "_blank");
-                              } catch (err: any) { toast.error(err.message || "Failed."); }
+                              } catch (err: any) {
+                                const msg = err.message?.toLowerCase() || "";
+                                if (msg.includes("non-2xx"))
+                                  toast.error("Unable to connect right now. Please try again later.");
+                                else
+                                  toast.error(err.message || "Failed to complete verification.");
+                              }
                             }}
                           >
                             Complete Verification
@@ -778,7 +804,13 @@ const AccountSettings = () => {
                                 if (data?.error) throw new Error(data.error);
                                 toast.success(data?.message || "Withdrawal initiated!");
                                 queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
-                              } catch (err: any) { toast.error(err.message || "Failed to withdraw."); }
+                              } catch (err: any) {
+                                const msg = err.message?.toLowerCase() || "";
+                                if (msg.includes("connect account not set up") || msg.includes("non-2xx"))
+                                  toast.info("Set up your payout account first to withdraw earnings.");
+                                else
+                                  toast.error(err.message || "Failed to withdraw.");
+                              }
                             }}
                           >
                             <Download className="h-4 w-4 mr-1.5 rotate-180" /> Withdraw Funds
@@ -791,7 +823,13 @@ const AccountSettings = () => {
                                 const { data, error } = await supabase.functions.invoke("create-connect-account");
                                 if (error) throw error;
                                 if (data?.url) window.open(data.url, "_blank");
-                              } catch (err: any) { toast.error(err.message || "Failed."); }
+                              } catch (err: any) {
+                                const msg = err.message?.toLowerCase() || "";
+                                if (msg.includes("non-2xx"))
+                                  toast.error("Unable to update payout method right now. Please try again later.");
+                                else
+                                  toast.error(err.message || "Failed to update payout method.");
+                              }
                             }}
                           >
                             <CreditCard className="h-4 w-4 mr-1.5" /> Update Payout Method
@@ -814,7 +852,13 @@ const AccountSettings = () => {
                                 if (data?.error) throw new Error(data.error);
                                 toast.success(data?.message || "Payout preference updated!");
                                 queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
-                              } catch (err: any) { toast.error(err.message || "Failed to update."); }
+                              } catch (err: any) {
+                                const msg = err.message?.toLowerCase() || "";
+                                if (msg.includes("non-2xx"))
+                                  toast.error("Unable to update payout settings. Please try again later.");
+                                else
+                                  toast.error(err.message || "Failed to update payout preference.");
+                              }
                             }}
                           />
                         </div>
@@ -846,7 +890,13 @@ const AccountSettings = () => {
                       const { data, error } = await supabase.functions.invoke("customer-portal");
                       if (error) throw error;
                       if (data?.url) window.open(data.url, "_blank");
-                    } catch (err: any) { toast.error(err.message || "Failed to open portal."); }
+                    } catch (err: any) {
+                      const msg = err.message?.toLowerCase() || "";
+                      if (msg.includes("no stripe customer") || msg.includes("non-2xx"))
+                        toast.info("No active subscriptions to manage. Subscribe to a mentor first.");
+                      else
+                        toast.error(err.message || "Failed to open portal.");
+                    }
                   }}
                 >
                   Manage All
