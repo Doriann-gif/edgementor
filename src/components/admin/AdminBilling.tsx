@@ -287,7 +287,7 @@ const AdminBilling = () => {
                       ) : (
                         <Download className="h-3.5 w-3.5" />
                       )}
-                      Withdraw ${platformBalance.available.toFixed(2)}
+                      Withdraw {platformBalance.available > 0 ? `$${platformBalance.available.toFixed(2)}` : "funds"}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
