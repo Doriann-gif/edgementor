@@ -2,6 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
 import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,7 +47,19 @@ const MentorProfile = () => {
   const toggleSave = useToggleSaveMentor();
   const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
 
-
+  const { data: showcaseImages = [] } = useQuery({
+    queryKey: ["mentor-showcase-images", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("mentor_showcase_images")
+        .select("*")
+        .eq("mentor_id", id!)
+        .order("display_order");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleSave = () => {
     if (!user) { toast.error("Sign in to save mentors"); return; }
@@ -389,6 +403,24 @@ const MentorProfile = () => {
               </motion.div>
             ))}
           </div>
+
+          {showcaseImages.length > 0 && (
+            <div className="mt-6 pt-5 border-t border-border">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {showcaseImages.map((img: any, i: number) => (
+                  <motion.div
+                    key={img.id}
+                    className="rounded-xl overflow-hidden border border-border aspect-video bg-muted"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + i * 0.05, duration: 0.4 }}
+                  >
+                    <img src={img.image_url} alt={img.caption || "Showcase"} className="w-full h-full object-cover" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* Reviews */}

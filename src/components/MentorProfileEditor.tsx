@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import TierBadge from "@/components/TierBadge";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMentorReviews } from "@/hooks/use-mentors";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
   Star, Clock, Users, MapPin, TrendingUp, CheckCircle2,
   MessageSquare, Sparkles, Award, Pencil, Save, X, Plus, Trash2,
+  ImagePlus, Loader2,
 } from "lucide-react";
 
 interface MentorProfileEditorProps {
@@ -29,7 +32,8 @@ const StarRating = ({ rating }: { rating: number }) => (
 
 const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailability }: MentorProfileEditorProps) => {
   const { data: reviews = [] } = useMentorReviews(mentor.id);
-  
+  const queryClient = useQueryClient();
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const tier = mentor.tier || "verified";
 
   const [editing, setEditing] = useState(false);
@@ -38,6 +42,47 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
   const [editPrice, setEditPrice] = useState(String(mentor.monthly_price));
   const [editHighlights, setEditHighlights] = useState<string[]>([...mentor.highlights]);
   const [newHighlight, setNewHighlight] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const { data: showcaseImages = [] } = useQuery({
+    queryKey: ["mentor-showcase-images", mentor.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("mentor_showcase_images")
+        .select("*")
+        .eq("mentor_id", mentor.id)
+        .order("display_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const uploadShowcaseImage = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB per image."); return; }
+    setUploadingImage(true);
+    try {
+      const fileName = `${mentor.id}/showcase-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const { error: upErr } = await supabase.storage.from("mentor-content").upload(fileName, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("mentor-content").getPublicUrl(fileName);
+      const { error } = await supabase.from("mentor_showcase_images").insert({
+        mentor_id: mentor.id,
+        image_url: publicUrl,
+        display_order: showcaseImages.length,
+      });
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["mentor-showcase-images"] });
+      toast.success("Image added!");
+    } catch (err: any) { toast.error(err.message || "Upload failed."); }
+    finally { setUploadingImage(false); }
+  };
+
+  const deleteShowcaseImage = async (id: string) => {
+    const { error } = await supabase.from("mentor_showcase_images").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete image."); return; }
+    queryClient.invalidateQueries({ queryKey: ["mentor-showcase-images"] });
+    toast.success("Image removed.");
+  };
 
 
   const startEditing = () => {
@@ -231,6 +276,61 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
             ))}
           </div>
         )}
+
+        {/* Showcase Images */}
+        <div className="mt-6 pt-5 border-t border-border">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+            <ImagePlus className="h-4 w-4 text-primary" /> Showcase Images
+          </h3>
+
+          {showcaseImages.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+              {showcaseImages.map((img: any) => (
+                <div key={img.id} className="relative group rounded-xl overflow-hidden border border-border aspect-video bg-muted">
+                  <img src={img.image_url} alt={img.caption || "Showcase"} className="w-full h-full object-cover" />
+                  {editing && (
+                    <button
+                      onClick={() => deleteShowcaseImage(img.id)}
+                      className="absolute top-2 right-2 h-7 w-7 rounded-full bg-destructive/90 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {editing && (
+            <div>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadShowcaseImage(file);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5 mr-1.5" />}
+                {uploadingImage ? "Uploading…" : "Add Image"}
+              </Button>
+            </div>
+          )}
+
+          {!editing && showcaseImages.length === 0 && (
+            <p className="text-xs text-muted-foreground">No showcase images yet. Click Edit to add some.</p>
+          )}
+        </div>
       </div>
 
       {/* Price — editable */}
