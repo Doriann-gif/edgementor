@@ -2,13 +2,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Tag, ClipboardList, Users, GraduationCap, MessageSquare, BarChart3, Crown } from "lucide-react";
+import { ArrowLeft, LogOut, Tag, ClipboardList, Users, GraduationCap, MessageSquare, BarChart3, Crown, DollarSign } from "lucide-react";
 import AdminApplications from "@/components/admin/AdminApplications";
 import AdminMentors from "@/components/admin/AdminMentors";
 import AdminStudents from "@/components/admin/AdminStudents";
 import AdminFeed from "@/components/admin/AdminFeed";
 import AdminStats from "@/components/admin/AdminStats";
 import AdminContent from "@/components/admin/AdminContent";
+import AdminBilling from "@/components/admin/AdminBilling";
 
 const AdminDashboard = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
