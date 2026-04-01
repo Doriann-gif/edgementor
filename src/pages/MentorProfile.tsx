@@ -403,6 +403,24 @@ const MentorProfile = () => {
               </motion.div>
             ))}
           </div>
+
+          {showcaseImages.length > 0 && (
+            <div className="mt-6 pt-5 border-t border-border">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {showcaseImages.map((img: any, i: number) => (
+                  <motion.div
+                    key={img.id}
+                    className="rounded-xl overflow-hidden border border-border aspect-video bg-muted"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + i * 0.05, duration: 0.4 }}
+                  >
+                    <img src={img.image_url} alt={img.caption || "Showcase"} className="w-full h-full object-cover" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
         </motion.div>
 
         {/* Reviews */}
