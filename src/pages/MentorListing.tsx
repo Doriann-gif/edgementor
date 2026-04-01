@@ -270,7 +270,7 @@ const MentorListingPage = () => {
           >
             <Target className="h-3.5 w-3.5" /> {mentors.length} Verified Mentors Available
           </motion.div>
-          <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
+          <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-5">
             Find Your <span className="text-primary">Edge</span>
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
