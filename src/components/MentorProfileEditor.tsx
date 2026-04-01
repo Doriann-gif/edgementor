@@ -276,6 +276,61 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
             ))}
           </div>
         )}
+
+        {/* Showcase Images */}
+        <div className="mt-6 pt-5 border-t border-border">
+          <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+            <ImagePlus className="h-4 w-4 text-primary" /> Showcase Images
+          </h3>
+
+          {showcaseImages.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+              {showcaseImages.map((img: any) => (
+                <div key={img.id} className="relative group rounded-xl overflow-hidden border border-border aspect-video bg-muted">
+                  <img src={img.image_url} alt={img.caption || "Showcase"} className="w-full h-full object-cover" />
+                  {editing && (
+                    <button
+                      onClick={() => deleteShowcaseImage(img.id)}
+                      className="absolute top-2 right-2 h-7 w-7 rounded-full bg-destructive/90 text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {editing && (
+            <div>
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadShowcaseImage(file);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => imageInputRef.current?.click()}
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5 mr-1.5" />}
+                {uploadingImage ? "Uploading…" : "Add Image"}
+              </Button>
+            </div>
+          )}
+
+          {!editing && showcaseImages.length === 0 && (
+            <p className="text-xs text-muted-foreground">No showcase images yet. Click Edit to add some.</p>
+          )}
+        </div>
       </div>
 
       {/* Price — editable */}
