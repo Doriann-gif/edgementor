@@ -544,7 +544,7 @@ const MentorListingPage = () => {
         {/* Bottom CTA */}
         {!isLoading && sorted.length > 0 && (
           <motion.div
-            className="mt-16 text-center"
+            className="mt-24 text-center"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
