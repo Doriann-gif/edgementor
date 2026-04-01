@@ -804,7 +804,13 @@ const AccountSettings = () => {
                                 if (data?.error) throw new Error(data.error);
                                 toast.success(data?.message || "Withdrawal initiated!");
                                 queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
-                              } catch (err: any) { toast.error(err.message || "Failed to withdraw."); }
+                              } catch (err: any) {
+                                const msg = err.message?.toLowerCase() || "";
+                                if (msg.includes("connect account not set up") || msg.includes("non-2xx"))
+                                  toast.info("Set up your payout account first to withdraw earnings.");
+                                else
+                                  toast.error(err.message || "Failed to withdraw.");
+                              }
                             }}
                           >
                             <Download className="h-4 w-4 mr-1.5 rotate-180" /> Withdraw Funds
