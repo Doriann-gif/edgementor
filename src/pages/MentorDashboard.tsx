@@ -140,18 +140,18 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-4 mb-5">
-          <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 text-center">
-            <DollarSign className="h-5 w-5 text-primary mx-auto mb-1" />
+          <div className="rounded-xl bg-muted/50 border border-border p-4 text-center">
+            <DollarSign className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
             <p className="font-heading text-2xl font-bold text-foreground">${balance.available.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">Available</p>
           </div>
-          <div className="rounded-xl bg-amber-500/5 border border-amber-500/10 p-4 text-center">
-            <Clock className="h-5 w-5 text-amber-400 mx-auto mb-1" />
+          <div className="rounded-xl bg-muted/50 border border-border p-4 text-center">
+            <Clock className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
             <p className="font-heading text-2xl font-bold text-foreground">${balance.pending.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">Pending</p>
           </div>
-          <div className="rounded-xl bg-pink/5 border border-pink/10 p-4 text-center">
-            <TrendingUp className="h-5 w-5 text-pink mx-auto mb-1" />
+          <div className="rounded-xl bg-muted/50 border border-border p-4 text-center">
+            <TrendingUp className="h-5 w-5 text-muted-foreground mx-auto mb-1" />
             <p className="font-heading text-2xl font-bold text-foreground">${balance.total_earned.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">Total Earned</p>
           </div>
