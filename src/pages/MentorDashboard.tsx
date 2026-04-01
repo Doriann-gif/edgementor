@@ -57,12 +57,21 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       if (resp.error) throw resp.error;
+      if (resp.data?.error) throw new Error(resp.data.error);
       return resp.data;
     },
     onSuccess: (data) => {
       if (data?.url) window.open(data.url, "_blank");
+      else toast.error("No onboarding URL returned. Please try again.");
     },
-    onError: () => toast.error("Failed to start onboarding"),
+    onError: (e: any) => {
+      const msg = e?.message || String(e);
+      if (msg.includes("signed up for Connect")) {
+        toast.error("Stripe Connect is not yet activated. The platform admin needs to enable Connect in the Stripe Dashboard.");
+      } else {
+        toast.error(msg || "Failed to start onboarding");
+      }
+    },
   });
 
   const withdraw = useMutation({
