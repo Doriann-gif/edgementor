@@ -699,23 +699,34 @@ const AccountSettings = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <button
                   className="group rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                  disabled={connectLoading}
                   onClick={async () => {
+                    setConnectLoading(true);
                     try {
                       const { data, error } = await supabase.functions.invoke("customer-portal");
                       if (error) throw error;
+                      if (data?.error) {
+                        if (data.error === "no_customer" || data.message?.includes("No billing account"))
+                          toast.info(data.message || "No billing account found. Subscribe to a mentor first.");
+                        else
+                          throw new Error(data.error);
+                        return;
+                      }
                       if (data?.url) window.open(data.url, "_blank");
                       else toast.info("No active subscriptions yet. Subscribe to a mentor first to manage billing.");
                     } catch (err: any) {
                       const msg = err.message?.toLowerCase() || "";
-                      if (msg.includes("no stripe customer") || msg.includes("non-2xx"))
+                      if (msg.includes("no stripe customer") || msg.includes("no_customer") || msg.includes("non-2xx") || msg.includes("no billing"))
                         toast.info("No billing account found. Subscribe to a mentor first to manage your subscriptions.");
                       else
                         toast.error(err.message || "Failed to open billing portal.");
+                    } finally {
+                      setConnectLoading(false);
                     }
                   }}
                 >
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4 group-hover:bg-primary/15 transition-colors">
-                    <CreditCard className="h-5 w-5 text-primary" />
+                    {connectLoading ? <Loader2 className="h-5 w-5 text-primary animate-spin" /> : <CreditCard className="h-5 w-5 text-primary" />}
                   </div>
                   <h4 className="font-heading font-semibold text-foreground mb-1">Manage Subscriptions</h4>
                   <p className="text-xs text-muted-foreground">Update plans, change payment method, or cancel</p>
