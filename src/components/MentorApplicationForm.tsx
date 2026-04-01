@@ -281,7 +281,8 @@ const MentorApplicationForm = () => {
                 <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{email}</span></div>
                 <div><span className="text-muted-foreground">Experience:</span> <span className="text-foreground font-medium">{experience}</span></div>
                 <div><span className="text-muted-foreground">Session:</span> <span className="text-foreground font-medium">{session}</span></div>
-                <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">${monthlyPrice}/mo</span></div>
+                <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">${monthlyPrice}{paymentType === "monthly" ? "/mo" : " one-time"}</span></div>
+                <div><span className="text-muted-foreground">Type:</span> <span className="text-foreground font-medium">{paymentType === "monthly" ? "Monthly Subscription" : "One-Time Payment"}</span></div>
               </div>
               <div className="flex flex-wrap gap-1.5 pt-2">
                 {instruments.map(i => <span key={i} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">{i}</span>)}
