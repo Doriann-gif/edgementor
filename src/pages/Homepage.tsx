@@ -498,7 +498,7 @@ const Homepage = () => {
 
           <div className="max-w-5xl mx-auto relative">
             <motion.div
-              className="text-center mb-14"
+              className="text-center mb-16"
               initial="hidden"
               whileInView="show"
               viewport={{ once: true }}
