@@ -27,6 +27,7 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
   const queryClient = useQueryClient();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(true);
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const { data: balance, isLoading, refetch } = useQuery({
     queryKey: ["connect-balance", mentorId],
