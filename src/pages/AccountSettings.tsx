@@ -679,9 +679,13 @@ const AccountSettings = () => {
                       const { data, error } = await supabase.functions.invoke("customer-portal");
                       if (error) throw error;
                       if (data?.url) window.open(data.url, "_blank");
-                      else toast.error("Could not open portal.");
+                      else toast.info("No billing history yet. Your invoices will appear here after your first subscription.");
                     } catch (err: any) {
-                      toast.error(err.message || "Failed to open portal.");
+                      const msg = err.message?.toLowerCase() || "";
+                      if (msg.includes("no stripe customer") || msg.includes("non-2xx"))
+                        toast.info("No billing history yet. Subscribe to a mentor first to view invoices.");
+                      else
+                        toast.error(err.message || "Failed to open portal.");
                     }
                   }}
                 >
