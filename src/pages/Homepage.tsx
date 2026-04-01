@@ -519,7 +519,7 @@ const Homepage = () => {
             </motion.div>
 
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-8"
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, margin: "-50px" }}
