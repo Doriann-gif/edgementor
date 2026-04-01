@@ -278,7 +278,7 @@ const MentorListingPage = () => {
           </p>
 
           {/* Quick stats */}
-          <div className="flex items-center justify-center gap-8 mt-8">
+          <div className="flex items-center justify-center gap-10 mt-10">
             {[
               { value: `${mentors.length}`, label: "Mentors" },
               { value: "4.8", label: "Avg Rating" },
