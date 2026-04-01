@@ -492,7 +492,7 @@ const MentorListingPage = () => {
 
         {/* Mentor Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-14">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="relative rounded-2xl border border-border bg-card/50 p-5 overflow-hidden">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-muted-foreground/5 to-transparent" />
@@ -534,7 +534,7 @@ const MentorListingPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-14">
             {sorted.map((mentor, i) => (
               <MentorCard key={mentor.id} mentor={mentor} index={i} />
             ))}
