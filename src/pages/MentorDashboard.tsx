@@ -43,6 +43,7 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
         total_earned: number;
         payouts_enabled: boolean;
         auto_payout: boolean;
+        payout_history?: { id: string; amount: number; status: string; created: number; arrival_date: number; description: string | null }[];
       };
     },
   });
