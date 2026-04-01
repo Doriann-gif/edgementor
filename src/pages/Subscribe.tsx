@@ -202,11 +202,11 @@ const Subscribe = () => {
 
         {/* Subscribe Button */}
         <Button variant="glow" className="w-full h-12 font-semibold text-sm" onClick={handleSubscribe} disabled={subscribing}>
-          {subscribing ? "Processing..." : `Subscribe for $${finalPrice}/mo`}
+          {subscribing ? "Processing..." : isOneTime ? `Pay $${finalPrice}` : `Subscribe for $${finalPrice}/mo`}
         </Button>
 
         <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Cancel anytime</span>
+          {!isOneTime && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Cancel anytime</span>}
           <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> Instant access</span>
         </div>
       </div>
