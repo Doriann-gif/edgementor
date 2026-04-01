@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import PinkGlow from "@/components/PinkGlow";
+import Footer from "@/components/Footer";
+import CookieConsent from "@/components/CookieConsent";
 import Homepage from "./pages/Homepage.tsx";
 import Index from "./pages/Index.tsx";
 import MentorListing from "./pages/MentorListing.tsx";
@@ -20,6 +22,8 @@ import AccountSettings from "./pages/AccountSettings.tsx";
 import DiscountCodes from "./pages/DiscountCodes.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Terms from "./pages/Terms.tsx";
+import Privacy from "./pages/Privacy.tsx";
+import About from "./pages/About.tsx";
 import MentorContentPage from "./pages/MentorContent.tsx";
 import Navbar from "./components/Navbar";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
@@ -27,6 +31,13 @@ import FreeContent from "./pages/FreeContent.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
+
+const HideFooterOnAdmin = () => {
+  const location = useLocation();
+  const hideOn = ["/admin", "/mentor-dashboard", "/settings"];
+  if (hideOn.some((p) => location.pathname.startsWith(p))) return null;
+  return <Footer />;
+};
 
 const App = () => (
   <HelmetProvider>
@@ -54,11 +65,15 @@ const App = () => (
             <Route path="/codes" element={<DiscountCodes />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/about" element={<About />} />
             <Route path="/mentorship/:id" element={<MentorContentPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <HideFooterOnAdmin />
+          <CookieConsent />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
