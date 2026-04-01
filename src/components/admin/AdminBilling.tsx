@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import {
   DollarSign, TrendingUp, CreditCard, Users, Search, ArrowUpDown,
   CalendarDays, Clock, CheckCircle2, XCircle, AlertCircle, Ban, Trash2,
+  Download, Wallet, Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -71,6 +72,42 @@ const AdminBilling = () => {
       toast.success("Subscription removed");
     },
     onError: () => toast.error("Failed to remove subscription"),
+  });
+
+  // Platform balance
+  const { data: platformBalance, isLoading: balanceLoading } = useQuery({
+    queryKey: ["admin-platform-balance"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("admin-balance");
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as {
+        available: number;
+        pending: number;
+        breakdown: { available: { amount: number; currency: string }[]; pending: { amount: number; currency: string }[] };
+        payout_history: { id: string; amount: number; currency: string; status: string; created: number; arrival_date: number }[];
+      };
+    },
+  });
+
+  const withdrawMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("admin-balance", {
+        body: { action: "payout" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-platform-balance"] });
+      toast.success(`Withdrawal of $${data.amount.toFixed(2)} initiated!`);
+    },
+    onError: (err: any) => {
+      const msg = err.message || "Failed to withdraw";
+      if (msg.includes("No available balance")) toast.info("No available balance to withdraw yet.");
+      else toast.error(msg);
+    },
   });
 
   const profileMap = new Map(profiles.map((p) => [p.id, p.display_name || "Unknown"]));
@@ -173,6 +210,115 @@ const AdminBilling = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Platform Balance */}
+      <Card className="border-border">
+        <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <div>
+            <CardTitle className="text-base font-heading font-semibold">Platform Balance</CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">Your Stripe account balance</p>
+          </div>
+          <Wallet className="h-5 w-5 text-primary" />
+        </CardHeader>
+        <CardContent>
+          {balanceLoading ? (
+            <div className="flex items-center gap-2 py-4">
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Loading balance...</span>
+            </div>
+          ) : platformBalance ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="rounded-xl bg-muted/40 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Available</p>
+                  <p className="text-2xl font-heading font-bold text-foreground">
+                    ${platformBalance.available.toFixed(2)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Ready to withdraw</p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Pending</p>
+                  <p className="text-2xl font-heading font-bold text-foreground">
+                    ${platformBalance.pending.toFixed(2)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Processing by Stripe</p>
+                </div>
+                <div className="rounded-xl bg-muted/40 p-4">
+                  <p className="text-xs text-muted-foreground mb-1">Total</p>
+                  <p className="text-2xl font-heading font-bold text-foreground">
+                    ${(platformBalance.available + platformBalance.pending).toFixed(2)}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Available + pending</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      disabled={platformBalance.available <= 0 || withdrawMutation.isPending}
+                      className="gap-1.5"
+                    >
+                      {withdrawMutation.isPending ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Download className="h-3.5 w-3.5" />
+                      )}
+                      Withdraw ${platformBalance.available.toFixed(2)}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Withdraw Funds</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will transfer ${platformBalance.available.toFixed(2)} to your connected bank account. Funds typically arrive in 2-3 business days.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => withdrawMutation.mutate()}>
+                        Confirm Withdrawal
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                {platformBalance.available <= 0 && (
+                  <p className="text-xs text-muted-foreground">No available balance — funds are still pending</p>
+                )}
+              </div>
+
+              {/* Payout History */}
+              {platformBalance.payout_history && platformBalance.payout_history.length > 0 && (
+                <div className="space-y-2 pt-2">
+                  <h4 className="text-xs font-medium text-muted-foreground">Recent Payouts</h4>
+                  <div className="rounded-xl border border-border overflow-hidden divide-y divide-border">
+                    {platformBalance.payout_history.map((p) => (
+                      <div key={p.id} className="flex items-center justify-between px-4 py-3">
+                        <div>
+                          <p className="text-sm font-medium">${p.amount.toFixed(2)} {p.currency.toUpperCase()}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {format(new Date(p.created * 1000), "MMM d, yyyy")}
+                            {p.arrival_date && ` → ${format(new Date(p.arrival_date * 1000), "MMM d, yyyy")}`}
+                          </p>
+                        </div>
+                        <Badge
+                          variant={p.status === "paid" ? "default" : p.status === "failed" ? "destructive" : "secondary"}
+                          className="text-[10px] capitalize"
+                        >
+                          {p.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground py-4">Unable to load balance</p>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Subscription History Table */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden">
