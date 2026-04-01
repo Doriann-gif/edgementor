@@ -722,27 +722,41 @@ const AccountSettings = () => {
                       </div>
                       <p className="text-sm text-foreground font-medium mb-1">Set up your payout account</p>
                       <p className="text-xs text-muted-foreground mb-5 max-w-sm mx-auto">Connect your bank account to start receiving payouts from your mentorship subscriptions.</p>
-                      <Button
-                        variant="glow"
-                        className="font-semibold"
-                        onClick={async () => {
-                          try {
-                            const { data, error } = await supabase.functions.invoke("create-connect-account");
-                            if (error) throw error;
-                            if (data?.error) throw new Error(data.error);
-                            if (data?.url) window.open(data.url, "_blank");
-                            else toast.error("Could not start onboarding. Please try again.");
-                          } catch (err: any) {
-                            const msg = err.message?.toLowerCase() || "";
-                            if (msg.includes("non-2xx"))
-                              toast.error("Unable to set up payouts right now. Please try again later.");
-                            else
-                              toast.error(err.message || "Failed to start onboarding.");
-                          }
-                        }}
-                      >
-                        <CreditCard className="h-4 w-4 mr-1.5" /> Set Up Payout Account
-                      </Button>
+                      {(() => {
+                        const [loading, setLoading] = React.useState(false);
+                        return (
+                          <Button
+                            variant="glow"
+                            className="font-semibold"
+                            disabled={loading}
+                            onClick={async () => {
+                              setLoading(true);
+                              try {
+                                const { data, error } = await supabase.functions.invoke("create-connect-account");
+                                if (error) throw error;
+                                if (data?.error) throw new Error(data.error);
+                                if (data?.url) window.open(data.url, "_blank");
+                                else toast.error("Could not start onboarding. Please try again.");
+                              } catch (err: any) {
+                                const msg = err.message?.toLowerCase() || "";
+                                if (msg.includes("non-2xx"))
+                                  toast.error("Unable to set up payouts right now. Please try again later.");
+                                else
+                                  toast.error(err.message || "Failed to start onboarding.");
+                              } finally {
+                                setLoading(false);
+                              }
+                            }}
+                          >
+                            {loading ? (
+                              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+                            ) : (
+                              <CreditCard className="h-4 w-4 mr-1.5" />
+                            )}
+                            {loading ? "Setting up…" : "Set Up Payout Account"}
+                          </Button>
+                        );
+                      })()}
                     </div>
                   ) : (
                     <>
