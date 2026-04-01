@@ -32,7 +32,8 @@ const StarRating = ({ rating }: { rating: number }) => (
 
 const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailability }: MentorProfileEditorProps) => {
   const { data: reviews = [] } = useMentorReviews(mentor.id);
-  
+  const queryClient = useQueryClient();
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const tier = mentor.tier || "verified";
 
   const [editing, setEditing] = useState(false);
@@ -41,6 +42,47 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
   const [editPrice, setEditPrice] = useState(String(mentor.monthly_price));
   const [editHighlights, setEditHighlights] = useState<string[]>([...mentor.highlights]);
   const [newHighlight, setNewHighlight] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const { data: showcaseImages = [] } = useQuery({
+    queryKey: ["mentor-showcase-images", mentor.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("mentor_showcase_images")
+        .select("*")
+        .eq("mentor_id", mentor.id)
+        .order("display_order");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const uploadShowcaseImage = async (file: File) => {
+    if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB per image."); return; }
+    setUploadingImage(true);
+    try {
+      const fileName = `${mentor.id}/showcase-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const { error: upErr } = await supabase.storage.from("mentor-content").upload(fileName, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from("mentor-content").getPublicUrl(fileName);
+      const { error } = await supabase.from("mentor_showcase_images").insert({
+        mentor_id: mentor.id,
+        image_url: publicUrl,
+        display_order: showcaseImages.length,
+      });
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["mentor-showcase-images"] });
+      toast.success("Image added!");
+    } catch (err: any) { toast.error(err.message || "Upload failed."); }
+    finally { setUploadingImage(false); }
+  };
+
+  const deleteShowcaseImage = async (id: string) => {
+    const { error } = await supabase.from("mentor_showcase_images").delete().eq("id", id);
+    if (error) { toast.error("Failed to delete image."); return; }
+    queryClient.invalidateQueries({ queryKey: ["mentor-showcase-images"] });
+    toast.success("Image removed.");
+  };
 
 
   const startEditing = () => {
