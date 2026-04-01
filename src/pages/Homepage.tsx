@@ -227,7 +227,7 @@ const Homepage = () => {
 
             <motion.p
               variants={fadeUp}
-              className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+              className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-14 leading-relaxed"
             >
               Connect with verified mentors, join active trading communities, and accelerate your edge with real strategies — not theory.
             </motion.p>
