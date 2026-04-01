@@ -852,7 +852,13 @@ const AccountSettings = () => {
                                 if (data?.error) throw new Error(data.error);
                                 toast.success(data?.message || "Payout preference updated!");
                                 queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
-                              } catch (err: any) { toast.error(err.message || "Failed to update."); }
+                              } catch (err: any) {
+                                const msg = err.message?.toLowerCase() || "";
+                                if (msg.includes("non-2xx"))
+                                  toast.error("Unable to update payout settings. Please try again later.");
+                                else
+                                  toast.error(err.message || "Failed to update payout preference.");
+                              }
                             }}
                           />
                         </div>
