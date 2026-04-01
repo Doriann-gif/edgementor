@@ -65,23 +65,6 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
     }
   };
 
-  const handleSaveBannerColor = async (color: string) => {
-    setSavingColor(true);
-    try {
-      const { error } = await supabase
-        .from("mentors")
-        .update({ banner_color: color })
-        .eq("id", mentor.id);
-      if (error) throw error;
-      queryClient.invalidateQueries({ queryKey: ["mentor-profile"] });
-      toast.success("Banner color updated!");
-      setShowColorPicker(false);
-    } catch {
-      toast.error("Failed to update banner color.");
-    } finally {
-      setSavingColor(false);
-    }
-  };
 
   const addHighlight = () => {
     if (newHighlight.trim()) {
