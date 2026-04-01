@@ -2,18 +2,22 @@ import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyMentorProfile, useUpdateMentorProfile, useMentorStudents, useMentorEarnings } from "@/hooks/use-mentor-dashboard";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import MentorContentManager from "@/components/MentorContentManager";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
 import {
   ArrowLeft, LogOut, Users, DollarSign, TrendingUp, Edit3, Save,
-  X, Clock, Star, Eye, Tag, Crown, Sparkles, BookOpen,
+  X, Clock, Star, Eye, Tag, Crown, Sparkles, BookOpen, Wallet,
+  ChevronDown, ChevronUp, Banknote, ArrowDownToLine, RefreshCw, ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 
