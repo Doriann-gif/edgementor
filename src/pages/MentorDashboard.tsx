@@ -21,7 +21,239 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const MentorDashboard = () => {
+/* ── Income Tab Component ── */
+const IncomeTab = ({ mentorId }: { mentorId: string }) => {
+  const queryClient = useQueryClient();
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(true);
+
+  const { data: balance, isLoading, refetch } = useQuery({
+    queryKey: ["connect-balance", mentorId],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await supabase.functions.invoke("connect-balance", {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (resp.error) throw resp.error;
+      return resp.data as {
+        onboarded: boolean;
+        available: number;
+        pending: number;
+        total_earned: number;
+        payouts_enabled: boolean;
+        auto_payout: boolean;
+      };
+    },
+  });
+
+  const onboard = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await supabase.functions.invoke("create-connect-account", {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (resp.error) throw resp.error;
+      return resp.data;
+    },
+    onSuccess: (data) => {
+      if (data?.url) window.open(data.url, "_blank");
+    },
+    onError: () => toast.error("Failed to start onboarding"),
+  });
+
+  const withdraw = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await supabase.functions.invoke("process-withdrawal", {
+        body: { action: "withdraw" },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (resp.error) throw resp.error;
+      return resp.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      refetch();
+    },
+    onError: (e: any) => toast.error(e?.message || "Withdrawal failed"),
+  });
+
+  const toggleAuto = useMutation({
+    mutationFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await supabase.functions.invoke("process-withdrawal", {
+        body: { action: "toggle_auto_payout" },
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      });
+      if (resp.error) throw resp.error;
+      return resp.data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message);
+      refetch();
+    },
+    onError: () => toast.error("Failed to toggle auto-payout"),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="rounded-2xl border border-border bg-card p-5 animate-pulse">
+            <div className="h-4 w-32 bg-muted rounded mb-3" />
+            <div className="h-8 w-24 bg-muted rounded" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!balance?.onboarded) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
+        <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+          <Wallet className="h-10 w-10 text-primary/20 mx-auto mb-4" />
+        </motion.div>
+        <p className="text-sm text-foreground font-medium mb-1">Set up payouts</p>
+        <p className="text-xs text-muted-foreground mb-4">Connect your bank account to start receiving earnings from subscriptions.</p>
+        <Button size="sm" onClick={() => onboard.mutate()} disabled={onboard.isPending}>
+          <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+          {onboard.isPending ? "Setting up…" : "Set Up Payouts"}
+        </Button>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Earnings Overview */}
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-border bg-card p-6">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-primary" /> Earnings Overview
+          </h2>
+          <Button variant="ghost" size="sm" className="text-xs" onClick={() => refetch()}>
+            <RefreshCw className="h-3.5 w-3.5 mr-1" /> Refresh
+          </Button>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="rounded-xl bg-primary/5 border border-primary/10 p-4 text-center">
+            <DollarSign className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="font-heading text-2xl font-bold text-foreground">${balance.available.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Available</p>
+          </div>
+          <div className="rounded-xl bg-amber-500/5 border border-amber-500/10 p-4 text-center">
+            <Clock className="h-5 w-5 text-amber-400 mx-auto mb-1" />
+            <p className="font-heading text-2xl font-bold text-foreground">${balance.pending.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Pending</p>
+          </div>
+          <div className="rounded-xl bg-pink/5 border border-pink/10 p-4 text-center">
+            <TrendingUp className="h-5 w-5 text-pink mx-auto mb-1" />
+            <p className="font-heading text-2xl font-bold text-foreground">${balance.total_earned.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground mt-1">Total Earned</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Withdraw Section */}
+      <Collapsible open={withdrawOpen} onOpenChange={setWithdrawOpen}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-2xl border border-border bg-card">
+          <CollapsibleTrigger className="w-full flex items-center justify-between p-5 hover:bg-muted/30 transition-colors rounded-2xl">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <ArrowDownToLine className="h-4 w-4 text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-heading font-semibold text-foreground text-sm">Withdraw Funds</h3>
+                <p className="text-xs text-muted-foreground">Transfer available balance to your bank</p>
+              </div>
+            </div>
+            {withdrawOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-5 pb-5 pt-0 space-y-4">
+              <div className="rounded-xl bg-muted/50 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-muted-foreground">Available to withdraw</span>
+                  <span className="font-heading font-bold text-foreground">${balance.available.toFixed(2)}</span>
+                </div>
+                {!balance.payouts_enabled && (
+                  <p className="text-xs text-amber-400">⚠ Complete your account setup to enable payouts.</p>
+                )}
+              </div>
+              <Button
+                className="w-full"
+                disabled={balance.available <= 0 || !balance.payouts_enabled || withdraw.isPending}
+                onClick={() => withdraw.mutate()}
+              >
+                <Banknote className="h-4 w-4 mr-2" />
+                {withdraw.isPending ? "Processing…" : `Withdraw $${balance.available.toFixed(2)}`}
+              </Button>
+              <p className="text-[11px] text-muted-foreground text-center">Funds typically arrive in 2-3 business days.</p>
+            </div>
+          </CollapsibleContent>
+        </motion.div>
+      </Collapsible>
+
+      {/* Payout Settings */}
+      <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-2xl border border-border bg-card">
+          <CollapsibleTrigger className="w-full flex items-center justify-between p-5 hover:bg-muted/30 transition-colors rounded-2xl">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-heading font-semibold text-foreground text-sm">Payout Settings</h3>
+                <p className="text-xs text-muted-foreground">Configure how you receive earnings</p>
+              </div>
+            </div>
+            {detailsOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-5 pb-5 pt-0 space-y-4">
+              <div className="flex items-center justify-between rounded-xl bg-muted/50 p-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Automatic Monthly Payouts</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {balance.auto_payout
+                      ? "Your balance is automatically transferred on the 1st of each month."
+                      : "Manually withdraw whenever you want."}
+                  </p>
+                </div>
+                <Switch
+                  checked={balance.auto_payout}
+                  onCheckedChange={() => toggleAuto.mutate()}
+                  disabled={toggleAuto.isPending || !balance.payouts_enabled}
+                />
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-muted/50 p-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Payout Status</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Your account verification status</p>
+                </div>
+                <span className={`rounded-md px-2.5 py-1 text-[11px] font-semibold ${balance.payouts_enabled ? "bg-primary/10 text-primary" : "bg-amber-400/10 text-amber-400"}`}>
+                  {balance.payouts_enabled ? "Enabled" : "Pending Setup"}
+                </span>
+              </div>
+              {!balance.payouts_enabled && (
+                <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => onboard.mutate()} disabled={onboard.isPending}>
+                  <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                  Complete Account Setup
+                </Button>
+              )}
+              <div className="rounded-xl bg-muted/50 p-4">
+                <p className="text-sm font-medium text-foreground mb-1">Platform Fee</p>
+                <p className="text-xs text-muted-foreground">EdgeMentor retains a 20% platform fee on each subscription payment. The remaining 80% is deposited into your balance.</p>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </motion.div>
+      </Collapsible>
+    </div>
+  );
+};
+
   const { user, loading: authLoading, signOut } = useAuth();
   const { data: mentor, isLoading } = useMyMentorProfile();
   const updateProfile = useUpdateMentorProfile();
