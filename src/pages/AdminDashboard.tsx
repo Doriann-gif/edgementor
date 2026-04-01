@@ -59,6 +59,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="content" className="text-xs gap-1.5"><Crown className="h-3.5 w-3.5" /> Content</TabsTrigger>
             <TabsTrigger value="students" className="text-xs gap-1.5"><GraduationCap className="h-3.5 w-3.5" /> Students</TabsTrigger>
             <TabsTrigger value="feed" className="text-xs gap-1.5"><MessageSquare className="h-3.5 w-3.5" /> Feed</TabsTrigger>
+            <TabsTrigger value="billing" className="text-xs gap-1.5"><DollarSign className="h-3.5 w-3.5" /> Billing</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stats"><AdminStats /></TabsContent>
@@ -67,6 +68,7 @@ const AdminDashboard = () => {
           <TabsContent value="content"><AdminContent /></TabsContent>
           <TabsContent value="students"><AdminStudents /></TabsContent>
           <TabsContent value="feed"><AdminFeed /></TabsContent>
+          <TabsContent value="billing"><AdminBilling /></TabsContent>
         </Tabs>
       </div>
     </div>
