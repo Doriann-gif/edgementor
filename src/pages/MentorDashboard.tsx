@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMyMentorProfile, useUpdateMentorProfile, useMentorStudents, useMentorEarnings } from "@/hooks/use-mentor-dashboard";
@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import MentorContentManager from "@/components/MentorContentManager";
+import MentorProfileEditor from "@/components/MentorProfileEditor";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -405,23 +406,9 @@ const MentorDashboard = () => {
   const { data: mentor, isLoading } = useMyMentorProfile();
   const updateProfile = useUpdateMentorProfile();
 
-  const [editing, setEditing] = useState(false);
-  const [editBio, setEditBio] = useState("");
-  const [editFullBio, setEditFullBio] = useState("");
-  const [editPrice, setEditPrice] = useState("");
-  const [editHighlights, setEditHighlights] = useState("");
 
   const { data: students = [] } = useMentorStudents(mentor?.id);
   const { data: earnings } = useMentorEarnings(mentor?.id, mentor?.monthly_price ?? 0);
-
-  useEffect(() => {
-    if (mentor) {
-      setEditBio(mentor.bio);
-      setEditFullBio(mentor.full_bio);
-      setEditPrice(String(mentor.monthly_price));
-      setEditHighlights(mentor.highlights.join("\n"));
-    }
-  }, [mentor]);
 
   if (authLoading || isLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
@@ -449,22 +436,8 @@ const MentorDashboard = () => {
     );
   }
 
-  const handleSaveProfile = async () => {
-    try {
-      await updateProfile.mutateAsync({
-        id: mentor.id,
-        updates: {
-          bio: editBio,
-          full_bio: editFullBio,
-          monthly_price: parseInt(editPrice, 10),
-          highlights: editHighlights.split("\n").map((h) => h.trim()).filter(Boolean),
-        },
-      });
-      setEditing(false);
-      toast.success("Profile updated!");
-    } catch {
-      toast.error("Failed to update profile.");
-    }
+  const handleSaveProfile = async (updates: any) => {
+    await updateProfile.mutateAsync({ id: mentor.id, updates });
   };
 
   const handleToggleAvailability = async () => {
@@ -550,84 +523,12 @@ const MentorDashboard = () => {
           </TabsList>
 
           <TabsContent value="profile">
-            {/* Availability + Edit in one compact row */}
-            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3.5 mb-4">
-              <div className="flex items-center gap-3">
-                <Switch
-                  checked={mentor.available}
-                  onCheckedChange={handleToggleAvailability}
-                  disabled={updateProfile.isPending}
-                />
-                <div>
-                  <span className="text-sm font-medium text-foreground">
-                    {mentor.available ? "Accepting students" : "Hidden from listing"}
-                  </span>
-                </div>
-              </div>
-              {!editing ? (
-                <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => setEditing(true)}>
-                  <Edit3 className="h-3 w-3 mr-1" /> Edit Profile
-                </Button>
-              ) : (
-                <div className="flex gap-1.5">
-                  <Button size="sm" className="text-xs h-8" onClick={handleSaveProfile} disabled={updateProfile.isPending}>
-                    <Save className="h-3 w-3 mr-1" /> Save
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => setEditing(false)}>
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-            </div>
-
-            {/* Profile Card */}
-            <div className="rounded-xl border border-border bg-card p-5">
-              {editing ? (
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] font-medium text-muted-foreground">Short Bio</Label>
-                    <Textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={2} className="bg-muted border-border text-sm resize-none" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[11px] font-medium text-muted-foreground">Monthly Price (USD)</Label>
-                    <Input type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} className="bg-muted border-border text-sm w-full" />
-                  </div>
-                  <div className="col-span-2 space-y-1.5">
-                    <Label className="text-[11px] font-medium text-muted-foreground">Full Bio</Label>
-                    <Textarea value={editFullBio} onChange={(e) => setEditFullBio(e.target.value)} rows={3} className="bg-muted border-border text-sm resize-none" />
-                  </div>
-                  <div className="col-span-2 space-y-1.5">
-                    <Label className="text-[11px] font-medium text-muted-foreground">Highlights (one per line)</Label>
-                    <Textarea value={editHighlights} onChange={(e) => setEditHighlights(e.target.value)} rows={3} className="bg-muted border-border text-sm resize-none" placeholder="Live trading room daily&#10;1-on-1 weekly calls" />
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-[11px] text-muted-foreground font-medium">Short Bio</span>
-                      <p className="text-sm text-foreground mt-1 leading-relaxed">{mentor.bio}</p>
-                    </div>
-                    <div>
-                      <span className="text-[11px] text-muted-foreground font-medium">Full Bio</span>
-                      <p className="text-sm text-foreground mt-1 leading-relaxed line-clamp-4">{mentor.full_bio}</p>
-                    </div>
-                  </div>
-                  {mentor.highlights.length > 0 && (
-                    <div>
-                      <span className="text-[11px] text-muted-foreground font-medium">Highlights</span>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {mentor.highlights.map((h) => (
-                          <span key={h} className="inline-flex items-center gap-1.5 rounded-lg bg-primary/5 border border-primary/10 px-2.5 py-1 text-xs text-foreground">
-                            <span className="h-1 w-1 rounded-full bg-primary" /> {h}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <MentorProfileEditor
+              mentor={mentor}
+              onUpdate={handleSaveProfile}
+              isUpdating={updateProfile.isPending}
+              onToggleAvailability={handleToggleAvailability}
+            />
           </TabsContent>
 
           <TabsContent value="content">
