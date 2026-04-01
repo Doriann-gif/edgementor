@@ -285,7 +285,7 @@ const Homepage = () => {
         </motion.section>
 
         {/* Animated Stats Counter */}
-        <section className="border-y border-border/50 bg-card/30 backdrop-blur-sm py-10 px-4 sm:px-6 relative overflow-hidden">
+        <section className="border-y border-border/30 bg-card/20 backdrop-blur-sm py-16 px-4 sm:px-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-500/[0.03] to-transparent pointer-events-none" />
           <motion.div
             className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 relative"
