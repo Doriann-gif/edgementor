@@ -74,6 +74,42 @@ const AdminBilling = () => {
     onError: () => toast.error("Failed to remove subscription"),
   });
 
+  // Platform balance
+  const { data: platformBalance, isLoading: balanceLoading } = useQuery({
+    queryKey: ["admin-platform-balance"],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("admin-balance");
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data as {
+        available: number;
+        pending: number;
+        breakdown: { available: { amount: number; currency: string }[]; pending: { amount: number; currency: string }[] };
+        payout_history: { id: string; amount: number; currency: string; status: string; created: number; arrival_date: number }[];
+      };
+    },
+  });
+
+  const withdrawMutation = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke("admin-balance", {
+        body: { action: "payout" },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin-platform-balance"] });
+      toast.success(`Withdrawal of $${data.amount.toFixed(2)} initiated!`);
+    },
+    onError: (err: any) => {
+      const msg = err.message || "Failed to withdraw";
+      if (msg.includes("No available balance")) toast.info("No available balance to withdraw yet.");
+      else toast.error(msg);
+    },
+  });
+
   const profileMap = new Map(profiles.map((p) => [p.id, p.display_name || "Unknown"]));
 
   // Compute stats
