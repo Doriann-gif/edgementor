@@ -85,7 +85,7 @@ serve(async (req) => {
     const pending = balance.pending.reduce((sum, b) => sum + b.amount, 0) / 100;
     logStep("Balance retrieved", { available, pending });
 
-    // Get total payouts for lifetime earned
+    // Get payouts for lifetime earned + history
     const payouts = await stripe.payouts.list(
       { limit: 100 },
       { stripeAccount: mentor.stripe_connect_account_id }
@@ -94,6 +94,15 @@ serve(async (req) => {
       .filter(p => p.status === "paid")
       .reduce((sum, p) => sum + p.amount, 0) / 100;
 
+    const payoutHistory = payouts.data.map(p => ({
+      id: p.id,
+      amount: p.amount / 100,
+      status: p.status,
+      created: p.created,
+      arrival_date: p.arrival_date,
+      description: p.description,
+    }));
+
     return new Response(JSON.stringify({
       onboarded: true,
       available,
@@ -101,6 +110,7 @@ serve(async (req) => {
       total_earned: available + pending + totalPaidOut,
       payouts_enabled: payoutsEnabled,
       auto_payout: mentor.auto_payout,
+      payout_history: payoutHistory,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
