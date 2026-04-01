@@ -33,7 +33,7 @@ serve(async (req) => {
     // Fetch mentor details
     const { data: mentor, error: mentorError } = await supabaseClient
       .from("mentors")
-      .select("id, name, monthly_price, stripe_connect_account_id")
+      .select("id, name, monthly_price, stripe_connect_account_id, payment_type")
       .eq("id", mentorId)
       .single();
     if (mentorError || !mentor) throw new Error("Mentor not found");
@@ -66,25 +66,28 @@ serve(async (req) => {
     const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
 
     const unitAmount = Math.round(mentor.monthly_price * 100 * (1 - discountPercent / 100));
+    const isOneTime = mentor.payment_type === "one_time";
+
+    const lineItem: any = {
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: `${mentor.name} — ${isOneTime ? "Mentorship Access" : "Monthly Mentorship"}`,
+          description: isOneTime
+            ? `One-time access to ${mentor.name}`
+            : `Monthly subscription to ${mentor.name}`,
+        },
+        unit_amount: unitAmount,
+        ...(isOneTime ? {} : { recurring: { interval: "month" } }),
+      },
+      quantity: 1,
+    };
 
     const sessionParams: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: `${mentor.name} — Monthly Mentorship`,
-              description: `Monthly subscription to ${mentor.name}`,
-            },
-            unit_amount: unitAmount,
-            recurring: { interval: "month" },
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
+      line_items: [lineItem],
+      mode: isOneTime ? "payment" : "subscription",
       success_url: `${req.headers.get("origin")}/payment-success?mentor_id=${mentorId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/subscribe/${mentorId}`,
       metadata: {
@@ -96,13 +99,25 @@ serve(async (req) => {
     // Split payments to mentor's Connect account (platform keeps 20%)
     if (mentor.stripe_connect_account_id) {
       const applicationFeePercent = 20;
-      sessionParams.subscription_data = {
-        transfer_data: {
-          destination: mentor.stripe_connect_account_id,
-        },
-        application_fee_percent: applicationFeePercent,
-      };
-      console.log(`[CREATE-CHECKOUT] Splitting payments to Connect account ${mentor.stripe_connect_account_id}, platform fee: ${applicationFeePercent}%`);
+      if (isOneTime) {
+        // For one-time payments, use application_fee_amount
+        const feeAmount = Math.round(unitAmount * applicationFeePercent / 100);
+        sessionParams.payment_intent_data = {
+          application_fee_amount: feeAmount,
+          transfer_data: {
+            destination: mentor.stripe_connect_account_id,
+          },
+        };
+      } else {
+        // For subscriptions, use application_fee_percent on subscription_data
+        sessionParams.subscription_data = {
+          transfer_data: {
+            destination: mentor.stripe_connect_account_id,
+          },
+          application_fee_percent: applicationFeePercent,
+        };
+      }
+      console.log(`[CREATE-CHECKOUT] Splitting payments to Connect account ${mentor.stripe_connect_account_id}, platform fee: ${applicationFeePercent}%, mode: ${isOneTime ? "one_time" : "subscription"}`);
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);

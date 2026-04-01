@@ -47,6 +47,7 @@ const MentorApplicationForm = () => {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [monthlyPrice, setMonthlyPrice] = useState("");
+  const [paymentType, setPaymentType] = useState<"monthly" | "one_time">("monthly");
   const [bio, setBio] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -95,6 +96,7 @@ const MentorApplicationForm = () => {
         concepts,
         session,
         monthly_price: parseInt(monthlyPrice, 10),
+        payment_type: paymentType,
         bio,
         user_id: user?.id || null,
       });
@@ -234,8 +236,32 @@ const MentorApplicationForm = () => {
                 <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setProofFile(e.target.files?.[0] ?? null)} />
               </motion.label>
             </div>
+            {/* Payment Type */}
             <div className="space-y-2">
-              <Label htmlFor="price" className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-3.5 w-3.5 text-primary" /> Desired Monthly Price (USD) *</Label>
+              <Label className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-3.5 w-3.5 text-primary" /> Payment Type *</Label>
+              <div className="flex gap-3">
+                <motion.button
+                  type="button" onClick={() => setPaymentType("monthly")}
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all duration-200 ${paymentType === "monthly" ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--primary)/0.2)]" : "border-border bg-secondary text-muted-foreground hover:border-primary/30 hover:text-foreground"}`}
+                >
+                  <span className="block font-semibold">Monthly</span>
+                  <span className="block text-xs mt-0.5 opacity-70">Recurring subscription</span>
+                </motion.button>
+                <motion.button
+                  type="button" onClick={() => setPaymentType("one_time")}
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all duration-200 ${paymentType === "one_time" ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--primary)/0.2)]" : "border-border bg-secondary text-muted-foreground hover:border-primary/30 hover:text-foreground"}`}
+                >
+                  <span className="block font-semibold">One-Time</span>
+                  <span className="block text-xs mt-0.5 opacity-70">Single payment</span>
+                </motion.button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price" className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-3.5 w-3.5 text-primary" /> {paymentType === "monthly" ? "Monthly Price" : "One-Time Price"} (USD) *</Label>
               <Input id="price" type="number" placeholder="e.g. 199" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]" />
             </div>
             <div className="space-y-2">
@@ -255,7 +281,8 @@ const MentorApplicationForm = () => {
                 <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{email}</span></div>
                 <div><span className="text-muted-foreground">Experience:</span> <span className="text-foreground font-medium">{experience}</span></div>
                 <div><span className="text-muted-foreground">Session:</span> <span className="text-foreground font-medium">{session}</span></div>
-                <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">${monthlyPrice}/mo</span></div>
+                <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">${monthlyPrice}{paymentType === "monthly" ? "/mo" : " one-time"}</span></div>
+                <div><span className="text-muted-foreground">Type:</span> <span className="text-foreground font-medium">{paymentType === "monthly" ? "Monthly Subscription" : "One-Time Payment"}</span></div>
               </div>
               <div className="flex flex-wrap gap-1.5 pt-2">
                 {instruments.map(i => <span key={i} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">{i}</span>)}

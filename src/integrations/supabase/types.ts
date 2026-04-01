@@ -128,6 +128,7 @@ export type Database = {
           id: string
           instruments: string[]
           monthly_price: number
+          payment_type: string
           proof_url: string | null
           session: string
           social_link: string | null
@@ -144,6 +145,7 @@ export type Database = {
           id?: string
           instruments?: string[]
           monthly_price: number
+          payment_type?: string
           proof_url?: string | null
           session: string
           social_link?: string | null
@@ -160,6 +162,7 @@ export type Database = {
           id?: string
           instruments?: string[]
           monthly_price?: number
+          payment_type?: string
           proof_url?: string | null
           session?: string
           social_link?: string | null
@@ -262,6 +265,7 @@ export type Database = {
           instruments: string[]
           monthly_price: number
           name: string
+          payment_type: string
           payouts_enabled: boolean
           rating: number
           session: string
@@ -285,6 +289,7 @@ export type Database = {
           instruments?: string[]
           monthly_price: number
           name: string
+          payment_type?: string
           payouts_enabled?: boolean
           rating?: number
           session: string
@@ -308,6 +313,7 @@ export type Database = {
           instruments?: string[]
           monthly_price?: number
           name?: string
+          payment_type?: string
           payouts_enabled?: boolean
           rating?: number
           session?: string

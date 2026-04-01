@@ -99,6 +99,7 @@ const Subscribe = () => {
     );
   }
 
+  const isOneTime = (mentor as any).payment_type === "one_time";
   const originalPrice = mentor.monthly_price;
   const finalPrice = discount > 0 ? Math.round(originalPrice * (1 - discount / 100)) : originalPrice;
 
@@ -117,9 +118,11 @@ const Subscribe = () => {
 
         <div className="text-center mb-8">
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-            Subscribe to {mentor.name}
+            {isOneTime ? "Purchase from" : "Subscribe to"} {mentor.name}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1.5">Get full access to mentorship, resources, and community.</p>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            {isOneTime ? "Get lifetime access to mentorship resources." : "Get full access to mentorship, resources, and community."}
+          </p>
         </div>
 
         {/* Mentor Summary */}
@@ -182,28 +185,28 @@ const Subscribe = () => {
         {/* Pricing Summary */}
         <div className="rounded-2xl border border-primary/30 bg-card p-5 mb-6">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-muted-foreground">Monthly mentorship</span>
-            <span className={`text-sm ${discount > 0 ? "line-through text-muted-foreground" : "text-foreground font-semibold"}`}>${originalPrice}/mo</span>
+            <span className="text-sm text-muted-foreground">{isOneTime ? "One-time mentorship" : "Monthly mentorship"}</span>
+            <span className={`text-sm ${discount > 0 ? "line-through text-muted-foreground" : "text-foreground font-semibold"}`}>${originalPrice}{isOneTime ? "" : "/mo"}</span>
           </div>
           {discount > 0 && (
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm text-primary font-medium">Discount ({discount}%)</span>
-              <span className="text-sm text-primary font-semibold">−${originalPrice - finalPrice}/mo</span>
+              <span className="text-sm text-primary font-semibold">−${originalPrice - finalPrice}{isOneTime ? "" : "/mo"}</span>
             </div>
           )}
           <div className="border-t border-border pt-3 flex items-center justify-between">
             <span className="font-heading font-semibold text-foreground">Total</span>
-            <span className="font-heading text-2xl font-bold text-foreground">${finalPrice}<span className="text-sm text-muted-foreground font-normal">/mo</span></span>
+            <span className="font-heading text-2xl font-bold text-foreground">${finalPrice}{!isOneTime && <span className="text-sm text-muted-foreground font-normal">/mo</span>}</span>
           </div>
         </div>
 
         {/* Subscribe Button */}
         <Button variant="glow" className="w-full h-12 font-semibold text-sm" onClick={handleSubscribe} disabled={subscribing}>
-          {subscribing ? "Processing..." : `Subscribe for $${finalPrice}/mo`}
+          {subscribing ? "Processing..." : isOneTime ? `Pay $${finalPrice}` : `Subscribe for $${finalPrice}/mo`}
         </Button>
 
         <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Cancel anytime</span>
+          {!isOneTime && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Cancel anytime</span>}
           <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> Instant access</span>
         </div>
       </div>

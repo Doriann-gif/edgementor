@@ -11,6 +11,7 @@ export interface Mentor {
   concepts: string[];
   session: string;
   monthly_price: number;
+  payment_type: 'monthly' | 'one_time';
   rating: number;
   students: number;
   highlights: string[];
