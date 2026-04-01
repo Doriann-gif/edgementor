@@ -454,180 +454,152 @@ const MentorDashboard = () => {
         <motion.div className="absolute bottom-[-60px] right-1/3 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]" animate={{ y: [0, 12, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
       </div>
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3">
-              <ArrowLeft className="h-4 w-4" /> Back to site
-            </Link>
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Mentor Dashboard</h1>
-            <p className="text-sm text-muted-foreground mt-1">Manage your profile, students, and earnings.</p>
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-6">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-heading font-bold text-base">
+              {mentor.avatar}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-heading text-xl font-bold text-foreground tracking-tight">{mentor.name}</h1>
+                <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${mentor.available ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                  {mentor.available ? "Live" : "Hidden"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">{mentor.experience} · {mentor.session} session · ${mentor.monthly_price}/mo</p>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Link to={`/mentor/${mentor.id}`}>
-              <Button variant="outline" size="sm" className="text-xs"><Eye className="h-3.5 w-3.5 mr-1" /> View Public Profile</Button>
+              <Button variant="ghost" size="sm" className="text-xs h-8"><Eye className="h-3.5 w-3.5 mr-1" /> Preview</Button>
             </Link>
             <Link to="/codes">
-              <Button variant="outline" size="sm" className="text-xs"><Tag className="h-3.5 w-3.5 mr-1" /> Promo Codes</Button>
+              <Button variant="ghost" size="sm" className="text-xs h-8"><Tag className="h-3.5 w-3.5 mr-1" /> Codes</Button>
             </Link>
-            <Button variant="outline" size="sm" className="text-xs" onClick={signOut}>
-              <LogOut className="h-3.5 w-3.5 mr-1.5" /> Sign Out
+            <Button variant="ghost" size="sm" className="text-xs h-8" onClick={signOut}>
+              <LogOut className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
 
-        {/* Stats */}
-        <motion.div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.06 } } }}>
+        {/* Inline Stats Row */}
+        <div className="grid grid-cols-4 gap-3 mb-6">
           {[
-            { icon: Users, label: "Active Students", value: earnings?.activeStudents ?? 0, color: "text-primary", bg: "bg-primary/10" },
-            { icon: DollarSign, label: "Monthly Revenue", value: `$${earnings?.monthlyRevenue ?? 0}`, color: "text-primary", bg: "bg-primary/10" },
+            { icon: Users, label: "Students", value: earnings?.activeStudents ?? 0, color: "text-primary", bg: "bg-primary/10" },
+            { icon: DollarSign, label: "Revenue", value: `$${earnings?.monthlyRevenue ?? 0}`, color: "text-primary", bg: "bg-primary/10" },
             { icon: Star, label: "Rating", value: mentor.rating, color: "text-amber-400", bg: "bg-amber-400/10" },
-            { icon: TrendingUp, label: "Total Subscribers", value: earnings?.allTimeSubs ?? 0, color: "text-pink", bg: "bg-pink/10" },
+            { icon: TrendingUp, label: "Total Subs", value: earnings?.allTimeSubs ?? 0, color: "text-pink", bg: "bg-pink/10" },
           ].map((stat) => (
-            <motion.div
-              key={stat.label}
-              variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}
-              whileHover={{ y: -4, scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="rounded-2xl border border-border bg-card p-4 card-pink-hover cursor-default"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <div className={`h-8 w-8 rounded-lg ${stat.bg} flex items-center justify-center`}>
-                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                </div>
-                <span className="text-xs text-muted-foreground">{stat.label}</span>
+            <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
+              <div className={`h-8 w-8 rounded-lg ${stat.bg} flex items-center justify-center shrink-0`}>
+                <stat.icon className={`h-4 w-4 ${stat.color}`} />
               </div>
-              <span className="font-heading text-2xl font-bold text-foreground">{stat.value}</span>
-            </motion.div>
+              <div>
+                <span className="font-heading text-lg font-bold text-foreground leading-none">{stat.value}</span>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{stat.label}</p>
+              </div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Tabbed Content */}
-        <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="w-full grid grid-cols-4 h-11">
-            <TabsTrigger value="profile" className="text-xs font-semibold">
+        <Tabs defaultValue="profile" className="space-y-4">
+          <TabsList className="w-full grid grid-cols-4 h-10 bg-muted/50 rounded-xl">
+            <TabsTrigger value="profile" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
               <Edit3 className="h-3.5 w-3.5 mr-1.5" /> Profile
             </TabsTrigger>
-            <TabsTrigger value="content" className="text-xs font-semibold">
+            <TabsTrigger value="content" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
               <Crown className="h-3.5 w-3.5 mr-1.5" /> Content
             </TabsTrigger>
-            <TabsTrigger value="students" className="text-xs font-semibold">
+            <TabsTrigger value="students" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
               <Users className="h-3.5 w-3.5 mr-1.5" /> Students
             </TabsTrigger>
-            <TabsTrigger value="income" className="text-xs font-semibold">
+            <TabsTrigger value="income" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
               <Wallet className="h-3.5 w-3.5 mr-1.5" /> Income
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
-            {/* Availability Toggle */}
-            <div className="rounded-2xl border border-border bg-card p-5 mb-6 flex items-center justify-between">
-              <div>
-                <h3 className="font-heading font-semibold text-foreground text-sm">Availability</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {mentor.available ? "You're visible and accepting new students." : "You're hidden from the listing. Existing students aren't affected."}
-                </p>
-              </div>
+            {/* Availability + Edit in one compact row */}
+            <div className="flex items-center justify-between rounded-xl border border-border bg-card p-3.5 mb-4">
               <div className="flex items-center gap-3">
-                <span className={`text-xs font-medium ${mentor.available ? "text-primary" : "text-muted-foreground"}`}>
-                  {mentor.available ? "Available" : "Unavailable"}
-                </span>
                 <Switch
                   checked={mentor.available}
                   onCheckedChange={handleToggleAvailability}
                   disabled={updateProfile.isPending}
                 />
+                <div>
+                  <span className="text-sm font-medium text-foreground">
+                    {mentor.available ? "Accepting students" : "Hidden from listing"}
+                  </span>
+                </div>
               </div>
+              {!editing ? (
+                <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => setEditing(true)}>
+                  <Edit3 className="h-3 w-3 mr-1" /> Edit Profile
+                </Button>
+              ) : (
+                <div className="flex gap-1.5">
+                  <Button size="sm" className="text-xs h-8" onClick={handleSaveProfile} disabled={updateProfile.isPending}>
+                    <Save className="h-3 w-3 mr-1" /> Save
+                  </Button>
+                  <Button variant="ghost" size="sm" className="text-xs h-8" onClick={() => setEditing(false)}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
             </div>
 
-            {/* Profile Editor */}
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-heading font-semibold text-foreground flex items-center gap-2">
-                  <Edit3 className="h-4 w-4 text-primary" /> Profile
-                </h2>
-                {!editing ? (
-                  <Button variant="outline" size="sm" className="text-xs" onClick={() => setEditing(true)}>
-                    <Edit3 className="h-3.5 w-3.5 mr-1" /> Edit
-                  </Button>
-                ) : (
-                  <div className="flex gap-2">
-                    <Button size="sm" className="text-xs h-8" onClick={handleSaveProfile} disabled={updateProfile.isPending}>
-                      <Save className="h-3.5 w-3.5 mr-1" /> Save
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => setEditing(false)}>
-                      <X className="h-3.5 w-3.5 mr-1" /> Cancel
-                    </Button>
+            {/* Profile Card */}
+            <div className="rounded-xl border border-border bg-card p-5">
+              {editing ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Short Bio</Label>
+                    <Textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={2} className="bg-muted border-border text-sm resize-none" />
                   </div>
-                )}
-              </div>
-
-              <div className="rounded-2xl border border-border bg-card p-5 space-y-5">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary font-heading font-bold text-lg">
-                    {mentor.avatar}
+                  <div className="space-y-1.5">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Monthly Price (USD)</Label>
+                    <Input type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} className="bg-muted border-border text-sm w-full" />
                   </div>
-                  <div>
-                    <h3 className="font-heading font-semibold text-foreground">{mentor.name}</h3>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5">
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {mentor.experience}</span>
-                      <span>{mentor.session} session</span>
-                    </div>
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Full Bio</Label>
+                    <Textarea value={editFullBio} onChange={(e) => setEditFullBio(e.target.value)} rows={3} className="bg-muted border-border text-sm resize-none" />
+                  </div>
+                  <div className="col-span-2 space-y-1.5">
+                    <Label className="text-[11px] font-medium text-muted-foreground">Highlights (one per line)</Label>
+                    <Textarea value={editHighlights} onChange={(e) => setEditHighlights(e.target.value)} rows={3} className="bg-muted border-border text-sm resize-none" placeholder="Live trading room daily&#10;1-on-1 weekly calls" />
                   </div>
                 </div>
-
-                {editing ? (
-                  <>
-                    <div className="space-y-2">
-                      <Label className="text-xs">Short Bio</Label>
-                      <Textarea value={editBio} onChange={(e) => setEditBio(e.target.value)} rows={2} className="bg-muted border-border text-sm resize-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs">Full Bio</Label>
-                      <Textarea value={editFullBio} onChange={(e) => setEditFullBio(e.target.value)} rows={4} className="bg-muted border-border text-sm resize-none" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs">Monthly Price (USD)</Label>
-                      <Input type="number" value={editPrice} onChange={(e) => setEditPrice(e.target.value)} className="bg-muted border-border text-sm w-32" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs">Highlights (one per line)</Label>
-                      <Textarea value={editHighlights} onChange={(e) => setEditHighlights(e.target.value)} rows={4} className="bg-muted border-border text-sm resize-none" placeholder="Live trading room daily&#10;1-on-1 weekly calls" />
-                    </div>
-                  </>
-                ) : (
-                  <>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <span className="text-xs text-muted-foreground">Short Bio</span>
-                      <p className="text-sm text-foreground mt-1">{mentor.bio}</p>
+                      <span className="text-[11px] text-muted-foreground font-medium">Short Bio</span>
+                      <p className="text-sm text-foreground mt-1 leading-relaxed">{mentor.bio}</p>
                     </div>
                     <div>
-                      <span className="text-xs text-muted-foreground">Full Bio</span>
-                      <p className="text-sm text-foreground mt-1 leading-relaxed">{mentor.full_bio}</p>
+                      <span className="text-[11px] text-muted-foreground font-medium">Full Bio</span>
+                      <p className="text-sm text-foreground mt-1 leading-relaxed line-clamp-4">{mentor.full_bio}</p>
                     </div>
-                    <div className="flex items-center gap-6">
-                      <div>
-                        <span className="text-xs text-muted-foreground">Monthly Price</span>
-                        <p className="font-heading font-bold text-foreground mt-1">${mentor.monthly_price}</p>
+                  </div>
+                  {mentor.highlights.length > 0 && (
+                    <div>
+                      <span className="text-[11px] text-muted-foreground font-medium">Highlights</span>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {mentor.highlights.map((h) => (
+                          <span key={h} className="inline-flex items-center gap-1.5 rounded-lg bg-primary/5 border border-primary/10 px-2.5 py-1 text-xs text-foreground">
+                            <span className="h-1 w-1 rounded-full bg-primary" /> {h}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                    {mentor.highlights.length > 0 && (
-                      <div>
-                        <span className="text-xs text-muted-foreground">Highlights</span>
-                        <ul className="mt-2 space-y-1.5">
-                          {mentor.highlights.map((h) => (
-                            <li key={h} className="text-sm text-foreground flex items-center gap-2">
-                              <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" /> {h}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </section>
+                  )}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="content">
@@ -635,35 +607,34 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="students">
-            <h2 className="font-heading font-semibold text-foreground mb-4 flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" /> Your Students ({students.length})
-            </h2>
             {students.length === 0 ? (
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
-                <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
-                  <Users className="h-10 w-10 text-primary/20 mx-auto mb-4" />
-                </motion.div>
+              <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
+                <Users className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-sm text-foreground font-medium mb-1">No active students yet</p>
-                <p className="text-xs text-muted-foreground">They'll appear here once someone subscribes to your mentorship.</p>
-              </motion.div>
+                <p className="text-xs text-muted-foreground">They'll appear here once someone subscribes.</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
+                <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-4 py-2.5 border-b border-border bg-muted/30 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  <span />
+                  <span>Student</span>
+                  <span>Joined</span>
+                  <span>Status</span>
+                </div>
                 {students.map((sub: any) => {
                   const profile = sub.profiles;
                   return (
-                    <div key={sub.id} className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
-                      <div className="h-10 w-10 shrink-0 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
+                    <div key={sub.id} className="grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center px-4 py-3 border-b border-border/50 last:border-0 hover:bg-muted/20 transition-colors">
+                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
                         {(profile?.display_name || "?").charAt(0).toUpperCase()}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-heading font-semibold text-sm text-foreground truncate">
-                          {profile?.display_name || "Student"}
-                        </h4>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" /> Joined {new Date(sub.started_at).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary capitalize">{sub.status}</span>
+                      <span className="font-heading font-semibold text-sm text-foreground truncate">
+                        {profile?.display_name || "Student"}
+                      </span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {new Date(sub.started_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                      <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary capitalize">{sub.status}</span>
                     </div>
                   );
                 })}
