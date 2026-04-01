@@ -47,7 +47,19 @@ const MentorProfile = () => {
   const toggleSave = useToggleSaveMentor();
   const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
 
-
+  const { data: showcaseImages = [] } = useQuery({
+    queryKey: ["mentor-showcase-images", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("mentor_showcase_images")
+        .select("*")
+        .eq("mentor_id", id!)
+        .order("display_order");
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleSave = () => {
     if (!user) { toast.error("Sign in to save mentors"); return; }
