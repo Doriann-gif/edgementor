@@ -84,7 +84,20 @@ const fadeUp = {
 const FreeContent = () => {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
-  
+  const [sortBy, setSortBy] = useState("default");
+
+  const parseViews = (v: string) => {
+    const num = parseFloat(v);
+    if (v.endsWith("M")) return num * 1_000_000;
+    if (v.endsWith("K")) return num * 1_000;
+    return num;
+  };
+
+  const parseDuration = (d: string) => {
+    const parts = d.split(":").map(Number);
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    return parts[0] * 60 + parts[1];
+  };
 
   const filtered = VIDEOS.filter((v) => {
     const matchCat = category === "All" || v.category === category;
@@ -93,6 +106,13 @@ const FreeContent = () => {
       v.title.toLowerCase().includes(search.toLowerCase()) ||
       v.channel.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    if (sortBy === "views") return parseViews(b.views) - parseViews(a.views);
+    if (sortBy === "duration") return parseDuration(b.duration) - parseDuration(a.duration);
+    if (sortBy === "shortest") return parseDuration(a.duration) - parseDuration(b.duration);
+    return 0;
   });
 
   return (
