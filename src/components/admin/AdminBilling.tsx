@@ -1,20 +1,25 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import {
   DollarSign, TrendingUp, CreditCard, Users, Search, ArrowUpDown,
-  CalendarDays, Clock, CheckCircle2, XCircle, AlertCircle,
+  CalendarDays, Clock, CheckCircle2, XCircle, AlertCircle, Ban, Trash2,
 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 const AdminBilling = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"date" | "price">("date");
+  const queryClient = useQueryClient();
+
 
   // Fetch all subscriptions with mentor details
   const { data: subscriptions = [], isLoading } = useQuery({
@@ -37,6 +42,35 @@ const AdminBilling = () => {
       if (error) throw error;
       return data || [];
     },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: async (subId: string) => {
+      const { error } = await supabase
+        .from("subscriptions")
+        .update({ status: "canceled", expires_at: new Date().toISOString() })
+        .eq("id", subId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-billing-subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-subscriptions"] });
+      toast.success("Subscription canceled");
+    },
+    onError: () => toast.error("Failed to cancel subscription"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (subId: string) => {
+      const { error } = await supabase.from("subscriptions").delete().eq("id", subId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-billing-subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-all-subscriptions"] });
+      toast.success("Subscription removed");
+    },
+    onError: () => toast.error("Failed to remove subscription"),
   });
 
   const profileMap = new Map(profiles.map((p) => [p.id, p.display_name || "Unknown"]));
@@ -187,12 +221,13 @@ const AdminBilling = () => {
         ) : (
           <div className="divide-y divide-border">
             {/* Table Header */}
-            <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-muted/30 text-xs font-medium text-muted-foreground">
+            <div className="hidden sm:grid grid-cols-13 gap-4 px-6 py-3 bg-muted/30 text-xs font-medium text-muted-foreground">
               <div className="col-span-3">Subscriber</div>
               <div className="col-span-3">Mentor</div>
               <div className="col-span-2">Price</div>
               <div className="col-span-2">Started</div>
               <div className="col-span-2">Status</div>
+              <div className="col-span-1">Actions</div>
             </div>
 
             {sorted.map((sub) => {
@@ -202,9 +237,8 @@ const AdminBilling = () => {
               return (
                 <div
                   key={sub.id}
-                  className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 px-6 py-4 hover:bg-muted/20 transition-colors items-center"
+                  className="grid grid-cols-1 sm:grid-cols-13 gap-2 sm:gap-4 px-6 py-4 hover:bg-muted/20 transition-colors items-center"
                 >
-                  {/* Subscriber */}
                   <div className="col-span-3 flex items-center gap-2.5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary text-xs font-bold shrink-0">
                       {userName.charAt(0).toUpperCase()}
@@ -215,7 +249,6 @@ const AdminBilling = () => {
                     </div>
                   </div>
 
-                  {/* Mentor */}
                   <div className="col-span-3 flex items-center gap-2.5">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-bold shrink-0">
                       {mentor?.avatar || "?"}
@@ -223,14 +256,12 @@ const AdminBilling = () => {
                     <p className="text-sm text-foreground truncate">{mentor?.name || "Unknown Mentor"}</p>
                   </div>
 
-                  {/* Price */}
                   <div className="col-span-2">
                     <p className="text-sm font-semibold text-foreground">
                       ${mentor?.monthly_price || 0}<span className="text-xs text-muted-foreground font-normal">/mo</span>
                     </p>
                   </div>
 
-                  {/* Started */}
                   <div className="col-span-2 flex items-center gap-1.5">
                     <CalendarDays className="h-3 w-3 text-muted-foreground shrink-0" />
                     <p className="text-xs text-muted-foreground">
@@ -238,7 +269,6 @@ const AdminBilling = () => {
                     </p>
                   </div>
 
-                  {/* Status */}
                   <div className="col-span-2 flex items-center gap-1.5">
                     {statusIcon(sub.status)}
                     <Badge variant={statusBadgeVariant(sub.status)} className="text-[10px] capitalize">
@@ -249,6 +279,61 @@ const AdminBilling = () => {
                         <Clock className="h-2.5 w-2.5" />
                         {format(new Date(sub.expires_at), "MMM d")}
                       </span>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-1 flex items-center gap-1">
+                    {sub.status === "active" ? (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" title="Cancel subscription">
+                            <Ban className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Cancel {userName}'s subscription to {mentor?.name}? This will mark it as canceled immediately.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Keep Active</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => cancelMutation.mutate(sub.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Cancel Subscription
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    ) : (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" title="Delete record">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Subscription Record</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Permanently delete this subscription record? This cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Keep</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteMutation.mutate(sub.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 </div>

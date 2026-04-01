@@ -1,17 +1,20 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import {
-  ChevronRight, User, CalendarDays, Mail, CheckCircle2, XCircle, Clock, CreditCard, ArrowLeft,
+  ChevronRight, CalendarDays, Mail, CheckCircle2, XCircle, CreditCard, ArrowLeft, Ban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const AdminStudents = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: profiles = [], isLoading } = useQuery({
     queryKey: ["admin-students"],
@@ -32,6 +35,35 @@ const AdminStudents = () => {
       if (error) throw error;
       return data;
     },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: async (subId: string) => {
+      const { error } = await supabase
+        .from("subscriptions")
+        .update({ status: "canceled", expires_at: new Date().toISOString() })
+        .eq("id", subId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-all-subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-billing-subscriptions"] });
+      toast.success("Subscription canceled successfully");
+    },
+    onError: () => toast.error("Failed to cancel subscription"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (subId: string) => {
+      const { error } = await supabase.from("subscriptions").delete().eq("id", subId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-all-subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-billing-subscriptions"] });
+      toast.success("Subscription removed");
+    },
+    onError: () => toast.error("Failed to remove subscription"),
   });
 
   const activeSubMap = new Map<string, string[]>();
@@ -56,7 +88,6 @@ const AdminStudents = () => {
 
     return (
       <div className="space-y-6">
-        {/* Back button */}
         <Button
           variant="ghost"
           size="sm"
@@ -67,7 +98,6 @@ const AdminStudents = () => {
           Back to Students
         </Button>
 
-        {/* Profile header */}
         <Card className="border-border">
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
@@ -93,7 +123,6 @@ const AdminStudents = () => {
           </CardContent>
         </Card>
 
-        {/* Stats row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Card className="border-border">
             <CardContent className="pt-5 pb-4">
@@ -115,7 +144,6 @@ const AdminStudents = () => {
           </Card>
         </div>
 
-        {/* Active subscriptions */}
         {activeSubs.length > 0 && (
           <div className="space-y-3">
             <h3 className="text-sm font-medium font-heading text-foreground">Active Subscriptions</h3>
@@ -133,17 +161,43 @@ const AdminStudents = () => {
                         Started {format(new Date(sub.started_at), "MMM d, yyyy")}
                       </p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-semibold">
-                        ${mentor?.monthly_price || 0}
-                        <span className="text-xs text-muted-foreground font-normal">
-                          {mentor?.payment_type === "one_time" ? "" : "/mo"}
-                        </span>
-                      </p>
-                      <Badge variant="default" className="text-[10px] mt-0.5">
-                        <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
-                        Active
-                      </Badge>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-semibold">
+                          ${mentor?.monthly_price || 0}
+                          <span className="text-xs text-muted-foreground font-normal">
+                            {mentor?.payment_type === "one_time" ? "" : "/mo"}
+                          </span>
+                        </p>
+                        <Badge variant="default" className="text-[10px] mt-0.5">
+                          <CheckCircle2 className="h-2.5 w-2.5 mr-0.5" />
+                          Active
+                        </Badge>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                            <Ban className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Cancel Subscription</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will cancel {selectedProfile.display_name}'s subscription to {mentor?.name}. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Keep Active</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => cancelMutation.mutate(sub.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Cancel Subscription
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 );
@@ -152,7 +206,6 @@ const AdminStudents = () => {
           </div>
         )}
 
-        {/* Past subscriptions */}
         {pastSubs.length > 0 && (
           <div className="space-y-3">
             <h3 className="text-sm font-medium font-heading text-foreground">Past Subscriptions</h3>
@@ -171,14 +224,38 @@ const AdminStudents = () => {
                         {sub.expires_at && ` — ${format(new Date(sub.expires_at), "MMM d, yyyy")}`}
                       </p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-semibold text-muted-foreground">
-                        ${mentor?.monthly_price || 0}
-                      </p>
-                      <Badge variant="destructive" className="text-[10px] mt-0.5 capitalize">
-                        <XCircle className="h-2.5 w-2.5 mr-0.5" />
-                        {sub.status}
-                      </Badge>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-semibold text-muted-foreground">${mentor?.monthly_price || 0}</p>
+                        <Badge variant="destructive" className="text-[10px] mt-0.5 capitalize">
+                          <XCircle className="h-2.5 w-2.5 mr-0.5" />
+                          {sub.status}
+                        </Badge>
+                      </div>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive">
+                            <XCircle className="h-3.5 w-3.5" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remove Subscription Record</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete this subscription record. This cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Keep</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => deleteMutation.mutate(sub.id)}
+                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            >
+                              Delete Record
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 );
