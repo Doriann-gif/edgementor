@@ -558,7 +558,7 @@ const Homepage = () => {
                     <div className="absolute -top-12 -right-12 w-24 h-24 bg-pink-400/[0.06] rounded-full blur-xl pointer-events-none group-hover:bg-pink-400/[0.12] transition-colors duration-500" />
 
                     <motion.div
-                      className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-5`}
+                      className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-6`}
                       whileHover={{ scale: 1.2, rotate: -10 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
