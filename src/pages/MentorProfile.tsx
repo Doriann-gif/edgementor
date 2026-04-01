@@ -2,6 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
 import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
