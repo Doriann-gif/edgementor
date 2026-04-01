@@ -99,13 +99,25 @@ serve(async (req) => {
     // Split payments to mentor's Connect account (platform keeps 20%)
     if (mentor.stripe_connect_account_id) {
       const applicationFeePercent = 20;
-      sessionParams.subscription_data = {
-        transfer_data: {
-          destination: mentor.stripe_connect_account_id,
-        },
-        application_fee_percent: applicationFeePercent,
-      };
-      console.log(`[CREATE-CHECKOUT] Splitting payments to Connect account ${mentor.stripe_connect_account_id}, platform fee: ${applicationFeePercent}%`);
+      if (isOneTime) {
+        // For one-time payments, use application_fee_amount
+        const feeAmount = Math.round(unitAmount * applicationFeePercent / 100);
+        sessionParams.payment_intent_data = {
+          application_fee_amount: feeAmount,
+          transfer_data: {
+            destination: mentor.stripe_connect_account_id,
+          },
+        };
+      } else {
+        // For subscriptions, use application_fee_percent on subscription_data
+        sessionParams.subscription_data = {
+          transfer_data: {
+            destination: mentor.stripe_connect_account_id,
+          },
+          application_fee_percent: applicationFeePercent,
+        };
+      }
+      console.log(`[CREATE-CHECKOUT] Splitting payments to Connect account ${mentor.stripe_connect_account_id}, platform fee: ${applicationFeePercent}%, mode: ${isOneTime ? "one_time" : "subscription"}`);
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
