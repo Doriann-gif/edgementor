@@ -221,12 +221,13 @@ const AdminBilling = () => {
         ) : (
           <div className="divide-y divide-border">
             {/* Table Header */}
-            <div className="hidden sm:grid grid-cols-12 gap-4 px-6 py-3 bg-muted/30 text-xs font-medium text-muted-foreground">
+            <div className="hidden sm:grid grid-cols-13 gap-4 px-6 py-3 bg-muted/30 text-xs font-medium text-muted-foreground">
               <div className="col-span-3">Subscriber</div>
               <div className="col-span-3">Mentor</div>
               <div className="col-span-2">Price</div>
               <div className="col-span-2">Started</div>
               <div className="col-span-2">Status</div>
+              <div className="col-span-1">Actions</div>
             </div>
 
             {sorted.map((sub) => {
