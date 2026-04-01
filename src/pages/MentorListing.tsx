@@ -492,7 +492,7 @@ const MentorListingPage = () => {
 
         {/* Mentor Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="relative rounded-2xl border border-border bg-card/50 p-5 overflow-hidden">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-muted-foreground/5 to-transparent" />
