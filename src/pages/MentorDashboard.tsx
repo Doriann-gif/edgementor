@@ -482,17 +482,11 @@ const MentorDashboard = () => {
   return (
     <PageTransition>
     <div className="min-h-screen bg-background">
-      {/* Ambient */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div className="absolute top-[-80px] left-1/4 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]" animate={{ y: [0, -15, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
-        <motion.div className="absolute bottom-[-60px] right-1/3 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]" animate={{ y: [0, 12, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
-      </div>
-
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-6">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         {/* Compact Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-heading font-bold text-base">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted text-foreground font-heading font-bold text-base">
               {mentor.avatar}
             </div>
             <div>
@@ -518,17 +512,17 @@ const MentorDashboard = () => {
           </div>
         </div>
 
-        {/* Inline Stats Row */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        {/* Stats Row */}
+        <div className="grid grid-cols-4 gap-4 mb-8">
           {[
-            { icon: Users, label: "Students", value: earnings?.activeStudents ?? 0, color: "text-primary", bg: "bg-primary/10" },
-            { icon: DollarSign, label: "Revenue", value: `$${earnings?.monthlyRevenue ?? 0}`, color: "text-primary", bg: "bg-primary/10" },
-            { icon: Star, label: "Rating", value: mentor.rating, color: "text-amber-400", bg: "bg-amber-400/10" },
-            { icon: TrendingUp, label: "Total Subs", value: earnings?.allTimeSubs ?? 0, color: "text-pink", bg: "bg-pink/10" },
+            { icon: Users, label: "Students", value: earnings?.activeStudents ?? 0 },
+            { icon: DollarSign, label: "Revenue", value: `$${earnings?.monthlyRevenue ?? 0}` },
+            { icon: Star, label: "Rating", value: mentor.rating },
+            { icon: TrendingUp, label: "Total Subs", value: earnings?.allTimeSubs ?? 0 },
           ].map((stat) => (
-            <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3">
-              <div className={`h-8 w-8 rounded-lg ${stat.bg} flex items-center justify-center shrink-0`}>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+            <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-border bg-card p-4">
+              <div className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                <stat.icon className="h-4 w-4 text-muted-foreground" />
               </div>
               <div>
                 <span className="font-heading text-lg font-bold text-foreground leading-none">{stat.value}</span>
