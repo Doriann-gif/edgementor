@@ -59,7 +59,7 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
         whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
-        className={`relative rounded-2xl border p-5 transition-colors duration-300 card-pink-hover ${
+        className={`relative rounded-2xl border p-6 transition-colors duration-300 card-pink-hover ${
           isElite
             ? "border-slate-600/50 bg-gradient-to-br from-slate-900 via-card to-slate-800/60 hover:border-slate-400/50 hover:shadow-[0_20px_60px_-15px_rgba(148,163,184,0.15)]"
             : "border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-[0_20px_60px_-15px_hsl(160_84%_39%/0.12)]"
