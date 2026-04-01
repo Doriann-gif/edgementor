@@ -66,25 +66,28 @@ serve(async (req) => {
     const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
 
     const unitAmount = Math.round(mentor.monthly_price * 100 * (1 - discountPercent / 100));
+    const isOneTime = mentor.payment_type === "one_time";
+
+    const lineItem: any = {
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: `${mentor.name} — ${isOneTime ? "Mentorship Access" : "Monthly Mentorship"}`,
+          description: isOneTime
+            ? `One-time access to ${mentor.name}`
+            : `Monthly subscription to ${mentor.name}`,
+        },
+        unit_amount: unitAmount,
+        ...(isOneTime ? {} : { recurring: { interval: "month" } }),
+      },
+      quantity: 1,
+    };
 
     const sessionParams: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: `${mentor.name} — Monthly Mentorship`,
-              description: `Monthly subscription to ${mentor.name}`,
-            },
-            unit_amount: unitAmount,
-            recurring: { interval: "month" },
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
+      line_items: [lineItem],
+      mode: isOneTime ? "payment" : "subscription",
       success_url: `${req.headers.get("origin")}/payment-success?mentor_id=${mentorId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/subscribe/${mentorId}`,
       metadata: {
