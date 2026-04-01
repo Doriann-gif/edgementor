@@ -622,8 +622,18 @@ const AccountSettings = () => {
                 {isMentor && (
                   <button
                     className="group rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
-                    onClick={() => {
-                      toast.info("Withdrawal request submitted. Funds will be sent to your linked payout method within 3-5 business days.", { duration: 5000 });
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await supabase.functions.invoke("process-withdrawal", {
+                          body: { action: "withdraw" },
+                        });
+                        if (error) throw error;
+                        if (data?.error) throw new Error(data.error);
+                        toast.success(data?.message || "Withdrawal initiated!");
+                        queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
+                      } catch (err: any) {
+                        toast.error(err.message || "Failed to withdraw.");
+                      }
                     }}
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 mb-4 group-hover:bg-emerald-500/15 transition-colors">
