@@ -7,151 +7,66 @@ import PageTransition from "@/components/PageTransition";
 
 const CATEGORIES = ["All", "Price Action", "ICT / SMC", "Order Flow", "Risk Management", "Psychology", "Crypto"];
 
+const FEATURED_CREATORS = [
+  { name: "ICT", channel: "The Inner Circle Trader" },
+  { name: "TJR", channel: "TJR" },
+  { name: "PB Trading", channel: "PB Trading" },
+  { name: "Rayner Teo", channel: "Rayner Teo" },
+  { name: "Trading Rush", channel: "Trading Rush" },
+];
+
 const VIDEOS = [
-  {
-    id: "C_0Jh7HwCUI",
-    title: "Advanced ICT Liquidity Concepts",
-    channel: "The Inner Circle Trader",
-    views: "218K",
-    duration: "1:14:02",
-    category: "ICT / SMC",
-  },
-  {
-    id: "3ZM2b-Sdg2A",
-    title: "SMC Trading Strategy Explained Step by Step",
-    channel: "Justin Bennett",
-    views: "75K",
-    duration: "18:44",
-    category: "ICT / SMC",
-  },
-  {
-    id: "mEyuQVy3OHc",
-    title: "The Ultimate Forex Trading Course (For Beginners)",
-    channel: "Rayner Teo",
-    views: "3.4M",
-    duration: "45:22",
-    category: "Price Action",
-  },
-  {
-    id: "_JRQn7_1Wyk",
-    title: "How to Reveal Market Intent With Order Flow",
-    channel: "Axia Futures",
-    views: "3.5K",
-    duration: "2:22",
-    category: "Order Flow",
-  },
-  {
-    id: "7lWMAe8P4N0",
-    title: "70%+ Win Rate Trading Strategy With Proof",
-    channel: "Trading Rush",
-    views: "152K",
-    duration: "9:32",
-    category: "Risk Management",
-  },
-  {
-    id: "492qcmMD70c",
-    title: "Trading with a Gambling Mindset",
-    channel: "Mark Douglas",
-    views: "386",
-    duration: "22:36",
-    category: "Psychology",
-  },
-  {
-    id: "TxFITsJBQbI",
-    title: "Best Supply and Demand Trading Strategy Explained",
-    channel: "Trading Educators",
-    views: "1.5M",
-    duration: "34:50",
-    category: "Price Action",
-  },
-  {
-    id: "q2cT_jMup_w",
-    title: "Bitcoin Trading 101 — The Only Guide You Need",
-    channel: "Coin Bureau",
-    views: "148K",
-    duration: "19:40",
-    category: "Crypto",
-  },
-  {
-    id: "Nj2Gb-x7lIA",
-    title: "Volume Profile — The Ultimate Day Trading Guide",
-    channel: "Trader Dale",
-    views: "75K",
-    duration: "2:09:00",
-    category: "Order Flow",
-  },
-  {
-    id: "mE6GruXMcFM",
-    title: "8 ICT Liquidity Concepts Every Trader Must Know",
-    channel: "Smart Money Strategy",
-    views: "1.3M",
-    duration: "58:20",
-    category: "ICT / SMC",
-  },
-  {
-    id: "m4WOwgUMQuc",
-    title: "The Best Candlestick Pattern Guide You'll Ever Find",
-    channel: "Data Trader",
-    views: "2.6M",
-    duration: "22:59",
-    category: "Price Action",
-  },
-  {
-    id: "RdMPYEjvPvI",
-    title: "Footprint Charts Mastery — The Ultimate Trading Tool",
-    channel: "Wysetrade",
-    views: "238K",
-    duration: "22:32",
-    category: "Order Flow",
-  },
-  {
-    id: "uzwx8pe0QdA",
-    title: "4 Position Sizing Methods Behind Winning Trades",
-    channel: "Unbiased Trading",
-    views: "12K",
-    duration: "12:11",
-    category: "Risk Management",
-  },
-  {
-    id: "hnS5sjqXXIc",
-    title: "Crypto Trading for Beginners — Full Course",
-    channel: "Crypto Educators",
-    views: "2.3M",
-    duration: "1:24:15",
-    category: "Crypto",
-  },
-  {
-    id: "0CO9DCNfMSA",
-    title: "Why Most Traders Fail — Psychology, Risk & Consistency",
-    channel: "Andrew Mitchem",
-    views: "249",
-    duration: "30:09",
-    category: "Psychology",
-  },
-  {
-    id: "BFfF_Lnk9T4",
-    title: "Fair Value Gap Simplified — Smart Money Course",
-    channel: "Smart Risk",
-    views: "942K",
-    duration: "14:33",
-    category: "ICT / SMC",
-  },
-  {
-    id: "Ogj1tFEXDQ8",
-    title: "Support & Resistance Strategy — All You Need to Know",
-    channel: "Riley Coleman",
-    views: "46K",
-    duration: "27:01",
-    category: "Price Action",
-  },
-  {
-    id: "BhgmwbVk96c",
-    title: "How to 10x Your Bitcoin",
-    channel: "Coin Bureau Trading",
-    views: "15K",
-    duration: "29:55",
-    category: "Crypto",
-  },
+  // ICT / SMC
+  { id: "C_0Jh7HwCUI", title: "Advanced ICT Liquidity Concepts", channel: "The Inner Circle Trader", views: "218K", duration: "1:14:02", category: "ICT / SMC" },
+  { id: "3ZM2b-Sdg2A", title: "SMC Trading Strategy Explained Step by Step", channel: "Justin Bennett", views: "75K", duration: "18:44", category: "ICT / SMC" },
+  { id: "mE6GruXMcFM", title: "8 ICT Liquidity Concepts Every Trader Must Know", channel: "Smart Money Strategy", views: "1.3M", duration: "58:20", category: "ICT / SMC" },
+  { id: "BFfF_Lnk9T4", title: "Fair Value Gap Simplified — Smart Money Course", channel: "Smart Risk", views: "942K", duration: "14:33", category: "ICT / SMC" },
+  { id: "xYJMy2mMGJ4", title: "ICT Order Blocks Explained in 10 Minutes", channel: "The Inner Circle Trader", views: "530K", duration: "10:22", category: "ICT / SMC" },
+  { id: "Kv5y3GaXHcQ", title: "How To Trade Fair Value Gaps Like a PRO", channel: "TJR", views: "412K", duration: "22:15", category: "ICT / SMC" },
+  { id: "WP1fVkRyMiU", title: "Smart Money Concepts Full Breakdown", channel: "TJR", views: "289K", duration: "35:40", category: "ICT / SMC" },
+  { id: "QyKcbvMYKH0", title: "ICT Breaker Blocks & Mitigation — Complete Guide", channel: "PB Trading", views: "185K", duration: "28:33", category: "ICT / SMC" },
+  { id: "pDf5ORJQ0zM", title: "Liquidity Sweeps — The Only Strategy You Need", channel: "PB Trading", views: "320K", duration: "19:47", category: "ICT / SMC" },
+  { id: "6fGp2HKZOQA", title: "How ICT Trades the London Session", channel: "The Inner Circle Trader", views: "1.1M", duration: "1:02:30", category: "ICT / SMC" },
+
+  // Price Action
+  { id: "mEyuQVy3OHc", title: "The Ultimate Forex Trading Course (For Beginners)", channel: "Rayner Teo", views: "3.4M", duration: "45:22", category: "Price Action" },
+  { id: "TxFITsJBQbI", title: "Best Supply and Demand Trading Strategy Explained", channel: "Trading Educators", views: "1.5M", duration: "34:50", category: "Price Action" },
+  { id: "m4WOwgUMQuc", title: "The Best Candlestick Pattern Guide You'll Ever Find", channel: "Data Trader", views: "2.6M", duration: "22:59", category: "Price Action" },
+  { id: "Ogj1tFEXDQ8", title: "Support & Resistance Strategy — All You Need to Know", channel: "Riley Coleman", views: "46K", duration: "27:01", category: "Price Action" },
+  { id: "N5yVxOaKcXk", title: "Price Action Trading Was Hard Until I Learned This", channel: "TJR", views: "198K", duration: "16:42", category: "Price Action" },
+  { id: "L3EazkCHn1I", title: "How to Read Candlestick Charts for Day Trading", channel: "PB Trading", views: "275K", duration: "24:18", category: "Price Action" },
+  { id: "hRhJMo0TJaw", title: "The Only Price Action Video You Will Ever Need", channel: "Rayner Teo", views: "2.1M", duration: "38:15", category: "Price Action" },
+  { id: "7srdUDjfWCY", title: "3 Simple Price Action Strategies for Beginners", channel: "Trading Rush", views: "1.8M", duration: "11:20", category: "Price Action" },
+  { id: "PwFCg0lP-ks", title: "Market Structure Explained — Breaks, CHoCH & BOS", channel: "PB Trading", views: "156K", duration: "20:55", category: "Price Action" },
+
+  // Order Flow
+  { id: "_JRQn7_1Wyk", title: "How to Reveal Market Intent With Order Flow", channel: "Axia Futures", views: "3.5K", duration: "2:22", category: "Order Flow" },
+  { id: "Nj2Gb-x7lIA", title: "Volume Profile — The Ultimate Day Trading Guide", channel: "Trader Dale", views: "75K", duration: "2:09:00", category: "Order Flow" },
+  { id: "RdMPYEjvPvI", title: "Footprint Charts Mastery — The Ultimate Trading Tool", channel: "Wysetrade", views: "238K", duration: "22:32", category: "Order Flow" },
+  { id: "J4oVhLFhMp8", title: "Order Flow Trading — How Institutions Move Price", channel: "Axia Futures", views: "92K", duration: "31:10", category: "Order Flow" },
+  { id: "Grs3_dRqnNw", title: "Delta & Cumulative Volume Delta Explained", channel: "Trader Dale", views: "48K", duration: "15:44", category: "Order Flow" },
+
+  // Risk Management
+  { id: "7lWMAe8P4N0", title: "70%+ Win Rate Trading Strategy With Proof", channel: "Trading Rush", views: "152K", duration: "9:32", category: "Risk Management" },
+  { id: "uzwx8pe0QdA", title: "4 Position Sizing Methods Behind Winning Trades", channel: "Unbiased Trading", views: "12K", duration: "12:11", category: "Risk Management" },
+  { id: "vz4c5XRxzJE", title: "Risk Management: The #1 Skill Every Trader Needs", channel: "TJR", views: "134K", duration: "14:50", category: "Risk Management" },
+  { id: "SEoMj5GNYEM", title: "How to Size Your Trades Properly", channel: "Rayner Teo", views: "890K", duration: "12:08", category: "Risk Management" },
+  { id: "jGN8r8fKNiA", title: "Why 90% of Traders Lose Money — Risk Rules", channel: "Trading Rush", views: "2.4M", duration: "8:45", category: "Risk Management" },
+  { id: "EYxMFHjQWQQ", title: "My Risk Management System (Copy This)", channel: "PB Trading", views: "98K", duration: "17:30", category: "Risk Management" },
+
+  // Psychology
+  { id: "492qcmMD70c", title: "Trading with a Gambling Mindset", channel: "Mark Douglas", views: "386", duration: "22:36", category: "Psychology" },
+  { id: "0CO9DCNfMSA", title: "Why Most Traders Fail — Psychology, Risk & Consistency", channel: "Andrew Mitchem", views: "249", duration: "30:09", category: "Psychology" },
+  { id: "cAVsjaErJjk", title: "Trading in the Zone — Full Audiobook Summary", channel: "Trading Psychology", views: "1.2M", duration: "42:18", category: "Psychology" },
+  { id: "Rl5I1h1OZZY", title: "How to Stay Disciplined as a Trader", channel: "TJR", views: "76K", duration: "11:33", category: "Psychology" },
+  { id: "wuYwvjdSX6w", title: "The Mindset That Made Me Profitable", channel: "PB Trading", views: "112K", duration: "15:20", category: "Psychology" },
+
+  // Crypto
+  { id: "q2cT_jMup_w", title: "Bitcoin Trading 101 — The Only Guide You Need", channel: "Coin Bureau", views: "148K", duration: "19:40", category: "Crypto" },
+  { id: "hnS5sjqXXIc", title: "Crypto Trading for Beginners — Full Course", channel: "Crypto Educators", views: "2.3M", duration: "1:24:15", category: "Crypto" },
+  { id: "BhgmwbVk96c", title: "How to 10x Your Bitcoin", channel: "Coin Bureau Trading", views: "15K", duration: "29:55", category: "Crypto" },
+  { id: "bNMVWA2bpOQ", title: "Altcoin Trading Strategy That Actually Works", channel: "Coin Bureau", views: "320K", duration: "18:12", category: "Crypto" },
+  { id: "Lhf_2gJJS1I", title: "How to Read Crypto Charts — Complete Beginner Guide", channel: "Crypto Educators", views: "1.8M", duration: "26:40", category: "Crypto" },
 ];
 
 const fadeUp = {
@@ -223,6 +138,22 @@ const FreeContent = () => {
                 <span className="font-semibold text-foreground">{s.value}</span>
                 <span>{s.label}</span>
               </div>
+            ))}
+          </motion.div>
+
+          {/* Featured Creators */}
+          <motion.div variants={fadeUp} custom={4} className="flex flex-wrap items-center justify-center gap-2 mt-5">
+            <span className="text-xs text-muted-foreground mr-1">
+              <Star className="h-3 w-3 inline mr-1" />Featured:
+            </span>
+            {FEATURED_CREATORS.map((c) => (
+              <button
+                key={c.name}
+                onClick={() => { setSearch(c.channel); setCategory("All"); }}
+                className="rounded-full border border-border bg-muted/50 px-3 py-1 text-xs font-medium text-foreground hover:border-primary/40 hover:bg-primary/10 transition-colors"
+              >
+                {c.name}
+              </button>
             ))}
           </motion.div>
         </motion.div>
