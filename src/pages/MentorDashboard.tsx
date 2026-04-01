@@ -307,6 +307,61 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
           </CollapsibleContent>
         </motion.div>
       </Collapsible>
+
+      {/* Payout History */}
+      <Collapsible open={historyOpen} onOpenChange={setHistoryOpen}>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="rounded-2xl border border-border bg-card">
+          <CollapsibleTrigger className="w-full flex items-center justify-between p-5 hover:bg-muted/30 transition-colors rounded-2xl">
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <History className="h-4 w-4 text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-heading font-semibold text-foreground text-sm">Payout History</h3>
+                <p className="text-xs text-muted-foreground">
+                  {balance.payout_history?.length ? `${balance.payout_history.length} payout(s)` : "No payouts yet"}
+                </p>
+              </div>
+            </div>
+            {historyOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="px-5 pb-5 pt-0 space-y-2">
+              {!balance.payout_history?.length ? (
+                <p className="text-xs text-muted-foreground text-center py-4">No payouts have been made yet.</p>
+              ) : (
+                balance.payout_history.map((p) => {
+                  const statusColor =
+                    p.status === "paid" ? "bg-primary/10 text-primary" :
+                    p.status === "pending" || p.status === "in_transit" ? "bg-amber-400/10 text-amber-400" :
+                    "bg-destructive/10 text-destructive";
+                  return (
+                    <div key={p.id} className="flex items-center justify-between rounded-xl bg-muted/50 p-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-primary/5 flex items-center justify-center">
+                          <Banknote className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">${p.amount.toFixed(2)}</p>
+                          <p className="text-[11px] text-muted-foreground">
+                            {new Date(p.created * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                            {p.arrival_date && (
+                              <> · Est. arrival {new Date(p.arrival_date * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`rounded-md px-2.5 py-1 text-[11px] font-semibold capitalize ${statusColor}`}>
+                        {p.status === "in_transit" ? "In Transit" : p.status}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </CollapsibleContent>
+        </motion.div>
+      </Collapsible>
     </div>
   );
 };
