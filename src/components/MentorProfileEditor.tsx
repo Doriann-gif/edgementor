@@ -41,9 +41,6 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
   const [editHighlights, setEditHighlights] = useState<string[]>([...mentor.highlights]);
   const [newHighlight, setNewHighlight] = useState("");
 
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [pickerColor, setPickerColor] = useState(mentor.banner_color || "#6d28d9");
-  const [savingColor, setSavingColor] = useState(false);
 
   const startEditing = () => {
     setEditBio(mentor.bio);
