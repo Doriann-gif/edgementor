@@ -735,7 +735,9 @@ const AccountSettings = () => {
                 {isMentor && (
                   <button
                     className="group rounded-2xl border border-border bg-card p-6 text-left hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
+                    disabled={connectLoading}
                     onClick={async () => {
+                      setConnectLoading(true);
                       try {
                         const { data, error } = await supabase.functions.invoke("process-withdrawal", {
                           body: { action: "withdraw" },
@@ -745,18 +747,25 @@ const AccountSettings = () => {
                         toast.success(data?.message || "Withdrawal initiated!");
                         queryClient.invalidateQueries({ queryKey: ["connect-balance"] });
                       } catch (err: any) {
-                        const msg = err.message?.toLowerCase() || "";
-                        if (msg.includes("connect account not set up") || msg.includes("non-2xx"))
-                          toast.info("Set up your payout account first to withdraw earnings.");
-                        else if (msg.includes("no available balance") || msg.includes("insufficient"))
+                        const msg = err?.message || String(err);
+                        const lower = msg.toLowerCase();
+                        if (lower.includes("connect account not set up") || lower.includes("stripe connect account not set up") || lower.includes("non-2xx"))
+                          toast.info("Set up your payout account first in the Mentor Hub → Income tab.");
+                        else if (lower.includes("payouts not enabled"))
+                          toast.info("Complete your Stripe account setup first to enable withdrawals.");
+                        else if (lower.includes("no available balance") || lower.includes("insufficient"))
                           toast.info("No funds available to withdraw right now.");
+                        else if (lower.includes("mentor not found"))
+                          toast.info("Mentor profile not found. Make sure you're an approved mentor.");
                         else
-                          toast.error(err.message || "Failed to withdraw.");
+                          toast.error(msg || "Failed to withdraw.");
+                      } finally {
+                        setConnectLoading(false);
                       }
                     }}
                   >
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 mb-4 group-hover:bg-emerald-500/15 transition-colors">
-                      <Download className="h-5 w-5 text-emerald-500 rotate-180" />
+                      {connectLoading ? <Loader2 className="h-5 w-5 text-emerald-500 animate-spin" /> : <Download className="h-5 w-5 text-emerald-500 rotate-180" />}
                     </div>
                     <h4 className="font-heading font-semibold text-foreground mb-1">Withdraw Earnings</h4>
                     <p className="text-xs text-muted-foreground">Transfer your mentor earnings to your bank</p>
