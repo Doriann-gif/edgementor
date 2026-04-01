@@ -44,8 +44,6 @@ const MentorProfile = () => {
   const { data: isSubscribed } = useIsSubscribed(id);
   const toggleSave = useToggleSaveMentor();
   const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
-  const queryClient = useQueryClient();
-
 
 
 
