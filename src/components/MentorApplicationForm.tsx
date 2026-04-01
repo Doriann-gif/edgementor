@@ -236,8 +236,32 @@ const MentorApplicationForm = () => {
                 <input type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setProofFile(e.target.files?.[0] ?? null)} />
               </motion.label>
             </div>
+            {/* Payment Type */}
             <div className="space-y-2">
-              <Label htmlFor="price" className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-3.5 w-3.5 text-primary" /> Desired Monthly Price (USD) *</Label>
+              <Label className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-3.5 w-3.5 text-primary" /> Payment Type *</Label>
+              <div className="flex gap-3">
+                <motion.button
+                  type="button" onClick={() => setPaymentType("monthly")}
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all duration-200 ${paymentType === "monthly" ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--primary)/0.2)]" : "border-border bg-secondary text-muted-foreground hover:border-primary/30 hover:text-foreground"}`}
+                >
+                  <span className="block font-semibold">Monthly</span>
+                  <span className="block text-xs mt-0.5 opacity-70">Recurring subscription</span>
+                </motion.button>
+                <motion.button
+                  type="button" onClick={() => setPaymentType("one_time")}
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`flex-1 rounded-lg border px-4 py-3 text-sm font-medium transition-all duration-200 ${paymentType === "one_time" ? "border-primary/50 bg-primary/10 text-primary shadow-[0_0_20px_hsl(var(--primary)/0.2)]" : "border-border bg-secondary text-muted-foreground hover:border-primary/30 hover:text-foreground"}`}
+                >
+                  <span className="block font-semibold">One-Time</span>
+                  <span className="block text-xs mt-0.5 opacity-70">Single payment</span>
+                </motion.button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="price" className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-3.5 w-3.5 text-primary" /> {paymentType === "monthly" ? "Monthly Price" : "One-Time Price"} (USD) *</Label>
               <Input id="price" type="number" placeholder="e.g. 199" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]" />
             </div>
             <div className="space-y-2">
