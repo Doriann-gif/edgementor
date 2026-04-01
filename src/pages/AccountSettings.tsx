@@ -683,40 +683,10 @@ const AccountSettings = () => {
                   </div>
                 </div>
                 <div className="p-8">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                    <div className="rounded-xl border border-border bg-muted/30 p-5">
-                      <p className="text-xs text-muted-foreground mb-1">Available Balance</p>
-                      <p className="font-heading text-2xl font-bold text-foreground">$0.00</p>
-                      <p className="text-[11px] text-muted-foreground mt-1">Updated just now</p>
-                    </div>
-                    <div className="rounded-xl border border-border bg-muted/30 p-5">
-                      <p className="text-xs text-muted-foreground mb-1">Pending</p>
-                      <p className="font-heading text-2xl font-bold text-foreground">$0.00</p>
-                      <p className="text-[11px] text-muted-foreground mt-1">Processing withdrawals</p>
-                    </div>
-                    <div className="rounded-xl border border-border bg-muted/30 p-5">
-                      <p className="text-xs text-muted-foreground mb-1">Total Earned</p>
-                      <p className="font-heading text-2xl font-bold text-foreground">$0.00</p>
-                      <p className="text-[11px] text-muted-foreground mt-1">Lifetime earnings</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button
-                      variant="glow"
-                      className="font-semibold"
-                      onClick={() => toast.info("No balance available to withdraw yet.")}
-                    >
-                      <Download className="h-4 w-4 mr-1.5 rotate-180" /> Withdraw Funds
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="font-semibold text-sm"
-                      onClick={() => toast.info("Payout method setup coming soon. Contact support for manual setup.")}
-                    >
-                      <CreditCard className="h-4 w-4 mr-1.5" /> Set Up Payout Method
-                    </Button>
-                  </div>
+                  {(() => {
+                    // We'll use inline query here
+                    return <ConnectPayoutSection queryClient={queryClient} />;
+                  })()}
                 </div>
               </motion.div>
             )}
