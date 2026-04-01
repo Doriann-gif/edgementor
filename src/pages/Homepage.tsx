@@ -628,7 +628,7 @@ const Homepage = () => {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-border/50 py-12 px-4 sm:px-6">
+        <footer className="border-t border-border/30 py-16 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
               {/* Brand */}
