@@ -731,8 +731,14 @@ const AccountSettings = () => {
                             if (error) throw error;
                             if (data?.error) throw new Error(data.error);
                             if (data?.url) window.open(data.url, "_blank");
-                            else toast.error("Could not start onboarding.");
-                          } catch (err: any) { toast.error(err.message || "Failed to start onboarding."); }
+                            else toast.error("Could not start onboarding. Please try again.");
+                          } catch (err: any) {
+                            const msg = err.message?.toLowerCase() || "";
+                            if (msg.includes("non-2xx"))
+                              toast.error("Unable to set up payouts right now. Please try again later.");
+                            else
+                              toast.error(err.message || "Failed to start onboarding.");
+                          }
                         }}
                       >
                         <CreditCard className="h-4 w-4 mr-1.5" /> Set Up Payout Account
