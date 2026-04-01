@@ -259,7 +259,7 @@ const Homepage = () => {
 
             {/* Trust indicators */}
             <motion.div
-              className="flex flex-wrap items-center justify-center gap-6 mt-12 pt-8 border-t border-border/30"
+              className="flex flex-wrap items-center justify-center gap-8 mt-16 pt-10 border-t border-border/20"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2, duration: 0.8 }}
