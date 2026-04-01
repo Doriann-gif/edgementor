@@ -59,7 +59,7 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.06, ease: [0.25, 0.46, 0.45, 0.94] }}
         whileHover={{ y: -6, transition: { duration: 0.25, ease: "easeOut" } }}
-        className={`relative rounded-2xl border p-5 transition-colors duration-300 card-pink-hover ${
+        className={`relative rounded-2xl border p-6 transition-colors duration-300 card-pink-hover ${
           isElite
             ? "border-slate-600/50 bg-gradient-to-br from-slate-900 via-card to-slate-800/60 hover:border-slate-400/50 hover:shadow-[0_20px_60px_-15px_rgba(148,163,184,0.15)]"
             : "border-border bg-card/80 backdrop-blur-sm hover:border-primary/40 hover:shadow-[0_20px_60px_-15px_hsl(160_84%_39%/0.12)]"
@@ -255,9 +255,9 @@ const MentorListingPage = () => {
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-pink/[0.025] rounded-full blur-[100px]" />
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
         <motion.div
-          className="text-center mb-12"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
@@ -266,11 +266,11 @@ const MentorListingPage = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1, duration: 0.4 }}
-            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-5 backdrop-blur-sm"
+            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-6 backdrop-blur-sm"
           >
             <Target className="h-3.5 w-3.5" /> {mentors.length} Verified Mentors Available
           </motion.div>
-          <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-4">
+          <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-5">
             Find Your <span className="text-primary">Edge</span>
           </h1>
           <p className="text-muted-foreground max-w-lg mx-auto text-sm sm:text-base leading-relaxed">
@@ -278,7 +278,7 @@ const MentorListingPage = () => {
           </p>
 
           {/* Quick stats */}
-          <div className="flex items-center justify-center gap-8 mt-8">
+          <div className="flex items-center justify-center gap-10 mt-10">
             {[
               { value: `${mentors.length}`, label: "Mentors" },
               { value: "4.8", label: "Avg Rating" },
@@ -302,7 +302,7 @@ const MentorListingPage = () => {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
-          className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-3 mb-8 shadow-lg shadow-background/50"
+          className="sticky top-2 z-20 rounded-2xl border border-border bg-card/90 backdrop-blur-xl p-4 mb-12 shadow-lg shadow-background/50"
         >
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
@@ -492,7 +492,7 @@ const MentorListingPage = () => {
 
         {/* Mentor Grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="relative rounded-2xl border border-border bg-card/50 p-5 overflow-hidden">
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-muted-foreground/5 to-transparent" />
@@ -534,7 +534,7 @@ const MentorListingPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
             {sorted.map((mentor, i) => (
               <MentorCard key={mentor.id} mentor={mentor} index={i} />
             ))}
@@ -544,13 +544,13 @@ const MentorListingPage = () => {
         {/* Bottom CTA */}
         {!isLoading && sorted.length > 0 && (
           <motion.div
-            className="mt-16 text-center"
+            className="mt-24 text-center"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.5 }}
           >
-            <div className="inline-flex flex-col items-center gap-4 rounded-2xl border border-border bg-card/50 backdrop-blur-sm px-8 py-8">
+            <div className="inline-flex flex-col items-center gap-5 rounded-2xl border border-border bg-card/50 backdrop-blur-sm px-12 py-10">
               <h3 className="font-heading font-bold text-foreground text-lg">Are you a profitable trader?</h3>
               <p className="text-sm text-muted-foreground max-w-sm">Share your knowledge, build your community, and earn recurring revenue.</p>
               <Link to="/apply">

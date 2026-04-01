@@ -160,7 +160,7 @@ const Homepage = () => {
 
       <div className="relative">
         {/* Hero */}
-        <motion.section className="py-24 sm:py-32 px-4 sm:px-6 relative">
+        <motion.section className="py-32 sm:py-44 px-4 sm:px-6 relative">
           {/* Central glow */}
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-r from-primary/[0.08] via-pink-400/[0.06] to-primary/[0.08] rounded-full blur-[120px] pointer-events-none"
@@ -194,7 +194,7 @@ const Homepage = () => {
             {/* Main heading with letter animation */}
             <motion.h1
               variants={fadeUp}
-              className="font-heading text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground tracking-tight leading-[1.05] mb-6"
+              className="font-heading text-4xl sm:text-5xl lg:text-7xl font-bold text-foreground tracking-tight leading-[1.08] mb-8"
             >
               <motion.span
                 className="block"
@@ -227,7 +227,7 @@ const Homepage = () => {
 
             <motion.p
               variants={fadeUp}
-              className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+              className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-14 leading-relaxed"
             >
               Connect with verified mentors, join active trading communities, and accelerate your edge with real strategies — not theory.
             </motion.p>
@@ -259,7 +259,7 @@ const Homepage = () => {
 
             {/* Trust indicators */}
             <motion.div
-              className="flex flex-wrap items-center justify-center gap-6 mt-12 pt-8 border-t border-border/30"
+              className="flex flex-wrap items-center justify-center gap-8 mt-16 pt-10 border-t border-border/20"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2, duration: 0.8 }}
@@ -285,10 +285,10 @@ const Homepage = () => {
         </motion.section>
 
         {/* Animated Stats Counter */}
-        <section className="border-y border-border/50 bg-card/30 backdrop-blur-sm py-10 px-4 sm:px-6 relative overflow-hidden">
+        <section className="border-y border-border/30 bg-card/20 backdrop-blur-sm py-16 px-4 sm:px-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-500/[0.03] to-transparent pointer-events-none" />
           <motion.div
-            className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 relative"
+            className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-12 relative"
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, margin: "-50px" }}
@@ -323,13 +323,13 @@ const Homepage = () => {
         </section>
 
         {/* Featured Mentors — Enhanced */}
-        <section className="py-20 sm:py-24 px-4 sm:px-6 relative">
+        <section className="py-28 sm:py-36 px-4 sm:px-6 relative">
           <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-pink-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] bg-primary/[0.03] rounded-full blur-[100px] pointer-events-none" />
 
           <div className="max-w-6xl mx-auto relative">
             <motion.div
-              className="flex items-end justify-between mb-10"
+              className="flex items-end justify-between mb-14"
               initial="hidden"
               whileInView="show"
               viewport={{ once: true }}
@@ -365,7 +365,7 @@ const Homepage = () => {
               </motion.div>
             ) : (
               <motion.div
-                className="grid grid-cols-1 md:grid-cols-3 gap-5"
+                className="grid grid-cols-1 md:grid-cols-3 gap-7"
                 initial="hidden"
                 whileInView="show"
                 viewport={{ once: true, margin: "-50px" }}
@@ -493,12 +493,12 @@ const Homepage = () => {
         </section>
 
         {/* Why Us — Interactive cards */}
-        <section className="py-20 sm:py-24 px-4 sm:px-6 bg-card/20 relative overflow-hidden">
+        <section className="py-28 sm:py-36 px-4 sm:px-6 bg-card/10 relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-gradient-to-r from-primary/[0.04] via-pink-500/[0.04] to-primary/[0.04] rounded-full blur-[120px] pointer-events-none" />
 
           <div className="max-w-5xl mx-auto relative">
             <motion.div
-              className="text-center mb-14"
+              className="text-center mb-16"
               initial="hidden"
               whileInView="show"
               viewport={{ once: true }}
@@ -519,7 +519,7 @@ const Homepage = () => {
             </motion.div>
 
             <motion.div
-              className="grid grid-cols-1 sm:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-3 gap-8"
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, margin: "-50px" }}
@@ -550,7 +550,7 @@ const Homepage = () => {
               ].map((item, i) => (
                 <motion.div key={item.title} variants={fadeUp} custom={i}>
                   <motion.div
-                    className={`group relative rounded-2xl border border-border bg-card/80 backdrop-blur-sm p-8 transition-all duration-300 hover:border-pink-400/20 overflow-hidden cursor-default ${item.hoverGlow}`}
+                    className={`group relative rounded-2xl border border-border bg-card/80 backdrop-blur-sm p-10 transition-all duration-300 hover:border-pink-400/20 overflow-hidden cursor-default ${item.hoverGlow}`}
                     whileHover={{ y: -8, boxShadow: "0 20px 50px -12px hsl(var(--primary) / 0.12)" }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
@@ -558,7 +558,7 @@ const Homepage = () => {
                     <div className="absolute -top-12 -right-12 w-24 h-24 bg-pink-400/[0.06] rounded-full blur-xl pointer-events-none group-hover:bg-pink-400/[0.12] transition-colors duration-500" />
 
                     <motion.div
-                      className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-5`}
+                      className={`h-14 w-14 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-6`}
                       whileHover={{ scale: 1.2, rotate: -10 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
@@ -574,7 +574,7 @@ const Homepage = () => {
         </section>
 
         {/* CTA — Dramatic */}
-        <section className="py-24 sm:py-32 px-4 sm:px-6 relative">
+        <section className="py-32 sm:py-44 px-4 sm:px-6 relative">
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-r from-primary/[0.06] via-pink-400/[0.06] to-primary/[0.06] rounded-full blur-[140px] pointer-events-none"
             animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
@@ -598,14 +598,14 @@ const Homepage = () => {
               </motion.div>
             </motion.div>
 
-            <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-5">
+            <motion.h2 variants={fadeUp} className="font-heading text-3xl sm:text-5xl font-bold text-foreground tracking-tight mb-6">
               Ready to{" "}
               <span className="bg-gradient-to-r from-primary via-pink-400 to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-[gradient-shift_4s_ease_infinite]">
                 level up
               </span>{" "}
               your trading?
             </motion.h2>
-            <motion.p variants={fadeUp} className="text-muted-foreground mb-10 max-w-lg mx-auto text-base">
+            <motion.p variants={fadeUp} className="text-muted-foreground mb-12 max-w-lg mx-auto text-base leading-relaxed">
               Join hundreds of traders already learning from the best. Find your mentor today.
             </motion.p>
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -628,9 +628,9 @@ const Homepage = () => {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-border/50 py-12 px-4 sm:px-6">
+        <footer className="border-t border-border/30 py-16 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 mb-10">
               {/* Brand */}
               <div>
                 <motion.div className="font-heading font-bold text-lg text-foreground flex items-center gap-2 mb-3" whileHover={{ scale: 1.03 }}>
