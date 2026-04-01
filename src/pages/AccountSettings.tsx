@@ -173,6 +173,12 @@ const AccountSettings = () => {
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (mentorProfile) {
+      setBannerColor((mentorProfile as any).banner_color || "#6d28d9");
+    }
+  }, [mentorProfile]);
+
   const uploadAvatar = async (file: File) => {
     if (!user) return;
     setUploading(true);
