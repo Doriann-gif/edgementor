@@ -4,8 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import TierBadge from "@/components/TierBadge";
-import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
 import { useMentorReviews } from "@/hooks/use-mentors";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
