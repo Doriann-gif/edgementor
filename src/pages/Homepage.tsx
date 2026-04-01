@@ -574,7 +574,7 @@ const Homepage = () => {
         </section>
 
         {/* CTA — Dramatic */}
-        <section className="py-24 sm:py-32 px-4 sm:px-6 relative">
+        <section className="py-32 sm:py-44 px-4 sm:px-6 relative">
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-r from-primary/[0.06] via-pink-400/[0.06] to-primary/[0.06] rounded-full blur-[140px] pointer-events-none"
             animate={{ scale: [1, 1.1, 1], opacity: [0.7, 1, 0.7] }}
