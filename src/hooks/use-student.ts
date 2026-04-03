@@ -117,6 +117,7 @@ export const useMarkMessageRead = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-notifications"] });
     },
   });
 };
