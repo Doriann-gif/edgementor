@@ -18,6 +18,19 @@ const CONCEPTS = ["ICT", "Order Flow", "Supply & Demand", "Price Action", "SMC"]
 const SESSIONS = ["London", "New York", "Asian"];
 const EXPERIENCE_OPTIONS = ["1-2 years", "3-5 years", "5-8 years", "8-10 years", "10+ years"];
 
+const COUNTRIES = [
+  "United States", "United Kingdom", "Canada", "Australia", "Germany", "France",
+  "Netherlands", "Sweden", "Switzerland", "Norway", "Denmark", "Finland",
+  "Spain", "Italy", "Portugal", "Austria", "Belgium", "Ireland",
+  "Japan", "South Korea", "Singapore", "Hong Kong", "India", "Indonesia",
+  "Malaysia", "Philippines", "Thailand", "Vietnam", "Taiwan",
+  "Brazil", "Mexico", "Argentina", "Colombia", "Chile",
+  "South Africa", "Nigeria", "Kenya", "Egypt", "Ghana",
+  "United Arab Emirates", "Saudi Arabia", "Qatar", "Kuwait", "Israel",
+  "Poland", "Czech Republic", "Romania", "Hungary", "Greece",
+  "Turkey", "Russia", "Ukraine", "New Zealand", "Pakistan",
+];
+
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   show: (i: number) => ({
