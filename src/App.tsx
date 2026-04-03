@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import PinkGlow from "@/components/PinkGlow";
+import UptrendLine from "@/components/UptrendLine";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import Homepage from "./pages/Homepage.tsx";
