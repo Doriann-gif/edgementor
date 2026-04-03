@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Clock, Users, MapPin, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
+import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -312,6 +312,11 @@ const MentorProfile = () => {
                 <span className="flex items-center gap-1.5 hover:text-foreground transition-colors">
                   <MapPin className="h-3.5 w-3.5" />{mentor.session} session
                 </span>
+                {mentor.country && (
+                  <span className="flex items-center gap-1.5 hover:text-foreground transition-colors">
+                    <Globe className="h-3.5 w-3.5" />{mentor.country}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-3 mt-3">
                 <StarRating rating={Math.round(mentor.rating)} />
