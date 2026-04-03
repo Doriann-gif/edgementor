@@ -346,65 +346,88 @@ const StudentDashboard = () => {
 
             {/* Messages Tab */}
             <TabsContent value="messages">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-heading font-semibold text-sm text-foreground">Messages</h3>
+                {subscriptions.length > 0 && (
+                  <Button size="sm" className="text-xs" onClick={() => { setComposeOpen(true); setComposeTo(""); setComposeSubject(""); setComposeBody(""); }}>
+                    <PenSquare className="h-3.5 w-3.5 mr-1.5" /> New Message
+                  </Button>
+                )}
+              </div>
               <AnimatePresence mode="wait">
                 {msgsLoading ? (
                   <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-16">
-                    <div className="h-6 w-6 border-2 border-border border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                    <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                     <p className="text-sm text-muted-foreground">Loading messages...</p>
                   </motion.div>
                 ) : messages.length === 0 ? (
                   <motion.div key="empty" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-xl border border-dashed border-border bg-card/50 p-12 text-center">
                     <Mail className="h-10 w-10 text-muted-foreground/20 mx-auto mb-4" />
                     <p className="text-sm text-muted-foreground">No messages yet.</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Messages from your mentors will appear here.</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Send a message to your mentor to get started.</p>
+                    {subscriptions.length > 0 && (
+                      <Button size="sm" className="text-xs mt-4" onClick={() => setComposeOpen(true)}>
+                        <PenSquare className="h-3.5 w-3.5 mr-1.5" /> Compose
+                      </Button>
+                    )}
                   </motion.div>
                 ) : (
                   <motion.div key="list" variants={stagger} initial="hidden" animate="show" className="space-y-3">
-                    {messages.map((msg, i) => (
-                      <motion.div
-                        key={msg.id}
-                        variants={fadeUp}
-                        custom={i}
-                        className={`rounded-xl border bg-card p-4 ${
-                          msg.is_read ? "border-border" : "border-primary/20"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                              msg.is_read ? "bg-muted" : "bg-primary/10"
-                            }`}>
-                              {msg.is_read ? (
-                                <MailOpen className="h-3.5 w-3.5 text-muted-foreground" />
-                              ) : (
-                                <Mail className="h-3.5 w-3.5 text-primary" />
-                              )}
+                    {messages.map((msg, i) => {
+                      const isSent = msg.sender_user_id === user!.id;
+                      return (
+                        <motion.div
+                          key={msg.id}
+                          variants={fadeUp}
+                          custom={i}
+                          className={`rounded-xl border bg-card p-4 ${
+                            !isSent && !msg.is_read ? "border-primary/20" : "border-border"
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                                isSent ? "bg-primary/10" : msg.is_read ? "bg-muted" : "bg-primary/10"
+                              }`}>
+                                {isSent ? (
+                                  <Send className="h-3.5 w-3.5 text-primary" />
+                                ) : msg.is_read ? (
+                                  <MailOpen className="h-3.5 w-3.5 text-muted-foreground" />
+                                ) : (
+                                  <Mail className="h-3.5 w-3.5 text-primary" />
+                                )}
+                              </div>
+                              <div>
+                                <span className="font-heading font-semibold text-sm text-foreground">
+                                  {isSent ? `To: ${msg.sender_name === (user?.user_metadata?.display_name || user?.email?.split("@")[0]) ? "Mentor" : msg.sender_name}` : msg.sender_name}
+                                </span>
+                                {isSent && (
+                                  <span className="ml-2 inline-flex items-center rounded-full bg-muted text-muted-foreground text-[9px] font-bold px-1.5 py-0.5">SENT</span>
+                                )}
+                                {!isSent && !msg.is_read && (
+                                  <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 text-primary text-[9px] font-bold px-1.5 py-0.5">NEW</span>
+                                )}
+                              </div>
                             </div>
-                            <div>
-                              <span className="font-heading font-semibold text-sm text-foreground">{msg.sender_name}</span>
-                              {!msg.is_read && (
-                                <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 text-primary text-[9px] font-bold px-1.5 py-0.5">NEW</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-muted-foreground">
+                                {new Date(msg.created_at).toLocaleDateString()}
+                              </span>
+                              {!isSent && !msg.is_read && (
+                                <button
+                                  onClick={() => markRead.mutate(msg.id)}
+                                  className="text-[10px] text-primary hover:underline font-medium"
+                                >
+                                  Mark read
+                                </button>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-muted-foreground">
-                              {new Date(msg.created_at).toLocaleDateString()}
-                            </span>
-                            {!msg.is_read && (
-                              <button
-                                onClick={() => markRead.mutate(msg.id)}
-                                className="text-[10px] text-primary hover:underline font-medium"
-                              >
-                                Mark read
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        <h4 className="text-sm font-medium text-foreground mb-1">{msg.subject}</h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{msg.body}</p>
-                      </motion.div>
-                    ))}
+                          <h4 className="text-sm font-medium text-foreground mb-1">{msg.subject}</h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed">{msg.body}</p>
+                        </motion.div>
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>
