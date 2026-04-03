@@ -757,6 +757,10 @@ const MentorDashboard = () => {
             )}
           </TabsContent>
 
+          <TabsContent value="messages">
+            <MentorMessagesTab mentorId={mentor.id} mentorName={mentor.name} />
+          </TabsContent>
+
           <TabsContent value="income">
             <IncomeTab mentorId={mentor.id} />
           </TabsContent>
