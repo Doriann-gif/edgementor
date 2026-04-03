@@ -54,11 +54,16 @@ const StudentDashboard = () => {
   const { data: allMentors = [] } = useMentors();
   const { data: messages = [], isLoading: msgsLoading } = useMessages();
   const markRead = useMarkMessageRead();
+  const sendMessage = useSendMessage();
   const [portalLoading, setPortalLoading] = useState(false);
   const [canManageBilling, setCanManageBilling] = useState(false);
   const [cancellingSubId, setCancellingSubId] = useState<string | null>(null);
   const [confirmCancelSub, setConfirmCancelSub] = useState<{ id: string; mentorName: string } | null>(null);
   const [activeTab, setActiveTab] = useState("mentorships");
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeTo, setComposeTo] = useState("");
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeBody, setComposeBody] = useState("");
   const queryClient = useQueryClient();
 
   useEffect(() => {
