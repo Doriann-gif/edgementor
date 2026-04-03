@@ -120,7 +120,7 @@ const MentorDashboard = () => {
           </TabsList>
 
           <TabsContent value="profile">
-            <MentorProfileEditor mentor={mentor} onSave={handleSaveProfile} onToggleAvailability={handleToggleAvailability} saving={updateProfile.isPending} />
+            <MentorProfileEditor mentor={mentor} onUpdate={handleSaveProfile} onToggleAvailability={handleToggleAvailability} isUpdating={updateProfile.isPending} />
           </TabsContent>
 
           <TabsContent value="content">
