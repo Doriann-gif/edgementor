@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import confetti from "canvas-confetti";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -59,6 +60,7 @@ const STEPS = [
 ];
 
 const MentorApplicationForm = () => {
+  const reduced = useReducedMotion();
   const [step, setStep] = useState(0);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -363,22 +365,26 @@ const MentorApplicationForm = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 sm:p-8">
-      {/* Ambient background */}
+      {/* Ambient background — reduced on mobile */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(160 84% 39% / 0.3) 1px, transparent 0)',
           backgroundSize: '48px 48px'
         }} />
-        <motion.div
-          className="absolute top-[-80px] left-1/4 w-[450px] h-[450px] bg-primary/[0.04] rounded-full blur-[130px]"
-          animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-[-80px] right-1/4 w-[350px] h-[350px] bg-pink-400/[0.03] rounded-full blur-[100px]"
-          animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {!reduced && (
+          <>
+            <motion.div
+              className="absolute top-[-80px] left-1/4 w-[450px] h-[450px] bg-primary/[0.04] rounded-full blur-[130px]"
+              animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute bottom-[-80px] right-1/4 w-[350px] h-[350px] bg-pink-400/[0.03] rounded-full blur-[100px]"
+              animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </>
+        )}
       </div>
 
       <div className="w-full max-w-2xl relative">
