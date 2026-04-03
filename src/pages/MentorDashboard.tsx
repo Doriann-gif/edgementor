@@ -454,7 +454,10 @@ const MentorMessagesTab = ({ mentorId, mentorName }: { mentorId: string; mentorN
     mutationFn: async (id: string) => {
       await supabase.from("messages").update({ is_read: true }).eq("id", id);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mentor-messages"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mentor-messages"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-notifications"] });
+    },
   });
 
   const sendReply = useMutation({
