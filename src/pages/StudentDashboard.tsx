@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSubscriptions, useMessages, useMarkMessageRead, useSavedMentors } from "@/hooks/use-student";
+import { useSubscriptions, useMessages, useMarkMessageRead, useSavedMentors, useSendMessage } from "@/hooks/use-student";
 import { useQueryClient } from "@tanstack/react-query";
 import { useMentors } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
