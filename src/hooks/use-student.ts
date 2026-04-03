@@ -71,7 +71,7 @@ export const useMessages = () => {
       const { data, error } = await supabase
         .from("messages")
         .select("*")
-        .eq("recipient_id", user!.id)
+        .or(`recipient_id.eq.${user!.id},sender_user_id.eq.${user!.id}`)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -91,6 +91,42 @@ export const useMarkMessageRead = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["messages"] });
+    },
+  });
+};
+
+export const useSendMessage = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      recipientId,
+      senderMentorId,
+      subject,
+      body,
+      senderName,
+    }: {
+      recipientId: string;
+      senderMentorId?: string;
+      subject: string;
+      body: string;
+      senderName: string;
+    }) => {
+      if (!user) throw new Error("Must be logged in");
+      const row: any = {
+        recipient_id: recipientId,
+        sender_user_id: user.id,
+        sender_name: senderName,
+        subject,
+        body,
+      };
+      if (senderMentorId) row.sender_mentor_id = senderMentorId;
+      const { error } = await supabase.from("messages").insert(row);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages"] });
+      queryClient.invalidateQueries({ queryKey: ["mentor-messages"] });
     },
   });
 };
