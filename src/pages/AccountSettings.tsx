@@ -576,6 +576,28 @@ const AccountSettings = () => {
                   <Input value={user.email || ""} disabled className="bg-muted/50 border-border text-sm text-muted-foreground" />
                   <p className="text-[10px] text-muted-foreground">Email cannot be changed directly.</p>
                 </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Country <span className="text-muted-foreground">(optional)</span></Label>
+                  <Input value={country} onChange={(e) => setCountry(e.target.value)} className="bg-muted border-border text-sm" placeholder="e.g. United States" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Age <span className="text-muted-foreground">(optional)</span></Label>
+                  <Input type="number" min="13" max="120" value={age} onChange={(e) => setAge(e.target.value)} className="bg-muted border-border text-sm" placeholder="e.g. 25" />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label className="text-xs font-medium">Trading Experience <span className="text-muted-foreground">(optional)</span></Label>
+                  <Select value={tradingExperience} onValueChange={setTradingExperience}>
+                    <SelectTrigger className="bg-muted border-border text-sm">
+                      <SelectValue placeholder="Select your experience level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner — Just getting started</SelectItem>
+                      <SelectItem value="intermediate">Intermediate — Some experience</SelectItem>
+                      <SelectItem value="advanced">Advanced — Experienced trader</SelectItem>
+                      <SelectItem value="professional">Professional — Full-time trader</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-2">
