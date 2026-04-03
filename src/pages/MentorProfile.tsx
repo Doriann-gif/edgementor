@@ -61,6 +61,39 @@ const MentorProfile = () => {
   const toggleSave = useToggleSaveMentor();
   const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
   const reduced = useReducedMotion();
+  const queryClient = useQueryClient();
+
+  // Review form state
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+
+  const hasReviewed = reviews.some((r: any) => r.user_id === user?.id);
+
+  const submitReviewMutation = useMutation({
+    mutationFn: async () => {
+      if (!user || !id) throw new Error("Not authenticated");
+      if (!reviewText.trim()) throw new Error("Please write a review");
+      const profile = await supabase.from("profiles").select("display_name").eq("id", user.id).single();
+      const displayName = profile.data?.display_name || user.email?.split("@")[0] || "Student";
+      const { error } = await supabase.from("mentor_reviews").insert({
+        mentor_id: id,
+        user_id: user.id,
+        rating: reviewRating,
+        reviewer_name: displayName,
+        review_date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        review_text: reviewText.trim(),
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mentor-reviews", id] });
+      queryClient.invalidateQueries({ queryKey: ["mentor", id] });
+      setReviewText("");
+      setReviewRating(5);
+      toast.success("Review submitted! Thank you.");
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to submit review"),
+  });
 
   const { data: showcaseImages = [] } = useQuery({
     queryKey: ["mentor-showcase-images", id],
