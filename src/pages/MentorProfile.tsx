@@ -213,16 +213,7 @@ const MentorProfile = () => {
 
   if (!mentor) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <p className="text-muted-foreground mb-4">Mentor not found.</p>
-          <Link to="/mentors"><Button variant="outline" size="sm">Back to listing</Button></Link>
-        </motion.div>
-      </div>
+      <MentorNotFound />
     );
   }
 
