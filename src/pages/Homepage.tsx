@@ -129,38 +129,39 @@ const Homepage = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Animated ambient background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-[-200px] left-1/4 w-[700px] h-[700px] bg-primary/[0.04] rounded-full blur-[150px]"
-          {...floatingOrb}
-        />
-        <motion.div
-          className="absolute top-[30%] right-[-100px] w-[500px] h-[500px] bg-pink-400/[0.04] rounded-full blur-[130px]"
-          {...floatingOrbSlow}
-        />
-        <motion.div
-          className="absolute bottom-[-150px] left-[-100px] w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px]"
-          animate={{ y: [0, 20, 0], scale: [1, 1.03, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" as const }}
-        />
-        <motion.div
-          className="absolute bottom-[20%] right-1/3 w-[400px] h-[400px] bg-pink-400/[0.035] rounded-full blur-[100px]"
-          animate={{ y: [0, -15, 0], x: [0, 12, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" as const }}
-        />
-        {/* Extra pink corner glows */}
-        <motion.div
-          className="absolute top-[10%] right-[5%] w-[250px] h-[250px] bg-pink-500/[0.06] rounded-full blur-[80px]"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-[10%] left-[5%] w-[200px] h-[200px] bg-pink-400/[0.05] rounded-full blur-[70px]"
-          animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
+      {/* Animated ambient background — disabled on mobile */}
+      {!reduced && (
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute top-[-200px] left-1/4 w-[700px] h-[700px] bg-primary/[0.04] rounded-full blur-[150px]"
+            {...floatingOrb}
+          />
+          <motion.div
+            className="absolute top-[30%] right-[-100px] w-[500px] h-[500px] bg-pink-400/[0.04] rounded-full blur-[130px]"
+            {...floatingOrbSlow}
+          />
+          <motion.div
+            className="absolute bottom-[-150px] left-[-100px] w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px]"
+            animate={{ y: [0, 20, 0], scale: [1, 1.03, 1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" as const }}
+          />
+          <motion.div
+            className="absolute bottom-[20%] right-1/3 w-[400px] h-[400px] bg-pink-400/[0.035] rounded-full blur-[100px]"
+            animate={{ y: [0, -15, 0], x: [0, 12, 0] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" as const }}
+          />
+          <motion.div
+            className="absolute top-[10%] right-[5%] w-[250px] h-[250px] bg-pink-500/[0.06] rounded-full blur-[80px]"
+            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-[10%] left-[5%] w-[200px] h-[200px] bg-pink-400/[0.05] rounded-full blur-[70px]"
+            animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+      )}
 
       <div className="relative">
         {/* Hero */}
