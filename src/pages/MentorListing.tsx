@@ -422,7 +422,8 @@ const MentorListingPage = () => {
                         ))}
                       </div>
                     </div>
-                  )
+                  )}
+
                   {/* Active Filters Summary */}
                   <AnimatePresence>
                     {activeFilterCount > 0 && (
