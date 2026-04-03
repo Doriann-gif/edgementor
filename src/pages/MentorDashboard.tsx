@@ -757,14 +757,37 @@ const MentorDashboard = () => {
                 </div>
                 {students.map((sub: any) => {
                   const profile = sub.profiles;
+                  const experienceLabels: Record<string, string> = {
+                    beginner: "Beginner",
+                    intermediate: "Intermediate",
+                    advanced: "Advanced",
+                    professional: "Professional",
+                  };
                   return (
                     <div key={sub.id} className="grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center px-4 py-3 border-b border-border/50 last:border-0 hover:bg-muted/20 transition-colors">
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground">
-                        {(profile?.display_name || "?").charAt(0).toUpperCase()}
+                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-semibold text-muted-foreground overflow-hidden">
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          (profile?.display_name || "?").charAt(0).toUpperCase()
+                        )}
                       </div>
-                      <span className="font-heading font-semibold text-sm text-foreground truncate">
-                        {profile?.display_name || "Student"}
-                      </span>
+                      <div className="min-w-0">
+                        <span className="font-heading font-semibold text-sm text-foreground truncate block">
+                          {profile?.display_name || "Student"}
+                        </span>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                          {profile?.country && (
+                            <span className="text-[10px] text-muted-foreground">🌍 {profile.country}</span>
+                          )}
+                          {profile?.age && (
+                            <span className="text-[10px] text-muted-foreground">Age {profile.age}</span>
+                          )}
+                          {profile?.trading_experience && (
+                            <span className="text-[10px] text-muted-foreground capitalize">📈 {experienceLabels[profile.trading_experience] || profile.trading_experience}</span>
+                          )}
+                        </div>
+                      </div>
                       <span className="text-xs text-muted-foreground whitespace-nowrap">
                         {new Date(sub.started_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                       </span>

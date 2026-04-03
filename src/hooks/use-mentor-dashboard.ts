@@ -42,7 +42,7 @@ export const useMentorStudents = (mentorId: string | undefined) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subscriptions")
-        .select("*, profiles:user_id(id, display_name, avatar_url)")
+        .select("*, profiles:user_id(id, display_name, avatar_url, country, age, trading_experience)")
         .eq("mentor_id", mentorId!)
         .eq("status", "active");
       if (error) throw error;
