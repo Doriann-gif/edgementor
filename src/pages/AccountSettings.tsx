@@ -207,9 +207,12 @@ const AccountSettings = () => {
     mutationFn: async () => {
       const { error } = await supabase.from("profiles").update({
         display_name: displayName, avatar_url: avatarUrl || null,
+        country: country || null,
+        age: age ? parseInt(age, 10) : null,
+        trading_experience: tradingExperience || null,
         email_notifications: emailNotifications, marketing_emails: marketingEmails,
         updated_at: new Date().toISOString(),
-      }).eq("id", user!.id);
+      } as any).eq("id", user!.id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["my-profile"] }); toast.success("Profile updated!"); },
