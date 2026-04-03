@@ -60,6 +60,7 @@ const STEPS = [
 ];
 
 const MentorApplicationForm = () => {
+  const reduced = useReducedMotion();
   const [step, setStep] = useState(0);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
