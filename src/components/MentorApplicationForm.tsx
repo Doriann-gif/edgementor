@@ -156,12 +156,30 @@ const MentorApplicationForm = () => {
             </div>
             <div className="space-y-2">
               <Label className="text-sm font-medium flex items-center gap-2"><User className="h-3.5 w-3.5 text-primary" /> Country *</Label>
-              <Select value={country} onValueChange={setCountry}>
-                <SelectTrigger className="bg-muted border-border focus:border-primary/50"><SelectValue placeholder="Select your country" /></SelectTrigger>
-                <SelectContent className="max-h-60">
-                  {COUNTRIES.sort().map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <Popover open={countryOpen} onOpenChange={setCountryOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" aria-expanded={countryOpen} className="w-full justify-between bg-muted border-border font-normal text-sm h-10">
+                    {country || "Select your country"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search country..." />
+                    <CommandList>
+                      <CommandEmpty>No country found.</CommandEmpty>
+                      <CommandGroup>
+                        {COUNTRIES.map((c) => (
+                          <CommandItem key={c} value={c} onSelect={() => { setCountry(c); setCountryOpen(false); }}>
+                            <Check className={`mr-2 h-4 w-4 ${country === c ? "opacity-100" : "opacity-0"}`} />
+                            {c}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="space-y-2">
               <Label htmlFor="socialLink" className="text-sm font-medium flex items-center gap-2"><Instagram className="h-3.5 w-3.5 text-primary" /> Social Link <span className="text-muted-foreground text-xs">(optional)</span></Label>
