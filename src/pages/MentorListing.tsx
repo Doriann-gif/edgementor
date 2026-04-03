@@ -463,6 +463,20 @@ const MentorListingPage = () => {
                               </button>
                             </motion.span>
                           ))}
+                          {activeCountries.map((c) => (
+                            <motion.span
+                              key={c}
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-2 py-0.5"
+                            >
+                              <Globe className="h-2.5 w-2.5" /> {c}
+                              <button onClick={() => setActiveCountries(toggleItem(activeCountries, c))}>
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </motion.span>
+                          ))}
                           {priceRange[0] < 500 && (
                             <motion.span
                               initial={{ scale: 0 }}
