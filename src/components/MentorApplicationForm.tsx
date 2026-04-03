@@ -51,6 +51,7 @@ const MentorApplicationForm = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [socialLink, setSocialLink] = useState("");
+  const [country, setCountry] = useState("");
   const [confirmGenuine, setConfirmGenuine] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [experience, setExperience] = useState("");
