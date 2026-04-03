@@ -171,6 +171,9 @@ const AccountSettings = () => {
     if (profile) {
       setDisplayName(profile.display_name || "");
       setAvatarUrl(profile.avatar_url || "");
+      setCountry((profile as any).country || "");
+      setAge((profile as any).age ? String((profile as any).age) : "");
+      setTradingExperience((profile as any).trading_experience || "");
       setEmailNotifications(profile.email_notifications ?? true);
       setMarketingEmails(profile.marketing_emails ?? false);
     }
