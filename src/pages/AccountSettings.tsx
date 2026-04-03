@@ -124,6 +124,9 @@ const AccountSettings = () => {
 
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [country, setCountry] = useState("");
+  const [age, setAge] = useState("");
+  const [tradingExperience, setTradingExperience] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [newPassword, setNewPassword] = useState("");
