@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   TrendingUp, Search, Star, Clock, SlidersHorizontal, X, Crown,
-  ArrowUpDown, Users, ChevronRight, Sparkles, Zap, Target,
+  ArrowUpDown, Users, ChevronRight, Sparkles, Zap, Target, Globe,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMentors } from "@/hooks/use-mentors";
