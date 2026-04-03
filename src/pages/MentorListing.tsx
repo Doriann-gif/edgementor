@@ -400,6 +400,29 @@ const MentorListingPage = () => {
                     </div>
                   </div>
 
+                  {/* Country */}
+                  {availableCountries.length > 0 && (
+                    <div className="space-y-3">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <Globe className="h-3.5 w-3.5" /> Country
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {availableCountries.map((c) => (
+                          <motion.button
+                            key={c}
+                            onClick={() => setActiveCountries(toggleItem(activeCountries, c))}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${activeCountries.includes(c)
+                              ? "border-primary/50 bg-primary/15 text-primary shadow-sm shadow-primary/10"
+                              : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:border-border"}`}
+                          >
+                            {c}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  )
                   {/* Active Filters Summary */}
                   <AnimatePresence>
                     {activeFilterCount > 0 && (
