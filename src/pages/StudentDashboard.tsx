@@ -436,6 +436,77 @@ const StudentDashboard = () => {
         </motion.div>
       </div>
 
+      {/* Compose Message Dialog */}
+      <Dialog open={composeOpen} onOpenChange={setComposeOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-heading">New Message</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div>
+              <label className="text-xs font-medium text-foreground mb-1.5 block">To</label>
+              <select
+                value={composeTo}
+                onChange={(e) => setComposeTo(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground"
+              >
+                <option value="">Select a mentor...</option>
+                {subscriptions.map((sub: any) => {
+                  const mentor = sub.mentors as Mentor;
+                  return (
+                    <option key={mentor.id} value={mentor.user_id || ""}>
+                      {mentor.name}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-foreground mb-1.5 block">Subject</label>
+              <Input
+                value={composeSubject}
+                onChange={(e) => setComposeSubject(e.target.value)}
+                placeholder="e.g. Question about your strategy"
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-foreground mb-1.5 block">Message</label>
+              <Textarea
+                value={composeBody}
+                onChange={(e) => setComposeBody(e.target.value)}
+                placeholder="Write your message..."
+                rows={4}
+                className="text-sm"
+              />
+            </div>
+            <Button
+              className="w-full text-sm"
+              disabled={!composeTo || !composeSubject.trim() || !composeBody.trim() || sendMessage.isPending}
+              onClick={async () => {
+                try {
+                  const mentor = subscriptions.find((s: any) => (s.mentors as Mentor).user_id === composeTo);
+                  const mentorName = mentor ? (mentor.mentors as Mentor).name : "Mentor";
+                  const senderName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "Student";
+                  await sendMessage.mutateAsync({
+                    recipientId: composeTo,
+                    subject: composeSubject.trim(),
+                    body: composeBody.trim(),
+                    senderName,
+                  });
+                  toast.success(`Message sent to ${mentorName}`);
+                  setComposeOpen(false);
+                } catch (err: any) {
+                  toast.error(err.message || "Failed to send message");
+                }
+              }}
+            >
+              {sendMessage.isPending ? "Sending..." : <><Send className="h-3.5 w-3.5 mr-1.5" /> Send Message</>}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Cancel Confirmation Dialog */}
       <AlertDialog open={!!confirmCancelSub} onOpenChange={(open) => !open && setConfirmCancelSub(null)}>
         <AlertDialogContent>
