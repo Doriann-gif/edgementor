@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import {
