@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award, Send } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
+import { useMentor, useMentorReviews, useFeaturedMentors } from "@/hooks/use-mentors";
+import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
@@ -49,6 +50,52 @@ const fadeUp = {
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.92 },
   show: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" as const } },
+};
+
+const MentorNotFound = () => {
+  const { data: suggested = [] } = useFeaturedMentors();
+  return (
+    <PageTransition>
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <motion.div className="max-w-md w-full text-center space-y-6" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          <motion.div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto" animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
+            <Search className="h-8 w-8 text-muted-foreground/40" />
+          </motion.div>
+          <div>
+            <h1 className="font-heading text-xl font-bold text-foreground mb-2">Mentor not found</h1>
+            <p className="text-sm text-muted-foreground leading-relaxed">This mentor profile doesn't exist or may have been removed. Browse our top-rated mentors instead.</p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link to="/mentors"><Button variant="glow" size="sm" className="font-semibold"><Users className="h-4 w-4 mr-1.5" /> Browse All Mentors</Button></Link>
+            <Link to="/"><Button variant="outline" size="sm">Back to Home</Button></Link>
+          </div>
+          {suggested.length > 0 && (
+            <div className="pt-4 border-t border-border/50">
+              <p className="text-xs font-medium text-muted-foreground mb-4 uppercase tracking-wider">Suggested Mentors</p>
+              <div className="space-y-3">
+                {suggested.slice(0, 3).map((m) => (
+                  <Link key={m.id} to={`/mentor/${m.id}`}>
+                    <motion.div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 hover:border-primary/30 transition-colors text-left" whileHover={{ y: -2 }}>
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary font-heading font-bold text-sm">{m.avatar}</div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-heading font-semibold text-sm text-foreground block truncate">{m.name}</span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="flex items-center gap-0.5 text-xs text-amber-500"><Star className="h-3 w-3 fill-current" /> {m.rating}</span>
+                          <span className="text-xs text-muted-foreground">{m.students} students</span>
+                          <span className="text-xs text-muted-foreground">${m.monthly_price}/mo</span>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    </motion.div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      </div>
+    </PageTransition>
+  );
 };
 
 const MentorProfile = () => {
@@ -213,16 +260,7 @@ const MentorProfile = () => {
 
   if (!mentor) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <p className="text-muted-foreground mb-4">Mentor not found.</p>
-          <Link to="/mentors"><Button variant="outline" size="sm">Back to listing</Button></Link>
-        </motion.div>
-      </div>
+      <MentorNotFound />
     );
   }
 
