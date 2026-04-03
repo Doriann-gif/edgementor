@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import confetti from "canvas-confetti";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
