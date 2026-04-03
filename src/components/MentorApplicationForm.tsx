@@ -142,6 +142,15 @@ const MentorApplicationForm = () => {
               <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]" />
             </div>
             <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2"><User className="h-3.5 w-3.5 text-primary" /> Country *</Label>
+              <Select value={country} onValueChange={setCountry}>
+                <SelectTrigger className="bg-muted border-border focus:border-primary/50"><SelectValue placeholder="Select your country" /></SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {COUNTRIES.sort().map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="socialLink" className="text-sm font-medium flex items-center gap-2"><Instagram className="h-3.5 w-3.5 text-primary" /> Social Link <span className="text-muted-foreground text-xs">(optional)</span></Label>
               <Input id="socialLink" placeholder="https://instagram.com/yourhandle" value={socialLink} onChange={(e) => setSocialLink(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]" />
             </div>
