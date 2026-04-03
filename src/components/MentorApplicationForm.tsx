@@ -86,7 +86,7 @@ const MentorApplicationForm = () => {
   };
 
   const canProceed = () => {
-    if (step === 0) return fullName && email;
+    if (step === 0) return fullName && email && country;
     if (step === 1) return experience && instruments.length > 0 && concepts.length > 0 && session;
     if (step === 2) return monthlyPrice && bio;
     if (step === 3) return confirmGenuine && agreeTerms;
