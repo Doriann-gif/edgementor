@@ -524,6 +524,52 @@ const MentorProfile = () => {
             <span className="text-sm font-normal text-muted-foreground">({reviews.length})</span>
           </h2>
 
+          {/* Review Submission Form */}
+          {isSubscribed && user && !hasReviewed && (
+            <motion.div
+              className="rounded-xl border border-primary/20 bg-primary/[0.03] p-5 mb-6"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h3 className="font-heading font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
+                <Award className="h-4 w-4 text-primary" />
+                Leave a Review
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1.5">Your rating</p>
+                  <InteractiveStarRating rating={reviewRating} onChange={setReviewRating} />
+                </div>
+                <Textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder="Share your experience with this mentor..."
+                  className="bg-muted border-border text-sm min-h-[80px] resize-none"
+                  maxLength={500}
+                />
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground">{reviewText.length}/500</span>
+                  <Button
+                    size="sm"
+                    onClick={() => submitReviewMutation.mutate()}
+                    disabled={submitReviewMutation.isPending || !reviewText.trim()}
+                    className="text-xs font-semibold"
+                  >
+                    <Send className="h-3.5 w-3.5 mr-1.5" />
+                    {submitReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {hasReviewed && (
+            <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-4 mb-6 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+              <p className="text-xs text-muted-foreground">You've already reviewed this mentor. Thank you!</p>
+            </div>
+          )}
+
           {reviews.length === 0 ? (
             <motion.div
               className="text-center py-8"
