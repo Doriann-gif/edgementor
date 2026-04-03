@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award, Send } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
 import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
