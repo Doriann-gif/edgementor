@@ -420,6 +420,22 @@ const MentorMessagesTab = ({ mentorId, mentorName }: { mentorId: string; mentorN
   const [replySubject, setReplySubject] = useState("");
   const [replyBody, setReplyBody] = useState("");
 
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("mentor-messages-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "messages", filter: `recipient_id=eq.${user.id}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["mentor-messages"] });
+          queryClient.invalidateQueries({ queryKey: ["unread-notifications"] });
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user?.id, queryClient]);
+
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ["mentor-messages", user?.id],
     enabled: !!user,
