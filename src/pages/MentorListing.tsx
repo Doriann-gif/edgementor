@@ -92,7 +92,7 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
               <h3 className="font-heading font-bold text-foreground truncate text-base">{mentor.name}</h3>
               <TierBadge tier={tier} size="sm" showLabel={false} />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" /> {mentor.experience}
               </span>
@@ -102,6 +102,11 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Users className="h-3 w-3" /> {mentor.students}
               </span>
+              {mentor.country && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Globe className="h-3 w-3" /> {mentor.country}
+                </span>
+              )}
             </div>
           </div>
         </div>
