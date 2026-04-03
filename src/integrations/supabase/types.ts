@@ -378,6 +378,7 @@ export type Database = {
           recipient_id: string
           sender_mentor_id: string | null
           sender_name: string
+          sender_user_id: string | null
           subject: string
         }
         Insert: {
@@ -388,6 +389,7 @@ export type Database = {
           recipient_id: string
           sender_mentor_id?: string | null
           sender_name: string
+          sender_user_id?: string | null
           subject: string
         }
         Update: {
@@ -398,6 +400,7 @@ export type Database = {
           recipient_id?: string
           sender_mentor_id?: string | null
           sender_name?: string
+          sender_user_id?: string | null
           subject?: string
         }
         Relationships: [
