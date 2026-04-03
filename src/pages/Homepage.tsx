@@ -49,6 +49,7 @@ const Homepage = () => {
   const { data: featuredMentors = [] } = useFeaturedMentors();
   const { data: allMentors = [] } = useMentors();
   const { user, loading } = useAuth();
+  const reduced = useReducedMotion();
   const [showWelcome, setShowWelcome] = useState(false);
 
 
