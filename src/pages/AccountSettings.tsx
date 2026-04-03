@@ -124,6 +124,9 @@ const AccountSettings = () => {
 
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [country, setCountry] = useState("");
+  const [age, setAge] = useState("");
+  const [tradingExperience, setTradingExperience] = useState("");
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -168,6 +171,9 @@ const AccountSettings = () => {
     if (profile) {
       setDisplayName(profile.display_name || "");
       setAvatarUrl(profile.avatar_url || "");
+      setCountry((profile as any).country || "");
+      setAge((profile as any).age ? String((profile as any).age) : "");
+      setTradingExperience((profile as any).trading_experience || "");
       setEmailNotifications(profile.email_notifications ?? true);
       setMarketingEmails(profile.marketing_emails ?? false);
     }
@@ -201,9 +207,12 @@ const AccountSettings = () => {
     mutationFn: async () => {
       const { error } = await supabase.from("profiles").update({
         display_name: displayName, avatar_url: avatarUrl || null,
+        country: country || null,
+        age: age ? parseInt(age, 10) : null,
+        trading_experience: tradingExperience || null,
         email_notifications: emailNotifications, marketing_emails: marketingEmails,
         updated_at: new Date().toISOString(),
-      }).eq("id", user!.id);
+      } as any).eq("id", user!.id);
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["my-profile"] }); toast.success("Profile updated!"); },
@@ -282,7 +291,7 @@ const AccountSettings = () => {
   const activeSubCount = subscriptions.filter((s: any) => s.status === "active").length;
 
   // Profile completeness
-  const profileFields = [displayName, avatarUrl, emailNotifications !== undefined];
+  const profileFields = [displayName, avatarUrl, country, age, tradingExperience, emailNotifications !== undefined];
   const completeness = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
 
   return (
@@ -535,6 +544,9 @@ const AccountSettings = () => {
                   { done: !!displayName, label: "Display name" },
                   { done: !!avatarUrl, label: "Profile photo" },
                   { done: true, label: "Email verified" },
+                  { done: !!country, label: "Country" },
+                  { done: !!age, label: "Age" },
+                  { done: !!tradingExperience, label: "Trading experience" },
                 ].map((item) => (
                   <span key={item.label} className={`inline-flex items-center gap-1 text-[11px] rounded-full px-2.5 py-1 border ${
                     item.done
@@ -566,6 +578,28 @@ const AccountSettings = () => {
                   <Label className="text-xs font-medium">Email Address</Label>
                   <Input value={user.email || ""} disabled className="bg-muted/50 border-border text-sm text-muted-foreground" />
                   <p className="text-[10px] text-muted-foreground">Email cannot be changed directly.</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Country <span className="text-muted-foreground">(optional)</span></Label>
+                  <Input value={country} onChange={(e) => setCountry(e.target.value)} className="bg-muted border-border text-sm" placeholder="e.g. United States" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Age <span className="text-muted-foreground">(optional)</span></Label>
+                  <Input type="number" min="13" max="120" value={age} onChange={(e) => setAge(e.target.value)} className="bg-muted border-border text-sm" placeholder="e.g. 25" />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label className="text-xs font-medium">Trading Experience <span className="text-muted-foreground">(optional)</span></Label>
+                  <Select value={tradingExperience} onValueChange={setTradingExperience}>
+                    <SelectTrigger className="bg-muted border-border text-sm">
+                      <SelectValue placeholder="Select your experience level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner — Just getting started</SelectItem>
+                      <SelectItem value="intermediate">Intermediate — Some experience</SelectItem>
+                      <SelectItem value="advanced">Advanced — Experienced trader</SelectItem>
+                      <SelectItem value="professional">Professional — Full-time trader</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
