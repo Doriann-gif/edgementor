@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award, Send } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
 import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,6 +22,16 @@ const StarRating = ({ rating }: { rating: number }) => (
       <div key={s}>
         <Star className={`h-4 w-4 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
       </div>
+    ))}
+  </div>
+);
+
+const InteractiveStarRating = ({ rating, onChange }: { rating: number; onChange: (r: number) => void }) => (
+  <div className="flex items-center gap-1">
+    {[1, 2, 3, 4, 5].map((s) => (
+      <button key={s} type="button" onClick={() => onChange(s)} className="p-0.5 hover:scale-125 transition-transform">
+        <Star className={`h-6 w-6 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30 hover:text-amber-400/50"}`} />
+      </button>
     ))}
   </div>
 );
@@ -49,6 +61,39 @@ const MentorProfile = () => {
   const toggleSave = useToggleSaveMentor();
   const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
   const reduced = useReducedMotion();
+  const queryClient = useQueryClient();
+
+  // Review form state
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+
+  const hasReviewed = reviews.some((r: any) => r.user_id === user?.id);
+
+  const submitReviewMutation = useMutation({
+    mutationFn: async () => {
+      if (!user || !id) throw new Error("Not authenticated");
+      if (!reviewText.trim()) throw new Error("Please write a review");
+      const profile = await supabase.from("profiles").select("display_name").eq("id", user.id).single();
+      const displayName = profile.data?.display_name || user.email?.split("@")[0] || "Student";
+      const { error } = await supabase.from("mentor_reviews").insert({
+        mentor_id: id,
+        user_id: user.id,
+        rating: reviewRating,
+        reviewer_name: displayName,
+        review_date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        review_text: reviewText.trim(),
+      } as any);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mentor-reviews", id] });
+      queryClient.invalidateQueries({ queryKey: ["mentor", id] });
+      setReviewText("");
+      setReviewRating(5);
+      toast.success("Review submitted! Thank you.");
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to submit review"),
+  });
 
   const { data: showcaseImages = [] } = useQuery({
     queryKey: ["mentor-showcase-images", id],
@@ -478,6 +523,52 @@ const MentorProfile = () => {
             Reviews
             <span className="text-sm font-normal text-muted-foreground">({reviews.length})</span>
           </h2>
+
+          {/* Review Submission Form */}
+          {isSubscribed && user && !hasReviewed && (
+            <motion.div
+              className="rounded-xl border border-primary/20 bg-primary/[0.03] p-5 mb-6"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <h3 className="font-heading font-semibold text-sm text-foreground mb-3 flex items-center gap-2">
+                <Award className="h-4 w-4 text-primary" />
+                Leave a Review
+              </h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1.5">Your rating</p>
+                  <InteractiveStarRating rating={reviewRating} onChange={setReviewRating} />
+                </div>
+                <Textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder="Share your experience with this mentor..."
+                  className="bg-muted border-border text-sm min-h-[80px] resize-none"
+                  maxLength={500}
+                />
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground">{reviewText.length}/500</span>
+                  <Button
+                    size="sm"
+                    onClick={() => submitReviewMutation.mutate()}
+                    disabled={submitReviewMutation.isPending || !reviewText.trim()}
+                    className="text-xs font-semibold"
+                  >
+                    <Send className="h-3.5 w-3.5 mr-1.5" />
+                    {submitReviewMutation.isPending ? "Submitting..." : "Submit Review"}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {hasReviewed && (
+            <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-4 mb-6 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+              <p className="text-xs text-muted-foreground">You've already reviewed this mentor. Thank you!</p>
+            </div>
+          )}
 
           {reviews.length === 0 ? (
             <motion.div
