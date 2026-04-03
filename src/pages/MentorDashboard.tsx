@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import MentorContentManager from "@/components/MentorContentManager";
 import MentorProfileEditor from "@/components/MentorProfileEditor";
 import PageTransition from "@/components/PageTransition";
@@ -20,6 +21,7 @@ import {
   ArrowLeft, LogOut, Users, DollarSign, TrendingUp, Edit3, Save,
   X, Clock, Star, Eye, Tag, Crown, Sparkles, BookOpen, Wallet,
   ChevronDown, ChevronUp, Banknote, ArrowDownToLine, RefreshCw, ExternalLink, BarChart3, History,
+  MessageSquare, Mail, MailOpen, Send,
 } from "lucide-react";
 import { toast } from "sonner";
 
