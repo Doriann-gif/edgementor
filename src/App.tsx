@@ -49,6 +49,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <PinkGlow />
+          {(() => { const UptrendLine = require("@/components/UptrendLine").default; return <UptrendLine />; })()}
           <Navbar />
           <Routes>
             <Route path="/" element={<Homepage />} />
