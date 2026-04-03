@@ -186,47 +186,48 @@ const MentorProfile = () => {
   return (
     <PageTransition>
     <div className={`min-h-screen ${isElite ? "bg-slate-950" : "bg-background"}`}>
-      {/* Ambient background with pink corners */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {isElite ? (
-          <>
-            <motion.div
-              className="absolute top-[-100px] left-1/3 w-[500px] h-[500px] bg-slate-400/[0.03] rounded-full blur-[120px]"
-              animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute bottom-[-100px] right-1/4 w-[400px] h-[400px] bg-pink-400/[0.03] rounded-full blur-[100px]"
-              animate={{ y: [0, 15, 0] }}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </>
-        ) : (
-          <>
-            <motion.div
-              className="absolute top-[-100px] right-1/4 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]"
-              animate={{ y: [0, -15, 0] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute bottom-[-100px] left-1/4 w-[400px] h-[400px] bg-pink-400/[0.04] rounded-full blur-[100px]"
-              animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            />
-            {/* Pink corner accents */}
-            <motion.div
-              className="absolute top-[5%] right-[3%] w-[200px] h-[200px] bg-pink-500/[0.06] rounded-full blur-[70px]"
-              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute bottom-[15%] left-[3%] w-[180px] h-[180px] bg-pink-400/[0.05] rounded-full blur-[60px]"
-              animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </>
-        )}
-      </div>
+      {/* Ambient background with pink corners — disabled on mobile */}
+      {!reduced && (
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          {isElite ? (
+            <>
+              <motion.div
+                className="absolute top-[-100px] left-1/3 w-[500px] h-[500px] bg-slate-400/[0.03] rounded-full blur-[120px]"
+                animate={{ y: [0, -20, 0], scale: [1, 1.05, 1] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="absolute bottom-[-100px] right-1/4 w-[400px] h-[400px] bg-pink-400/[0.03] rounded-full blur-[100px]"
+                animate={{ y: [0, 15, 0] }}
+                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </>
+          ) : (
+            <>
+              <motion.div
+                className="absolute top-[-100px] right-1/4 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]"
+                animate={{ y: [0, -15, 0] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="absolute bottom-[-100px] left-1/4 w-[400px] h-[400px] bg-pink-400/[0.04] rounded-full blur-[100px]"
+                animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
+                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="absolute top-[5%] right-[3%] w-[200px] h-[200px] bg-pink-500/[0.06] rounded-full blur-[70px]"
+                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+              />
+              <motion.div
+                className="absolute bottom-[15%] left-[3%] w-[180px] h-[180px] bg-pink-400/[0.05] rounded-full blur-[60px]"
+                animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4] }}
+                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </>
+          )}
+        </div>
+      )}
 
       <motion.div
         className="relative max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-10"
