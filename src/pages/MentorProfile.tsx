@@ -26,6 +26,16 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
+const InteractiveStarRating = ({ rating, onChange }: { rating: number; onChange: (r: number) => void }) => (
+  <div className="flex items-center gap-1">
+    {[1, 2, 3, 4, 5].map((s) => (
+      <button key={s} type="button" onClick={() => onChange(s)} className="p-0.5 hover:scale-125 transition-transform">
+        <Star className={`h-6 w-6 ${s <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30 hover:text-amber-400/50"}`} />
+      </button>
+    ))}
+  </div>
+);
+
 const stagger = {
   hidden: {},
   show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
