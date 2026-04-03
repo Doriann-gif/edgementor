@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   TrendingUp, Search, Star, Clock, SlidersHorizontal, X, Crown,
-  ArrowUpDown, Users, ChevronRight, Sparkles, Zap, Target,
+  ArrowUpDown, Users, ChevronRight, Sparkles, Zap, Target, Globe,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useMentors } from "@/hooks/use-mentors";
@@ -92,7 +92,7 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
               <h3 className="font-heading font-bold text-foreground truncate text-base">{mentor.name}</h3>
               <TierBadge tier={tier} size="sm" showLabel={false} />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" /> {mentor.experience}
               </span>
@@ -102,6 +102,11 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Users className="h-3 w-3" /> {mentor.students}
               </span>
+              {mentor.country && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Globe className="h-3 w-3" /> {mentor.country}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -205,6 +210,7 @@ const MentorListingPage = () => {
   const [search, setSearch] = useState("");
   const [activeInstruments, setActiveInstruments] = useState<string[]>([]);
   const [activeConcepts, setActiveConcepts] = useState<string[]>([]);
+  const [activeCountries, setActiveCountries] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number]>([500]);
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const { data: mentors = [], isLoading } = useMentors();
@@ -212,20 +218,25 @@ const MentorListingPage = () => {
   const toggleItem = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 
+  // Derive unique countries from mentors data
+  const availableCountries = [...new Set(mentors.map((m) => m.country).filter(Boolean) as string[])].sort();
+
   const filtered = mentors.filter((m) => {
     const matchesSearch = !search || m.name.toLowerCase().includes(search.toLowerCase()) || m.bio.toLowerCase().includes(search.toLowerCase());
     const matchesInstrument = activeInstruments.length === 0 || activeInstruments.some((i) => m.instruments.includes(i));
     const matchesConcept = activeConcepts.length === 0 || activeConcepts.some((c) => m.concepts.includes(c));
     const matchesPrice = m.monthly_price <= priceRange[0];
-    return matchesSearch && matchesInstrument && matchesConcept && matchesPrice;
+    const matchesCountry = activeCountries.length === 0 || (m.country && activeCountries.includes(m.country));
+    return matchesSearch && matchesInstrument && matchesConcept && matchesPrice && matchesCountry;
   });
 
   const sorted = sortMentors(filtered, sortBy);
-  const activeFilterCount = activeInstruments.length + activeConcepts.length + (priceRange[0] < 500 ? 1 : 0);
+  const activeFilterCount = activeInstruments.length + activeConcepts.length + activeCountries.length + (priceRange[0] < 500 ? 1 : 0);
 
   const clearFilters = () => {
     setActiveInstruments([]);
     setActiveConcepts([]);
+    setActiveCountries([]);
     setPriceRange([500]);
     setSearch("");
   };
@@ -394,6 +405,30 @@ const MentorListingPage = () => {
                     </div>
                   </div>
 
+                  {/* Country */}
+                  {availableCountries.length > 0 && (
+                    <div className="space-y-3">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                        <Globe className="h-3.5 w-3.5" /> Country
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {availableCountries.map((c) => (
+                          <motion.button
+                            key={c}
+                            onClick={() => setActiveCountries(toggleItem(activeCountries, c))}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all ${activeCountries.includes(c)
+                              ? "border-primary/50 bg-primary/15 text-primary shadow-sm shadow-primary/10"
+                              : "border-border bg-secondary text-muted-foreground hover:text-foreground hover:border-border"}`}
+                          >
+                            {c}
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Active Filters Summary */}
                   <AnimatePresence>
                     {activeFilterCount > 0 && (
@@ -429,6 +464,20 @@ const MentorListingPage = () => {
                             >
                               {c}
                               <button onClick={() => setActiveConcepts(toggleItem(activeConcepts, c))}>
+                                <X className="h-2.5 w-2.5" />
+                              </button>
+                            </motion.span>
+                          ))}
+                          {activeCountries.map((c) => (
+                            <motion.span
+                              key={c}
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              exit={{ scale: 0 }}
+                              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-2 py-0.5"
+                            >
+                              <Globe className="h-2.5 w-2.5" /> {c}
+                              <button onClick={() => setActiveCountries(toggleItem(activeCountries, c))}>
                                 <X className="h-2.5 w-2.5" />
                               </button>
                             </motion.span>
