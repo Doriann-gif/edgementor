@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import {
   Star, Clock, BookOpen, Heart, MessageSquare,
   Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard, MoreVertical,
-  XCircle, ExternalLink,
+  XCircle, ExternalLink, Send, PenSquare,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
