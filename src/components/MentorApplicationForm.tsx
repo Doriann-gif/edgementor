@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import { CheckCircle, Mail } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
