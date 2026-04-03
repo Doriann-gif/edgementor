@@ -16,7 +16,40 @@ const UptrendLine = () => (
           <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.08" />
           <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
         </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
+
+      {/* Glow layer behind the line */}
+      <motion.path
+        d={path}
+        stroke="hsl(var(--primary))"
+        strokeWidth="8"
+        strokeLinecap="round"
+        fill="none"
+        filter="url(#glow)"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: 1, opacity: [0, 0.4, 0.4] }}
+        transition={{ duration: 3, ease: "easeInOut" }}
+      />
+      <motion.path
+        d={path}
+        stroke="hsl(var(--primary))"
+        strokeWidth="8"
+        strokeLinecap="round"
+        fill="none"
+        filter="url(#glow)"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0, 0.5, 0.25, 0.5] }}
+        transition={{ duration: 4, delay: 3, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* Main line */}
       <motion.path
         d={path}
         stroke="hsl(var(--primary))"
@@ -27,6 +60,8 @@ const UptrendLine = () => (
         animate={{ pathLength: 1 }}
         transition={{ duration: 3, ease: "easeInOut" }}
       />
+
+      {/* Gradient fill */}
       <motion.path
         d={`${path} L1200 600 L0 600 Z`}
         fill="url(#uptrendGrad)"
