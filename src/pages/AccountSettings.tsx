@@ -291,7 +291,7 @@ const AccountSettings = () => {
   const activeSubCount = subscriptions.filter((s: any) => s.status === "active").length;
 
   // Profile completeness
-  const profileFields = [displayName, avatarUrl, emailNotifications !== undefined];
+  const profileFields = [displayName, avatarUrl, country, age, tradingExperience, emailNotifications !== undefined];
   const completeness = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
 
   return (
