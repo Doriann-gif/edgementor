@@ -121,6 +121,7 @@ export type Database = {
         Row: {
           bio: string
           concepts: string[]
+          country: string | null
           created_at: string
           email: string | null
           experience: string
@@ -138,6 +139,7 @@ export type Database = {
         Insert: {
           bio: string
           concepts?: string[]
+          country?: string | null
           created_at?: string
           email?: string | null
           experience: string
@@ -155,6 +157,7 @@ export type Database = {
         Update: {
           bio?: string
           concepts?: string[]
+          country?: string | null
           created_at?: string
           email?: string | null
           experience?: string
@@ -293,6 +296,7 @@ export type Database = {
           banner_color: string
           bio: string
           concepts: string[]
+          country: string | null
           created_at: string
           experience: string
           full_bio: string
@@ -318,6 +322,7 @@ export type Database = {
           banner_color?: string
           bio: string
           concepts?: string[]
+          country?: string | null
           created_at?: string
           experience: string
           full_bio?: string
@@ -343,6 +348,7 @@ export type Database = {
           banner_color?: string
           bio?: string
           concepts?: string[]
+          country?: string | null
           created_at?: string
           experience?: string
           full_bio?: string

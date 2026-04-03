@@ -18,6 +18,19 @@ const CONCEPTS = ["ICT", "Order Flow", "Supply & Demand", "Price Action", "SMC"]
 const SESSIONS = ["London", "New York", "Asian"];
 const EXPERIENCE_OPTIONS = ["1-2 years", "3-5 years", "5-8 years", "8-10 years", "10+ years"];
 
+const COUNTRIES = [
+  "United States", "United Kingdom", "Canada", "Australia", "Germany", "France",
+  "Netherlands", "Sweden", "Switzerland", "Norway", "Denmark", "Finland",
+  "Spain", "Italy", "Portugal", "Austria", "Belgium", "Ireland",
+  "Japan", "South Korea", "Singapore", "Hong Kong", "India", "Indonesia",
+  "Malaysia", "Philippines", "Thailand", "Vietnam", "Taiwan",
+  "Brazil", "Mexico", "Argentina", "Colombia", "Chile",
+  "South Africa", "Nigeria", "Kenya", "Egypt", "Ghana",
+  "United Arab Emirates", "Saudi Arabia", "Qatar", "Kuwait", "Israel",
+  "Poland", "Czech Republic", "Romania", "Hungary", "Greece",
+  "Turkey", "Russia", "Ukraine", "New Zealand", "Pakistan",
+];
+
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
   show: (i: number) => ({
@@ -38,6 +51,7 @@ const MentorApplicationForm = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [socialLink, setSocialLink] = useState("");
+  const [country, setCountry] = useState("");
   const [confirmGenuine, setConfirmGenuine] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [experience, setExperience] = useState("");
@@ -72,7 +86,7 @@ const MentorApplicationForm = () => {
   };
 
   const canProceed = () => {
-    if (step === 0) return fullName && email;
+    if (step === 0) return fullName && email && country;
     if (step === 1) return experience && instruments.length > 0 && concepts.length > 0 && session;
     if (step === 2) return monthlyPrice && bio;
     if (step === 3) return confirmGenuine && agreeTerms;
@@ -80,7 +94,7 @@ const MentorApplicationForm = () => {
   };
 
   const handleSubmit = async () => {
-    if (!fullName || !email || !experience || instruments.length === 0 || concepts.length === 0 || !session || !monthlyPrice || !bio) {
+    if (!fullName || !email || !country || !experience || instruments.length === 0 || concepts.length === 0 || !session || !monthlyPrice || !bio) {
       toast.error("Please fill in all required fields.");
       return;
     }
@@ -98,12 +112,13 @@ const MentorApplicationForm = () => {
         monthly_price: parseInt(monthlyPrice, 10),
         payment_type: paymentType,
         bio,
+        country: country || null,
         user_id: user?.id || null,
       });
       if (error) throw error;
       setShowSuccess(true);
       setStep(0);
-      setFullName(""); setEmail(""); setSocialLink(""); setConfirmGenuine(false); setAgreeTerms(false);
+      setFullName(""); setEmail(""); setSocialLink(""); setCountry(""); setConfirmGenuine(false); setAgreeTerms(false);
       setExperience(""); setInstruments([]); setConcepts([]); setSession("");
       setProofFile(null); setProfilePhoto(null); setMonthlyPrice(""); setBio("");
     } catch {
@@ -125,6 +140,15 @@ const MentorApplicationForm = () => {
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2"><Mail className="h-3.5 w-3.5 text-primary" /> Email Address *</Label>
               <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium flex items-center gap-2"><User className="h-3.5 w-3.5 text-primary" /> Country *</Label>
+              <Select value={country} onValueChange={setCountry}>
+                <SelectTrigger className="bg-muted border-border focus:border-primary/50"><SelectValue placeholder="Select your country" /></SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {COUNTRIES.sort().map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="socialLink" className="text-sm font-medium flex items-center gap-2"><Instagram className="h-3.5 w-3.5 text-primary" /> Social Link <span className="text-muted-foreground text-xs">(optional)</span></Label>
@@ -279,6 +303,7 @@ const MentorApplicationForm = () => {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><span className="text-muted-foreground">Name:</span> <span className="text-foreground font-medium">{fullName}</span></div>
                 <div><span className="text-muted-foreground">Email:</span> <span className="text-foreground font-medium">{email}</span></div>
+                <div><span className="text-muted-foreground">Country:</span> <span className="text-foreground font-medium">{country}</span></div>
                 <div><span className="text-muted-foreground">Experience:</span> <span className="text-foreground font-medium">{experience}</span></div>
                 <div><span className="text-muted-foreground">Session:</span> <span className="text-foreground font-medium">{session}</span></div>
                 <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">${monthlyPrice}{paymentType === "monthly" ? "/mo" : " one-time"}</span></div>
