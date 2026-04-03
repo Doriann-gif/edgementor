@@ -8,7 +8,7 @@ const UptrendLine = () => (
       viewBox="0 0 1200 600"
       fill="none"
       preserveAspectRatio="none"
-      className="absolute inset-0 w-full h-full opacity-10"
+      className="absolute inset-0 w-full h-full opacity-20"
       style={{ filter: "blur(6px)" }}
     >
       <defs>
