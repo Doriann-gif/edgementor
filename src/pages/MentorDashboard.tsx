@@ -690,7 +690,7 @@ const MentorDashboard = () => {
 
         {/* Tabbed Content */}
         <Tabs defaultValue="profile" className="space-y-4">
-          <TabsList className="w-full grid grid-cols-4 h-10 bg-muted/50 rounded-xl">
+          <TabsList className="w-full grid grid-cols-5 h-10 bg-muted/50 rounded-xl">
             <TabsTrigger value="profile" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
               <Edit3 className="h-3.5 w-3.5 mr-1.5" /> Profile
             </TabsTrigger>
@@ -699,6 +699,9 @@ const MentorDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="students" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
               <Users className="h-3.5 w-3.5 mr-1.5" /> Students
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
+              <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Messages
             </TabsTrigger>
             <TabsTrigger value="income" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
               <Wallet className="h-3.5 w-3.5 mr-1.5" /> Income
