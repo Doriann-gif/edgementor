@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
@@ -186,6 +187,40 @@ const MentorProfile = () => {
   return (
     <PageTransition>
     <div className={`min-h-screen ${isElite ? "bg-slate-950" : "bg-background"}`}>
+      <Helmet>
+        <title>{`${mentor.name} — Trading Mentor | EdgeMentor`}</title>
+        <meta name="description" content={`Learn from ${mentor.name}. ${mentor.bio} ${mentor.instruments?.join(", ")} mentor with ${mentor.students} students.`} />
+        <link rel="canonical" href={`https://edgementor.lovable.app/mentor/${id}`} />
+        <meta property="og:title" content={`${mentor.name} — Trading Mentor | EdgeMentor`} />
+        <meta property="og:description" content={mentor.bio} />
+        <meta property="og:type" content="profile" />
+        <meta property="og:url" content={`https://edgementor.lovable.app/mentor/${id}`} />
+        {mentor.avatar && <meta property="og:image" content={mentor.avatar} />}
+        <meta property="og:site_name" content="EdgeMentor" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${mentor.name} — Trading Mentor`} />
+        <meta name="twitter:description" content={mentor.bio} />
+        {mentor.avatar && <meta name="twitter:image" content={mentor.avatar} />}
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "name": mentor.name,
+          "description": mentor.bio,
+          "image": mentor.avatar,
+          "jobTitle": "Trading Mentor",
+          ...(mentor.country ? { "nationality": mentor.country } : {}),
+          "url": `https://edgementor.lovable.app/mentor/${id}`,
+          "memberOf": { "@type": "Organization", "name": "EdgeMentor", "url": "https://edgementor.lovable.app" },
+          ...(reviews.length > 0 ? {
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": mentor.rating,
+              "reviewCount": reviews.length,
+              "bestRating": 5
+            }
+          } : {})
+        })}</script>
+      </Helmet>
       {/* Ambient background with pink corners — disabled on mobile */}
       {!reduced && (
         <div className="fixed inset-0 overflow-hidden pointer-events-none">

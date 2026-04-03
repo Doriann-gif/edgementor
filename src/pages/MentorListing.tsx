@@ -249,7 +249,12 @@ const MentorListingPage = () => {
       <link rel="canonical" href="https://edgementor.lovable.app/mentors" />
       <meta property="og:title" content="Browse Trading Mentors — EdgeMentor" />
       <meta property="og:description" content="Explore verified trading mentors specializing in futures, forex, crypto & options." />
+      <meta property="og:type" content="website" />
       <meta property="og:url" content="https://edgementor.lovable.app/mentors" />
+      <meta property="og:site_name" content="EdgeMentor" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="Browse Trading Mentors — EdgeMentor" />
+      <meta name="twitter:description" content="Explore verified trading mentors in futures, forex, crypto & options." />
       <script type="application/ld+json">{JSON.stringify({
         "@context": "https://schema.org",
         "@type": "CollectionPage",

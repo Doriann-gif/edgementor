@@ -26,6 +26,21 @@ const About = () => (
     <Helmet>
       <title>About EdgeMentor — Learn From Real Traders</title>
       <meta name="description" content="EdgeMentor connects aspiring traders with verified mentors. Learn about our mission, how the platform works, and find answers to common questions." />
+      <link rel="canonical" href="https://edgementor.lovable.app/about" />
+      <meta property="og:title" content="About EdgeMentor — Learn From Real Traders" />
+      <meta property="og:description" content="Learn about our mission to connect aspiring traders with verified mentors who have proven track records." />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://edgementor.lovable.app/about" />
+      <meta property="og:site_name" content="EdgeMentor" />
+      <script type="application/ld+json">{JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": faqs.map(f => ({
+          "@type": "Question",
+          "name": f.q,
+          "acceptedAnswer": { "@type": "Answer", "text": f.a }
+        }))
+      })}</script>
     </Helmet>
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-20">

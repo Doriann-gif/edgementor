@@ -71,6 +71,14 @@ const Homepage = () => {
         <title>EdgeMentor — Find Your Trading Mentor</title>
         <meta name="description" content="Connect with elite trading mentors in futures, forex, crypto & options. Get personalized 1-on-1 mentorship to accelerate your trading journey." />
         <link rel="canonical" href="https://edgementor.lovable.app/" />
+        <meta property="og:title" content="EdgeMentor — Find Your Trading Mentor" />
+        <meta property="og:description" content="Connect with elite trading mentors in futures, forex, crypto & options. Personalized 1-on-1 mentorship." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://edgementor.lovable.app/" />
+        <meta property="og:site_name" content="EdgeMentor" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="EdgeMentor — Find Your Trading Mentor" />
+        <meta name="twitter:description" content="Connect with elite trading mentors. Personalized 1-on-1 mentorship in futures, forex, crypto & options." />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebSite",
