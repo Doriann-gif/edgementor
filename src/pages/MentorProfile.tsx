@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award } from "lucide-react";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMentor, useMentorReviews } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
