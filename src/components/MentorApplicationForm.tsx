@@ -118,7 +118,7 @@ const MentorApplicationForm = () => {
       if (error) throw error;
       setShowSuccess(true);
       setStep(0);
-      setFullName(""); setEmail(""); setSocialLink(""); setConfirmGenuine(false); setAgreeTerms(false);
+      setFullName(""); setEmail(""); setSocialLink(""); setCountry(""); setConfirmGenuine(false); setAgreeTerms(false);
       setExperience(""); setInstruments([]); setConcepts([]); setSession("");
       setProofFile(null); setProfilePhoto(null); setMonthlyPrice(""); setBio("");
     } catch {
