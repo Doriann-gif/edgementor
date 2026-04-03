@@ -118,6 +118,16 @@ const FreeContent = () => {
 
   return (
     <PageTransition>
+    <Helmet>
+      <title>Free Trading Education — EdgeMentor</title>
+      <meta name="description" content="Watch free trading tutorials and educational videos on price action, ICT/SMC, order flow, risk management, and more from top trading educators." />
+      <link rel="canonical" href="https://edgementor.lovable.app/learn" />
+      <meta property="og:title" content="Free Trading Education — EdgeMentor" />
+      <meta property="og:description" content="Watch free trading tutorials on price action, ICT/SMC, order flow, and more." />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content="https://edgementor.lovable.app/learn" />
+      <meta property="og:site_name" content="EdgeMentor" />
+    </Helmet>
     <div className="min-h-screen bg-background">
       {/* Ambient */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
