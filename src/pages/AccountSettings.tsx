@@ -544,6 +544,9 @@ const AccountSettings = () => {
                   { done: !!displayName, label: "Display name" },
                   { done: !!avatarUrl, label: "Profile photo" },
                   { done: true, label: "Email verified" },
+                  { done: !!country, label: "Country" },
+                  { done: !!age, label: "Age" },
+                  { done: !!tradingExperience, label: "Trading experience" },
                 ].map((item) => (
                   <span key={item.label} className={`inline-flex items-center gap-1 text-[11px] rounded-full px-2.5 py-1 border ${
                     item.done
