@@ -205,6 +205,7 @@ const MentorListingPage = () => {
   const [search, setSearch] = useState("");
   const [activeInstruments, setActiveInstruments] = useState<string[]>([]);
   const [activeConcepts, setActiveConcepts] = useState<string[]>([]);
+  const [activeCountries, setActiveCountries] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number]>([500]);
   const [sortBy, setSortBy] = useState<SortOption>("featured");
   const { data: mentors = [], isLoading } = useMentors();
@@ -212,20 +213,25 @@ const MentorListingPage = () => {
   const toggleItem = (arr: string[], item: string) =>
     arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 
+  // Derive unique countries from mentors data
+  const availableCountries = [...new Set(mentors.map((m) => m.country).filter(Boolean) as string[])].sort();
+
   const filtered = mentors.filter((m) => {
     const matchesSearch = !search || m.name.toLowerCase().includes(search.toLowerCase()) || m.bio.toLowerCase().includes(search.toLowerCase());
     const matchesInstrument = activeInstruments.length === 0 || activeInstruments.some((i) => m.instruments.includes(i));
     const matchesConcept = activeConcepts.length === 0 || activeConcepts.some((c) => m.concepts.includes(c));
     const matchesPrice = m.monthly_price <= priceRange[0];
-    return matchesSearch && matchesInstrument && matchesConcept && matchesPrice;
+    const matchesCountry = activeCountries.length === 0 || (m.country && activeCountries.includes(m.country));
+    return matchesSearch && matchesInstrument && matchesConcept && matchesPrice && matchesCountry;
   });
 
   const sorted = sortMentors(filtered, sortBy);
-  const activeFilterCount = activeInstruments.length + activeConcepts.length + (priceRange[0] < 500 ? 1 : 0);
+  const activeFilterCount = activeInstruments.length + activeConcepts.length + activeCountries.length + (priceRange[0] < 500 ? 1 : 0);
 
   const clearFilters = () => {
     setActiveInstruments([]);
     setActiveConcepts([]);
+    setActiveCountries([]);
     setPriceRange([500]);
     setSearch("");
   };
