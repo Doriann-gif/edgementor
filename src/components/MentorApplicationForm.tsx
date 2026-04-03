@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MultiSelect from "@/components/MultiSelect";
-import { Upload, TrendingUp, DollarSign, User, FileText, Instagram, Sparkles, ArrowRight, Shield } from "lucide-react";
+import { Upload, TrendingUp, DollarSign, User, FileText, Instagram, Sparkles, ArrowRight, Shield, ChevronsUpDown, Check } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
