@@ -18,6 +18,7 @@ export interface Mentor {
   status: string;
   tier: MentorTier;
   banner_color: string;
+  country?: string | null;
   user_id?: string | null;
 }
 
