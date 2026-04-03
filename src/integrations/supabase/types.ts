@@ -415,30 +415,39 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: number | null
           avatar_url: string | null
+          country: string | null
           created_at: string
           display_name: string | null
           email_notifications: boolean
           id: string
           marketing_emails: boolean
+          trading_experience: string | null
           updated_at: string
         }
         Insert: {
+          age?: number | null
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
           email_notifications?: boolean
           id: string
           marketing_emails?: boolean
+          trading_experience?: string | null
           updated_at?: string
         }
         Update: {
+          age?: number | null
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string | null
           email_notifications?: boolean
           id?: string
           marketing_emails?: boolean
+          trading_experience?: string | null
           updated_at?: string
         }
         Relationships: []
