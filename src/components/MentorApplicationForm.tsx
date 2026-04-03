@@ -94,7 +94,7 @@ const MentorApplicationForm = () => {
   };
 
   const handleSubmit = async () => {
-    if (!fullName || !email || !experience || instruments.length === 0 || concepts.length === 0 || !session || !monthlyPrice || !bio) {
+    if (!fullName || !email || !country || !experience || instruments.length === 0 || concepts.length === 0 || !session || !monthlyPrice || !bio) {
       toast.error("Please fill in all required fields.");
       return;
     }
