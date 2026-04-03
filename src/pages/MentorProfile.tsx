@@ -47,6 +47,7 @@ const MentorProfile = () => {
   const { data: isSubscribed } = useIsSubscribed(id);
   const toggleSave = useToggleSaveMentor();
   const isSaved = id ? savedMentorIds?.has(id) ?? false : false;
+  const reduced = useReducedMotion();
 
   const { data: showcaseImages = [] } = useQuery({
     queryKey: ["mentor-showcase-images", id],
