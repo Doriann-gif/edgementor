@@ -35,7 +35,6 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
         <div>
           <motion.span
             className="inline-flex items-center gap-1.5 text-xs font-medium text-primary mb-3 rounded-full bg-primary/5 border border-primary/20 px-3 py-1"
-            animate={{ boxShadow: ["0 0 0 0 hsl(var(--primary) / 0)", "0 0 12px 2px hsl(var(--primary) / 0.08)", "0 0 0 0 hsl(var(--primary) / 0)"] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
             <Star className="h-3 w-3 fill-current" /> Hand-picked

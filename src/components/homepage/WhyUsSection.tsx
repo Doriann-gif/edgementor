@@ -41,7 +41,7 @@ const WhyUsSection = () => (
         ].map((item, i) => (
           <motion.div key={item.title} variants={fadeUp} custom={i}>
             <motion.div
-              className={`group relative rounded-2xl border border-border bg-card/80 backdrop-blur-sm p-10 transition-all duration-300 hover:border-pink-400/20 overflow-hidden ${item.hoverGlow}`}
+              className={`group relative rounded-2xl border border-border bg-card/80 p-10 transition-all duration-300 hover:border-pink-400/20 overflow-hidden ${item.hoverGlow}`}
               whileHover={{ y: -8, boxShadow: "0 20px 50px -12px hsl(var(--primary) / 0.12)" }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
             >
