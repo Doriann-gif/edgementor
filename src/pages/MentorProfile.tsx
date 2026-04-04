@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award, Send } from "lucide-react";
+import { ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp, CheckCircle2, MessageSquare, Heart, Crown, ChevronRight, Sparkles, Shield, Award, Send, ImageIcon } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMentor, useMentorReviews, useFeaturedMentors } from "@/hooks/use-mentors";
 import { Search } from "lucide-react";
