@@ -31,7 +31,12 @@ const About = () => (
       <meta property="og:description" content="Learn about our mission to connect aspiring traders with verified mentors who have proven track records." />
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://edgementor.lovable.app/about" />
+      <meta property="og:image" content="https://edgementor.lovable.app/og-image.jpg" />
       <meta property="og:site_name" content="EdgeMentor" />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content="About EdgeMentor — Learn From Real Traders" />
+      <meta name="twitter:description" content="Learn about our mission to connect aspiring traders with verified mentors." />
+      <meta name="twitter:image" content="https://edgementor.lovable.app/og-image.jpg" />
       <script type="application/ld+json">{JSON.stringify({
         "@context": "https://schema.org",
         "@type": "FAQPage",
