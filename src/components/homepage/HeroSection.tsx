@@ -28,7 +28,7 @@ const HeroSection = () => (
     >
       <motion.div variants={scaleIn}>
         <motion.div
-          className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-5 py-2 text-xs font-medium text-primary mb-8 backdrop-blur-sm shadow-lg shadow-primary/5"
+          className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-5 py-2 text-xs font-medium text-primary mb-8 shadow-lg shadow-primary/5"
           animate={{ boxShadow: ["0 0 0 0 hsl(var(--primary) / 0)", "0 0 20px 4px hsl(var(--primary) / 0.1)", "0 0 0 0 hsl(var(--primary) / 0)"] }}
           transition={{ duration: 3, repeat: Infinity }}
         >
