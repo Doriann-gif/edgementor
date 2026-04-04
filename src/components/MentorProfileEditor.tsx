@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Star, Clock, Users, MapPin, TrendingUp, CheckCircle2,
   MessageSquare, Sparkles, Award, Pencil, Save, X, Plus, Trash2,
-  ImagePlus, Loader2,
+  ImagePlus, Loader2, ExternalLink, Link as LinkIcon,
 } from "lucide-react";
 
 interface MentorProfileEditorProps {
@@ -42,6 +42,7 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
   const [editPrice, setEditPrice] = useState(String(mentor.monthly_price));
   const [editHighlights, setEditHighlights] = useState<string[]>([...mentor.highlights]);
   const [newHighlight, setNewHighlight] = useState("");
+  const [editSocialLink, setEditSocialLink] = useState(mentor.social_link || "");
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { data: showcaseImages = [] } = useQuery({
@@ -90,6 +91,7 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
     setEditFullBio(mentor.full_bio);
     setEditPrice(String(mentor.monthly_price));
     setEditHighlights([...mentor.highlights]);
+    setEditSocialLink(mentor.social_link || "");
     setEditing(true);
   };
 
@@ -100,6 +102,7 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
         full_bio: editFullBio,
         monthly_price: parseInt(editPrice, 10),
         highlights: editHighlights.filter(Boolean),
+        social_link: editSocialLink.trim() || null,
       });
       setEditing(false);
       toast.success("Profile updated!");
@@ -203,9 +206,37 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
               <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Full Bio</label>
               <Textarea value={editFullBio} onChange={(e) => setEditFullBio(e.target.value)} rows={4} className="bg-muted border-border text-sm resize-none" />
             </div>
+            <div>
+              <label className="text-[11px] font-medium text-muted-foreground mb-1 block flex items-center gap-1.5">
+                <LinkIcon className="h-3 w-3" /> Social Link
+                <span className="text-muted-foreground/60 font-normal">(TikTok, Instagram, etc.)</span>
+              </label>
+              <Input
+                value={editSocialLink}
+                onChange={(e) => setEditSocialLink(e.target.value)}
+                placeholder="https://instagram.com/yourhandle"
+                className="bg-muted border-border text-sm"
+              />
+            </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground leading-relaxed">{mentor.full_bio}</p>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground leading-relaxed">{mentor.full_bio}</p>
+            {mentor.social_link && (
+              <a
+                href={mentor.social_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 hover:border-primary/50 transition-all"
+              >
+                <ExternalLink className="h-4 w-4" />
+                {mentor.social_link.includes("tiktok") ? "TikTok" :
+                 mentor.social_link.includes("instagram") ? "Instagram" :
+                 mentor.social_link.includes("youtube") ? "YouTube" :
+                 mentor.social_link.includes("twitter") || mentor.social_link.includes("x.com") ? "X / Twitter" : "Social Link"}
+              </a>
+            )}
+          </div>
         )}
       </div>
 
