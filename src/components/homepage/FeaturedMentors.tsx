@@ -35,7 +35,6 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
         <div>
           <motion.span
             className="inline-flex items-center gap-1.5 text-xs font-medium text-primary mb-3 rounded-full bg-primary/5 border border-primary/20 px-3 py-1"
-            animate={{ boxShadow: ["0 0 0 0 hsl(var(--primary) / 0)", "0 0 12px 2px hsl(var(--primary) / 0.08)", "0 0 0 0 hsl(var(--primary) / 0)"] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
             <Star className="h-3 w-3 fill-current" /> Hand-picked
@@ -61,7 +60,7 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
             <motion.div key={mentor.id} variants={fadeUp} custom={idx}>
               <Link to={`/mentor/${mentor.id}`}>
                 <motion.div
-                  className="group relative rounded-2xl border border-border bg-card/80 backdrop-blur-sm p-6 transition-all duration-300 hover:border-pink-400/30 overflow-hidden"
+                  className="group relative rounded-2xl border border-border bg-card/80 p-6 transition-all duration-300 hover:border-pink-400/30 overflow-hidden"
                   whileHover={{ y: -8, boxShadow: "0 25px 60px -12px hsl(var(--primary) / 0.15), 0 0 40px -8px rgba(236,72,153,0.08)" }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
