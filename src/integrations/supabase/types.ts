@@ -91,6 +91,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "discount_codes_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feed_posts: {
@@ -213,6 +220,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mentor_content_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mentor_reviews: {
@@ -254,6 +268,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "mentor_reviews_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       mentor_showcase_images: {
@@ -287,6 +308,13 @@ export type Database = {
             columns: ["mentor_id"]
             isOneToOne: false
             referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_showcase_images_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors_public"
             referencedColumns: ["id"]
           },
         ]
@@ -417,6 +445,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "messages_sender_mentor_id_fkey"
+            columns: ["sender_mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
@@ -485,6 +520,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "saved_mentors_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       subscriptions: {
@@ -520,6 +562,13 @@ export type Database = {
             referencedRelation: "mentors"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "subscriptions_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -542,7 +591,78 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mentors_public: {
+        Row: {
+          available: boolean | null
+          avatar: string | null
+          banner_color: string | null
+          bio: string | null
+          concepts: string[] | null
+          country: string | null
+          created_at: string | null
+          experience: string | null
+          full_bio: string | null
+          highlights: string[] | null
+          id: string | null
+          instruments: string[] | null
+          monthly_price: number | null
+          name: string | null
+          payment_type: string | null
+          rating: number | null
+          session: string | null
+          social_link: string | null
+          status: string | null
+          students: number | null
+          tier: string | null
+        }
+        Insert: {
+          available?: boolean | null
+          avatar?: string | null
+          banner_color?: string | null
+          bio?: string | null
+          concepts?: string[] | null
+          country?: string | null
+          created_at?: string | null
+          experience?: string | null
+          full_bio?: string | null
+          highlights?: string[] | null
+          id?: string | null
+          instruments?: string[] | null
+          monthly_price?: number | null
+          name?: string | null
+          payment_type?: string | null
+          rating?: number | null
+          session?: string | null
+          social_link?: string | null
+          status?: string | null
+          students?: number | null
+          tier?: string | null
+        }
+        Update: {
+          available?: boolean | null
+          avatar?: string | null
+          banner_color?: string | null
+          bio?: string | null
+          concepts?: string[] | null
+          country?: string | null
+          created_at?: string | null
+          experience?: string | null
+          full_bio?: string | null
+          highlights?: string[] | null
+          id?: string | null
+          instruments?: string[] | null
+          monthly_price?: number | null
+          name?: string | null
+          payment_type?: string | null
+          rating?: number | null
+          session?: string | null
+          social_link?: string | null
+          status?: string | null
+          students?: number | null
+          tier?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
