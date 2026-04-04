@@ -20,6 +20,7 @@ export interface Mentor {
   banner_color: string;
   country?: string | null;
   user_id?: string | null;
+  social_link?: string | null;
 }
 
 export interface MentorReview {

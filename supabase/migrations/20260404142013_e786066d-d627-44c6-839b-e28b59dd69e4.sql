@@ -1,0 +1,1 @@
+ALTER TABLE public.mentors ADD COLUMN social_link text DEFAULT NULL;
