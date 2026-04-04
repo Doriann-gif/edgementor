@@ -62,10 +62,10 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
     if (file.size > 5 * 1024 * 1024) { toast.error("Max 5MB per image."); return; }
     setUploadingImage(true);
     try {
-      const fileName = `${mentor.id}/showcase-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-      const { error: upErr } = await supabase.storage.from("mentor-content").upload(fileName, file, { upsert: true });
+      const fileName = `showcase/${mentor.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(fileName, file, { upsert: true });
       if (upErr) throw upErr;
-      const { data: { publicUrl } } = supabase.storage.from("mentor-content").getPublicUrl(fileName);
+      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(fileName);
       const { error } = await supabase.from("mentor_showcase_images").insert({
         mentor_id: mentor.id,
         image_url: publicUrl,
