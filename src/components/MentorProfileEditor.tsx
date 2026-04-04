@@ -91,6 +91,7 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
     setEditFullBio(mentor.full_bio);
     setEditPrice(String(mentor.monthly_price));
     setEditHighlights([...mentor.highlights]);
+    setEditSocialLink(mentor.social_link || "");
     setEditing(true);
   };
 
