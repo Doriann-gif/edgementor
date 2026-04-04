@@ -367,7 +367,7 @@ const MentorApplicationForm = () => {
                 <div><span className="text-muted-foreground">Country:</span> <span className="text-foreground font-medium">{country}</span></div>
                 <div><span className="text-muted-foreground">Experience:</span> <span className="text-foreground font-medium">{experience}</span></div>
                 <div><span className="text-muted-foreground">Session:</span> <span className="text-foreground font-medium">{session}</span></div>
-                <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">${monthlyPrice}{paymentType === "monthly" ? "/mo" : " one-time"}</span></div>
+                <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">{monthlyPrice} {currency}{paymentType === "monthly" ? "/mo" : " one-time"}</span></div>
                 <div><span className="text-muted-foreground">Type:</span> <span className="text-foreground font-medium">{paymentType === "monthly" ? "Monthly Subscription" : "One-Time Payment"}</span></div>
               </div>
               <div className="flex flex-wrap gap-1.5 pt-2">
