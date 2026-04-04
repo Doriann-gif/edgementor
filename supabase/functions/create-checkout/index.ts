@@ -88,8 +88,8 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [lineItem],
       mode: isOneTime ? "payment" : "subscription",
-      success_url: `${req.headers.get("origin")}/payment-success?mentor_id=${mentorId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/subscribe/${mentorId}`,
+      success_url: `${req.headers.get("origin") || "https://edgementor.lovable.app"}/payment-success?mentor_id=${mentorId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin") || "https://edgementor.lovable.app"}/subscribe/${mentorId}`,
       metadata: {
         mentor_id: mentorId,
         user_id: user.id,
