@@ -61,7 +61,7 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
             <motion.div key={mentor.id} variants={fadeUp} custom={idx}>
               <Link to={`/mentor/${mentor.id}`}>
                 <motion.div
-                  className="group relative rounded-2xl border border-border bg-card/80 backdrop-blur-sm p-6 transition-all duration-300 hover:border-pink-400/30 overflow-hidden"
+                  className="group relative rounded-2xl border border-border bg-card/80 p-6 transition-all duration-300 hover:border-pink-400/30 overflow-hidden"
                   whileHover={{ y: -8, boxShadow: "0 25px 60px -12px hsl(var(--primary) / 0.15), 0 0 40px -8px rgba(236,72,153,0.08)" }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
