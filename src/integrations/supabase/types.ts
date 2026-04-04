@@ -312,6 +312,7 @@ export type Database = {
           payouts_enabled: boolean
           rating: number
           session: string
+          social_link: string | null
           status: string
           stripe_connect_account_id: string | null
           students: number
@@ -338,6 +339,7 @@ export type Database = {
           payouts_enabled?: boolean
           rating?: number
           session: string
+          social_link?: string | null
           status?: string
           stripe_connect_account_id?: string | null
           students?: number
@@ -364,6 +366,7 @@ export type Database = {
           payouts_enabled?: boolean
           rating?: number
           session?: string
+          social_link?: string | null
           status?: string
           stripe_connect_account_id?: string | null
           students?: number
