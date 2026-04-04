@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Star, Clock, Users, MapPin, TrendingUp, CheckCircle2,
   MessageSquare, Sparkles, Award, Pencil, Save, X, Plus, Trash2,
-  ImagePlus, Loader2,
+  ImagePlus, Loader2, ExternalLink, Link as LinkIcon,
 } from "lucide-react";
 
 interface MentorProfileEditorProps {
