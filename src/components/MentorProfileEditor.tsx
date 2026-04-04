@@ -102,6 +102,7 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
         full_bio: editFullBio,
         monthly_price: parseInt(editPrice, 10),
         highlights: editHighlights.filter(Boolean),
+        social_link: editSocialLink.trim() || null,
       });
       setEditing(false);
       toast.success("Profile updated!");
