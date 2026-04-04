@@ -42,6 +42,7 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
   const [editPrice, setEditPrice] = useState(String(mentor.monthly_price));
   const [editHighlights, setEditHighlights] = useState<string[]>([...mentor.highlights]);
   const [newHighlight, setNewHighlight] = useState("");
+  const [editSocialLink, setEditSocialLink] = useState(mentor.social_link || "");
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { data: showcaseImages = [] } = useQuery({
