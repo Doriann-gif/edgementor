@@ -2,13 +2,17 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Mentor, MentorReview } from "@/types/mentor";
 
+// Only select public-safe columns — never fetch stripe_connect_account_id, payouts_enabled, auto_payout
+const PUBLIC_MENTOR_COLUMNS =
+  "id, name, avatar, bio, full_bio, experience, instruments, concepts, session, monthly_price, payment_type, rating, students, highlights, status, tier, banner_color, country, social_link, available, created_at";
+
 export const useMentors = () =>
   useQuery({
     queryKey: ["mentors"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("mentors")
-        .select("*")
+        .select(PUBLIC_MENTOR_COLUMNS)
         .order("rating", { ascending: false });
       if (error) throw error;
       return data as Mentor[];
@@ -22,7 +26,7 @@ export const useMentor = (id: string | undefined) =>
     queryFn: async () => {
       const { data, error } = await supabase
         .from("mentors")
-        .select("*")
+        .select(PUBLIC_MENTOR_COLUMNS)
         .eq("id", id!)
         .single();
       if (error) throw error;
@@ -51,7 +55,7 @@ export const useFeaturedMentors = () =>
     queryFn: async () => {
       const { data, error } = await supabase
         .from("mentors")
-        .select("*")
+        .select(PUBLIC_MENTOR_COLUMNS)
         .order("rating", { ascending: false })
         .limit(3);
       if (error) throw error;
