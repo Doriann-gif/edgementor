@@ -15,9 +15,12 @@ interface Application {
   concepts: string[];
   session: string;
   monthly_price: number;
+  payment_type: string;
   bio: string;
   status: string;
   proof_url: string | null;
+  social_link: string | null;
+  country: string | null;
   created_at: string;
   user_id: string | null;
   email: string | null;
