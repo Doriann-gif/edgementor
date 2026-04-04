@@ -77,6 +77,7 @@ const MentorApplicationForm = () => {
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [monthlyPrice, setMonthlyPrice] = useState("");
   const [paymentType, setPaymentType] = useState<"monthly" | "one_time">("monthly");
+  const [currency, setCurrency] = useState("USD");
   const [bio, setBio] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -318,8 +319,35 @@ const MentorApplicationForm = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price" className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-3.5 w-3.5 text-primary" /> {paymentType === "monthly" ? "Monthly Price" : "One-Time Price"} (USD) *</Label>
-              <Input id="price" type="number" placeholder="e.g. 199" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]" />
+              <Label htmlFor="price" className="text-sm font-medium flex items-center gap-2"><DollarSign className="h-3.5 w-3.5 text-primary" /> {paymentType === "monthly" ? "Monthly Price" : "One-Time Price"} *</Label>
+              <div className="flex gap-2">
+                <Select value={currency} onValueChange={setCurrency}>
+                  <SelectTrigger className="w-[100px] bg-muted border-border focus:border-primary/50 shrink-0"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">$ USD</SelectItem>
+                    <SelectItem value="EUR">€ EUR</SelectItem>
+                    <SelectItem value="GBP">£ GBP</SelectItem>
+                    <SelectItem value="CAD">$ CAD</SelectItem>
+                    <SelectItem value="AUD">$ AUD</SelectItem>
+                    <SelectItem value="JPY">¥ JPY</SelectItem>
+                    <SelectItem value="CHF">₣ CHF</SelectItem>
+                    <SelectItem value="INR">₹ INR</SelectItem>
+                    <SelectItem value="BRL">R$ BRL</SelectItem>
+                    <SelectItem value="ZAR">R ZAR</SelectItem>
+                    <SelectItem value="AED">د.إ AED</SelectItem>
+                    <SelectItem value="SGD">$ SGD</SelectItem>
+                    <SelectItem value="NZD">$ NZD</SelectItem>
+                    <SelectItem value="MXN">$ MXN</SelectItem>
+                    <SelectItem value="NGN">₦ NGN</SelectItem>
+                    <SelectItem value="KRW">₩ KRW</SelectItem>
+                    <SelectItem value="SEK">kr SEK</SelectItem>
+                    <SelectItem value="NOK">kr NOK</SelectItem>
+                    <SelectItem value="PLN">zł PLN</SelectItem>
+                    <SelectItem value="TRY">₺ TRY</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input id="price" type="number" placeholder="e.g. 199" value={monthlyPrice} onChange={(e) => setMonthlyPrice(e.target.value)} className="bg-muted border-border focus:border-primary/50 transition-all duration-300 focus:shadow-[0_0_20px_hsl(var(--primary)/0.15)]" />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="bio" className="text-sm font-medium">Short Bio *</Label>
@@ -339,7 +367,7 @@ const MentorApplicationForm = () => {
                 <div><span className="text-muted-foreground">Country:</span> <span className="text-foreground font-medium">{country}</span></div>
                 <div><span className="text-muted-foreground">Experience:</span> <span className="text-foreground font-medium">{experience}</span></div>
                 <div><span className="text-muted-foreground">Session:</span> <span className="text-foreground font-medium">{session}</span></div>
-                <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">${monthlyPrice}{paymentType === "monthly" ? "/mo" : " one-time"}</span></div>
+                <div><span className="text-muted-foreground">Price:</span> <span className="text-foreground font-medium">{monthlyPrice} {currency}{paymentType === "monthly" ? "/mo" : " one-time"}</span></div>
                 <div><span className="text-muted-foreground">Type:</span> <span className="text-foreground font-medium">{paymentType === "monthly" ? "Monthly Subscription" : "One-Time Payment"}</span></div>
               </div>
               <div className="flex flex-wrap gap-1.5 pt-2">
