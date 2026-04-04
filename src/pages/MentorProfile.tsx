@@ -113,6 +113,7 @@ const MentorProfile = () => {
   // Review form state
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
+  const [showAllImages, setShowAllImages] = useState(false);
 
   const hasReviewed = reviews.some((r: any) => r.user_id === user?.id);
 
