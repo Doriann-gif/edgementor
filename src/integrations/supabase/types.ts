@@ -141,7 +141,7 @@ export type Database = {
           session: string
           social_link: string | null
           status: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           bio: string
@@ -159,7 +159,7 @@ export type Database = {
           session: string
           social_link?: string | null
           status?: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           bio?: string
@@ -177,7 +177,7 @@ export type Database = {
           session?: string
           social_link?: string | null
           status?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
