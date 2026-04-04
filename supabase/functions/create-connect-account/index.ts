@@ -42,16 +42,23 @@ serve(async (req) => {
     // Check if user is a mentor
     const { data: mentor, error: mentorError } = await supabase
       .from("mentors")
-      .select("id, name, stripe_connect_account_id")
+      .select("id, name")
       .eq("user_id", user.id)
       .single();
     if (mentorError || !mentor) throw new Error("You are not a mentor");
     logStep("Mentor found", { mentorId: mentor.id });
 
+    // Get existing payment config
+    const { data: paymentConfig } = await supabase
+      .from("mentor_payment_config")
+      .select("stripe_connect_account_id")
+      .eq("mentor_id", mentor.id)
+      .maybeSingle();
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const origin = req.headers.get("origin") || "https://edgementor.lovable.app";
 
-    let accountId = mentor.stripe_connect_account_id;
+    let accountId = paymentConfig?.stripe_connect_account_id;
 
     // Create a new Custom Connect account if none exists
     if (!accountId) {
@@ -67,19 +74,21 @@ serve(async (req) => {
         business_type: "individual",
         business_profile: {
           name: mentor.name,
-          mcc: "8299", // Educational services
+          mcc: "8299",
           url: `${origin}/mentor/${mentor.id}`,
         },
       });
       accountId = account.id;
       logStep("Connect account created", { accountId });
 
-      // Store the Connect account ID
+      // Store in payment config table (upsert)
       await supabase
-        .from("mentors")
-        .update({ stripe_connect_account_id: accountId })
-        .eq("id", mentor.id);
-      logStep("Stored Connect account ID");
+        .from("mentor_payment_config")
+        .upsert({
+          mentor_id: mentor.id,
+          stripe_connect_account_id: accountId,
+        }, { onConflict: "mentor_id" });
+      logStep("Stored Connect account ID in payment config");
     }
 
     // Create an Account Link for onboarding

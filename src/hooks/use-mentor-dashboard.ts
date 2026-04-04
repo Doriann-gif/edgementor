@@ -11,7 +11,7 @@ export const useMyMentorProfile = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("mentors")
-        .select("*")
+        .select("id, name, avatar, bio, full_bio, experience, instruments, concepts, session, monthly_price, payment_type, rating, students, highlights, status, tier, banner_color, country, social_link, available, user_id, created_at")
         .eq("user_id", user!.id)
         .eq("status", "approved")
         .maybeSingle();
