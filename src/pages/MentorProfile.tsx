@@ -533,7 +533,7 @@ const MentorProfile = () => {
           {showcaseImages.length > 0 && (
             <div className="mt-6 pt-5 border-t border-border">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {showcaseImages.map((img: any, i: number) => (
+                {(showAllImages ? showcaseImages : showcaseImages.slice(0, 3)).map((img: any, i: number) => (
                   <motion.div
                     key={img.id}
                     className="rounded-xl overflow-hidden border border-border aspect-video bg-muted"
@@ -545,6 +545,15 @@ const MentorProfile = () => {
                   </motion.div>
                 ))}
               </div>
+              {showcaseImages.length > 3 && !showAllImages && (
+                <button
+                  onClick={() => setShowAllImages(true)}
+                  className="mt-4 w-full rounded-xl border border-border bg-muted/50 hover:bg-muted py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  See all {showcaseImages.length} photos
+                </button>
+              )}
             </div>
           )}
         </motion.div>
