@@ -15,9 +15,12 @@ interface Application {
   concepts: string[];
   session: string;
   monthly_price: number;
+  payment_type: string;
   bio: string;
   status: string;
   proof_url: string | null;
+  social_link: string | null;
+  country: string | null;
   created_at: string;
   user_id: string | null;
   email: string | null;
@@ -57,6 +60,9 @@ const AdminApplications = () => {
         concepts: app.concepts,
         session: app.session,
         monthly_price: app.monthly_price,
+        payment_type: (app as any).payment_type || "recurring",
+        country: (app as any).country || null,
+        social_link: (app as any).social_link || null,
         status: "approved",
         user_id: userId || null,
       });
