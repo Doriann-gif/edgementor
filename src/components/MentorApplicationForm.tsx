@@ -77,6 +77,7 @@ const MentorApplicationForm = () => {
   const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
   const [monthlyPrice, setMonthlyPrice] = useState("");
   const [paymentType, setPaymentType] = useState<"monthly" | "one_time">("monthly");
+  const [currency, setCurrency] = useState("USD");
   const [bio, setBio] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
