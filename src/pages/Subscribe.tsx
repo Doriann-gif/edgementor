@@ -27,24 +27,12 @@ const Subscribe = () => {
     if (!promoCode.trim()) return;
     setApplyingCode(true);
     try {
-      const { data, error } = await supabase
-        .from("discount_codes")
-        .select("*")
-        .eq("code", promoCode.trim().toUpperCase())
-        .eq("active", true)
-        .maybeSingle();
-
+      const { data, error } = await supabase.functions.invoke("validate-promo", {
+        body: { code: promoCode.trim() },
+      });
       if (error) throw error;
-      if (!data) {
-        toast.error("Invalid or expired promo code.");
-        return;
-      }
-      if (data.max_uses && data.current_uses >= data.max_uses) {
-        toast.error("This code has reached its maximum uses.");
-        return;
-      }
-      if (data.expires_at && new Date(data.expires_at) < new Date()) {
-        toast.error("This code has expired.");
+      if (!data?.valid) {
+        toast.error(data?.error || "Invalid or expired promo code.");
         return;
       }
       setDiscount(data.discount_percent);

@@ -321,7 +321,6 @@ export type Database = {
       }
       mentors: {
         Row: {
-          auto_payout: boolean
           available: boolean
           avatar: string
           banner_color: string
@@ -337,18 +336,15 @@ export type Database = {
           monthly_price: number
           name: string
           payment_type: string
-          payouts_enabled: boolean
           rating: number
           session: string
           social_link: string | null
           status: string
-          stripe_connect_account_id: string | null
           students: number
           tier: string
           user_id: string | null
         }
         Insert: {
-          auto_payout?: boolean
           available?: boolean
           avatar: string
           banner_color?: string
@@ -364,18 +360,15 @@ export type Database = {
           monthly_price: number
           name: string
           payment_type?: string
-          payouts_enabled?: boolean
           rating?: number
           session: string
           social_link?: string | null
           status?: string
-          stripe_connect_account_id?: string | null
           students?: number
           tier?: string
           user_id?: string | null
         }
         Update: {
-          auto_payout?: boolean
           available?: boolean
           avatar?: string
           banner_color?: string
@@ -391,12 +384,10 @@ export type Database = {
           monthly_price?: number
           name?: string
           payment_type?: string
-          payouts_enabled?: boolean
           rating?: number
           session?: string
           social_link?: string | null
           status?: string
-          stripe_connect_account_id?: string | null
           students?: number
           tier?: string
           user_id?: string | null
