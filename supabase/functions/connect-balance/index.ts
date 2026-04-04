@@ -39,22 +39,29 @@ serve(async (req) => {
     if (!user) throw new Error("User not authenticated");
     logStep("User authenticated", { userId: user.id });
 
-    // Get mentor's Connect account
+    // Get mentor ID
     const { data: mentor, error: mentorError } = await supabase
       .from("mentors")
-      .select("id, stripe_connect_account_id, payouts_enabled, auto_payout")
+      .select("id")
       .eq("user_id", user.id)
       .single();
     if (mentorError || !mentor) throw new Error("Mentor not found");
 
-    if (!mentor.stripe_connect_account_id) {
+    // Get payment config from separate table
+    const { data: paymentConfig } = await supabase
+      .from("mentor_payment_config")
+      .select("stripe_connect_account_id, payouts_enabled, auto_payout")
+      .eq("mentor_id", mentor.id)
+      .maybeSingle();
+
+    if (!paymentConfig?.stripe_connect_account_id) {
       return new Response(JSON.stringify({
         onboarded: false,
         available: 0,
         pending: 0,
         total_earned: 0,
         payouts_enabled: false,
-        auto_payout: mentor.auto_payout,
+        auto_payout: paymentConfig?.auto_payout ?? false,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -62,34 +69,29 @@ serve(async (req) => {
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const connectId = paymentConfig.stripe_connect_account_id;
 
     // Check account status
-    const account = await stripe.accounts.retrieve(mentor.stripe_connect_account_id);
+    const account = await stripe.accounts.retrieve(connectId);
     const payoutsEnabled = account.payouts_enabled ?? false;
     logStep("Account status", { payoutsEnabled, chargesEnabled: account.charges_enabled });
 
     // Update payouts_enabled in DB if changed
-    if (payoutsEnabled !== mentor.payouts_enabled) {
+    if (payoutsEnabled !== paymentConfig.payouts_enabled) {
       await supabase
-        .from("mentors")
+        .from("mentor_payment_config")
         .update({ payouts_enabled: payoutsEnabled })
-        .eq("id", mentor.id);
+        .eq("mentor_id", mentor.id);
     }
 
     // Get balance for the connected account
-    const balance = await stripe.balance.retrieve({
-      stripeAccount: mentor.stripe_connect_account_id,
-    });
-
+    const balance = await stripe.balance.retrieve({ stripeAccount: connectId });
     const available = balance.available.reduce((sum, b) => sum + b.amount, 0) / 100;
     const pending = balance.pending.reduce((sum, b) => sum + b.amount, 0) / 100;
     logStep("Balance retrieved", { available, pending });
 
     // Get payouts for lifetime earned + history
-    const payouts = await stripe.payouts.list(
-      { limit: 100 },
-      { stripeAccount: mentor.stripe_connect_account_id }
-    );
+    const payouts = await stripe.payouts.list({ limit: 100 }, { stripeAccount: connectId });
     const totalPaidOut = payouts.data
       .filter(p => p.status === "paid")
       .reduce((sum, p) => sum + p.amount, 0) / 100;
@@ -109,7 +111,7 @@ serve(async (req) => {
       pending,
       total_earned: available + pending + totalPaidOut,
       payouts_enabled: payoutsEnabled,
-      auto_payout: mentor.auto_payout,
+      auto_payout: paymentConfig.auto_payout,
       payout_history: payoutHistory,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

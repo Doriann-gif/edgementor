@@ -30,16 +30,22 @@ serve(async (req) => {
     const { mentorId, promoCode } = await req.json();
     if (!mentorId) throw new Error("mentorId is required");
 
-    // Fetch mentor details
+    // Fetch mentor details (public columns only)
     const { data: mentor, error: mentorError } = await supabaseClient
       .from("mentors")
-      .select("id, name, monthly_price, stripe_connect_account_id, payment_type")
+      .select("id, name, monthly_price, payment_type")
       .eq("id", mentorId)
       .single();
     if (mentorError || !mentor) throw new Error("Mentor not found");
 
+    // Fetch Stripe Connect account from separate payment config table
+    const { data: paymentConfig } = await supabaseClient
+      .from("mentor_payment_config")
+      .select("stripe_connect_account_id")
+      .eq("mentor_id", mentorId)
+      .maybeSingle();
+
     let discountPercent = 0;
-    // Apply promo code if provided
     if (promoCode) {
       const { data: code } = await supabaseClient
         .from("discount_codes")
@@ -61,7 +67,6 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Find or skip existing customer
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
     const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
 
@@ -96,28 +101,22 @@ serve(async (req) => {
       },
     };
 
-    // Split payments to mentor's Connect account (platform keeps 20%)
-    if (mentor.stripe_connect_account_id) {
+    const connectAccountId = paymentConfig?.stripe_connect_account_id;
+    if (connectAccountId) {
       const applicationFeePercent = 20;
       if (isOneTime) {
-        // For one-time payments, use application_fee_amount
         const feeAmount = Math.round(unitAmount * applicationFeePercent / 100);
         sessionParams.payment_intent_data = {
           application_fee_amount: feeAmount,
-          transfer_data: {
-            destination: mentor.stripe_connect_account_id,
-          },
+          transfer_data: { destination: connectAccountId },
         };
       } else {
-        // For subscriptions, use application_fee_percent on subscription_data
         sessionParams.subscription_data = {
-          transfer_data: {
-            destination: mentor.stripe_connect_account_id,
-          },
+          transfer_data: { destination: connectAccountId },
           application_fee_percent: applicationFeePercent,
         };
       }
-      console.log(`[CREATE-CHECKOUT] Splitting payments to Connect account ${mentor.stripe_connect_account_id}, platform fee: ${applicationFeePercent}%, mode: ${isOneTime ? "one_time" : "subscription"}`);
+      console.log(`[CREATE-CHECKOUT] Splitting payments to Connect account ${connectAccountId}, platform fee: ${applicationFeePercent}%, mode: ${isOneTime ? "one_time" : "subscription"}`);
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);

@@ -45,20 +45,28 @@ serve(async (req) => {
     // Get mentor
     const { data: mentor, error: mentorError } = await supabase
       .from("mentors")
-      .select("id, stripe_connect_account_id, payouts_enabled, auto_payout")
+      .select("id")
       .eq("user_id", user.id)
       .single();
     if (mentorError || !mentor) throw new Error("Mentor not found");
-    if (!mentor.stripe_connect_account_id) throw new Error("Stripe Connect account not set up");
-    if (!mentor.payouts_enabled) throw new Error("Payouts not enabled on your account yet");
+
+    // Get payment config from separate table
+    const { data: paymentConfig } = await supabase
+      .from("mentor_payment_config")
+      .select("stripe_connect_account_id, payouts_enabled, auto_payout")
+      .eq("mentor_id", mentor.id)
+      .maybeSingle();
+
+    if (!paymentConfig?.stripe_connect_account_id) throw new Error("Stripe Connect account not set up");
+    if (!paymentConfig.payouts_enabled) throw new Error("Payouts not enabled on your account yet");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
+    const connectId = paymentConfig.stripe_connect_account_id;
 
     if (action === "toggle_auto_payout") {
-      const newValue = !mentor.auto_payout;
+      const newValue = !paymentConfig.auto_payout;
 
-      // Update Stripe account payout schedule
-      await stripe.accounts.update(mentor.stripe_connect_account_id, {
+      await stripe.accounts.update(connectId, {
         settings: {
           payouts: {
             schedule: {
@@ -70,9 +78,9 @@ serve(async (req) => {
       });
 
       await supabase
-        .from("mentors")
+        .from("mentor_payment_config")
         .update({ auto_payout: newValue })
-        .eq("id", mentor.id);
+        .eq("mentor_id", mentor.id);
 
       logStep("Auto payout toggled", { newValue });
 
@@ -87,10 +95,7 @@ serve(async (req) => {
     }
 
     if (action === "withdraw") {
-      // Get available balance
-      const balance = await stripe.balance.retrieve({
-        stripeAccount: mentor.stripe_connect_account_id,
-      });
+      const balance = await stripe.balance.retrieve({ stripeAccount: connectId });
       const availableAmount = balance.available.reduce((sum, b) => sum + b.amount, 0);
 
       if (availableAmount <= 0) {
@@ -99,14 +104,13 @@ serve(async (req) => {
 
       logStep("Creating payout", { amount: availableAmount });
 
-      // Create a payout to the mentor's connected bank account
       const payout = await stripe.payouts.create(
         {
           amount: availableAmount,
           currency: "usd",
           description: "EdgeMentor earnings withdrawal",
         },
-        { stripeAccount: mentor.stripe_connect_account_id }
+        { stripeAccount: connectId }
       );
 
       logStep("Payout created", { payoutId: payout.id, amount: availableAmount / 100 });
