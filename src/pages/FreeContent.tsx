@@ -263,7 +263,6 @@ const FreeContent = () => {
                   alt={video.title}
                   loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover"
-                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
                 <div className="absolute inset-0 flex items-center justify-center">
