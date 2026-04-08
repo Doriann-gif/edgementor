@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { Helmet } from "react-helmet-async";
@@ -9,10 +9,12 @@ import { useFeaturedMentors, useMentors } from "@/hooks/use-mentors";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import HeroSection from "@/components/homepage/HeroSection";
-import StatsSection from "@/components/homepage/StatsSection";
-import FeaturedMentors from "@/components/homepage/FeaturedMentors";
-import WhyUsSection from "@/components/homepage/WhyUsSection";
-import CTASection from "@/components/homepage/CTASection";
+
+// Lazy-load below-the-fold sections to improve LCP
+const StatsSection = lazy(() => import("@/components/homepage/StatsSection"));
+const FeaturedMentors = lazy(() => import("@/components/homepage/FeaturedMentors"));
+const WhyUsSection = lazy(() => import("@/components/homepage/WhyUsSection"));
+const CTASection = lazy(() => import("@/components/homepage/CTASection"));
 
 const floatingOrb = {
   animate: { y: [0, -20, 0], scale: [1, 1.05, 1] },
@@ -107,10 +109,18 @@ const Homepage = () => {
 
       <div className="relative">
         <HeroSection />
-        <StatsSection allMentors={allMentors} />
-        <FeaturedMentors mentors={featuredMentors} />
-        <WhyUsSection />
-        <CTASection />
+        <Suspense fallback={<div className="h-32" />}>
+          <StatsSection allMentors={allMentors} />
+        </Suspense>
+        <Suspense fallback={<div className="h-64" />}>
+          <FeaturedMentors mentors={featuredMentors} />
+        </Suspense>
+        <Suspense fallback={<div className="h-64" />}>
+          <WhyUsSection />
+        </Suspense>
+        <Suspense fallback={<div className="h-32" />}>
+          <CTASection />
+        </Suspense>
       </div>
     </div>
   );

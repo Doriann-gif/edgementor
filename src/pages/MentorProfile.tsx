@@ -448,7 +448,7 @@ const MentorProfile = () => {
                           key={img.id}
                           className="rounded-xl overflow-hidden border border-border aspect-video bg-muted group cursor-pointer"
                         >
-                          <img src={img.image_url} alt={img.caption || "Showcase"} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                          <img src={img.image_url} alt={img.caption || "Showcase"} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                         </div>
                       ))}
                     </div>
