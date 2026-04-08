@@ -318,7 +318,7 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
               {showcaseImages.map((img: any) => (
                 <div key={img.id} className="relative group rounded-xl overflow-hidden border border-border aspect-video bg-muted">
-                  <img src={img.image_url} alt={img.caption || "Showcase"} className="w-full h-full object-cover" />
+                  <img src={img.image_url} alt={img.caption || "Showcase"} loading="lazy" className="w-full h-full object-cover" />
                   {editing && (
                     <button
                       onClick={() => deleteShowcaseImage(img.id)}

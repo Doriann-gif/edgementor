@@ -261,6 +261,7 @@ const FreeContent = () => {
                 <img
                   src={`https://img.youtube.com/vi/${video.id}/hqdefault.jpg`}
                   alt={video.title}
+                  loading="lazy"
                   className="absolute inset-0 w-full h-full object-cover"
                   loading="lazy"
                 />
