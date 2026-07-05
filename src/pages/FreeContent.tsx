@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { Play, Clock, Eye, Star, Search, TrendingUp, BookOpen, BarChart3, Zap, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,7 @@ const fadeUp = {
 };
 
 const FreeContent = () => {
+  const reduced = useReducedMotion();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("default");
@@ -134,19 +136,21 @@ const FreeContent = () => {
       <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
     </Helmet>
     <div className="min-h-screen bg-background">
-      {/* Ambient */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute top-[-100px] left-1/3 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]"
-          animate={{ y: [0, -20, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute bottom-[-80px] right-1/4 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]"
-          animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
+      {/* Ambient — animated on desktop, static on mobile/reduced-motion */}
+      {!reduced && (
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <motion.div
+            className="absolute top-[-100px] left-1/3 w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[130px]"
+            animate={{ y: [0, -20, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute bottom-[-80px] right-1/4 w-[400px] h-[400px] bg-pink/[0.03] rounded-full blur-[100px]"
+            animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+      )}
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
         {/* Hero */}
