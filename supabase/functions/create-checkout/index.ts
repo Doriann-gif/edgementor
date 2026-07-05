@@ -116,8 +116,8 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [lineItem],
       mode: isOneTime ? "payment" : "subscription",
-      success_url: `${req.headers.get("origin") || "https://edgementor.netlify.app"}/payment-success?mentor_id=${mentorId}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin") || "https://edgementor.netlify.app"}/subscribe/${mentorId}`,
+      success_url: `${req.headers.get("origin") || "https://edgementor.pages.dev"}/payment-success?mentor_id=${mentorId}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${req.headers.get("origin") || "https://edgementor.pages.dev"}/subscribe/${mentorId}`,
       metadata: flowMetadata,
       ...(isOneTime
         ? { payment_intent_data: { metadata: flowMetadata } }

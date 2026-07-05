@@ -26,17 +26,17 @@ const About = () => (
     <Helmet>
       <title>About EdgeMentor — Learn From Real Traders</title>
       <meta name="description" content="EdgeMentor connects aspiring traders with verified mentors. Learn about our mission, how the platform works, and find answers to common questions." />
-      <link rel="canonical" href="https://edgementor.netlify.app/about" />
+      <link rel="canonical" href="https://edgementor.pages.dev/about" />
       <meta property="og:title" content="About EdgeMentor — Learn From Real Traders" />
       <meta property="og:description" content="Learn about our mission to connect aspiring traders with verified mentors who have proven track records." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://edgementor.netlify.app/about" />
-      <meta property="og:image" content="https://edgementor.netlify.app/og-image.jpg" />
+      <meta property="og:url" content="https://edgementor.pages.dev/about" />
+      <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
       <meta property="og:site_name" content="EdgeMentor" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="About EdgeMentor — Learn From Real Traders" />
       <meta name="twitter:description" content="Learn about our mission to connect aspiring traders with verified mentors." />
-      <meta name="twitter:image" content="https://edgementor.netlify.app/og-image.jpg" />
+      <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
       <script type="application/ld+json">{JSON.stringify({
         "@context": "https://schema.org",
         "@type": "FAQPage",

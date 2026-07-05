@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://edgementor.netlify.app/sitemap.xml
+Sitemap: https://edgementor.pages.dev/sitemap.xml

@@ -225,11 +225,11 @@ const MentorProfile = () => {
         <Helmet>
           <title>{`${mentor.name} — Trading Mentor | EdgeMentor`}</title>
           <meta name="description" content={`Learn from ${mentor.name}. ${mentor.bio} ${mentor.instruments?.join(", ")} mentor with ${mentor.students} students.`} />
-          <link rel="canonical" href={`https://edgementor.netlify.app/mentor/${id}`} />
+          <link rel="canonical" href={`https://edgementor.pages.dev/mentor/${id}`} />
           <meta property="og:title" content={`${mentor.name} — Trading Mentor | EdgeMentor`} />
           <meta property="og:description" content={mentor.bio} />
           <meta property="og:type" content="profile" />
-          <meta property="og:url" content={`https://edgementor.netlify.app/mentor/${id}`} />
+          <meta property="og:url" content={`https://edgementor.pages.dev/mentor/${id}`} />
           {mentor.avatar && <meta property="og:image" content={mentor.avatar} />}
           <meta property="og:site_name" content="EdgeMentor" />
           <meta name="twitter:card" content="summary_large_image" />
@@ -244,8 +244,8 @@ const MentorProfile = () => {
             "image": mentor.avatar,
             "jobTitle": "Trading Mentor",
             ...(mentor.country ? { "nationality": mentor.country } : {}),
-            "url": `https://edgementor.netlify.app/mentor/${id}`,
-            "memberOf": { "@type": "Organization", "name": "EdgeMentor", "url": "https://edgementor.netlify.app" },
+            "url": `https://edgementor.pages.dev/mentor/${id}`,
+            "memberOf": { "@type": "Organization", "name": "EdgeMentor", "url": "https://edgementor.pages.dev" },
             ...(reviews.length > 0 ? {
               "aggregateRating": {
                 "@type": "AggregateRating",
