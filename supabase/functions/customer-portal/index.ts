@@ -41,14 +41,26 @@ serve(async (req) => {
     logStep("User authenticated", { email: user.email });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    if (customers.data.length === 0) {
+
+    // Prefer the stored customer mapping; fall back to email lookup
+    let customerId: string | undefined;
+    const { data: userPayment } = await supabaseClient
+      .from("user_payment_config")
+      .select("stripe_customer_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (userPayment?.stripe_customer_id) {
+      customerId = userPayment.stripe_customer_id;
+    } else {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
+    }
+    if (!customerId) {
       return new Response(JSON.stringify({ error: "no_customer", message: "No billing account found. Complete a subscription checkout first." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
     }
-    const customerId = customers.data[0].id;
     logStep("Found Stripe customer", { customerId });
 
     const origin = req.headers.get("origin") || "http://localhost:3000";

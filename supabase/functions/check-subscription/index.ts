@@ -40,10 +40,52 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { email: user.email });
 
-    const { mentorId } = await req.json();
+    const { mentorId } = await req.json().catch(() => ({} as { mentorId?: string }));
+
+    // One-time purchases never appear in Stripe's subscription list —
+    // the local record (written by verify-payment) is the source of truth.
+    if (mentorId) {
+      const { data: mentorRow } = await supabaseClient
+        .from("mentors")
+        .select("payment_type")
+        .eq("id", mentorId)
+        .maybeSingle();
+
+      if (mentorRow?.payment_type === "one_time") {
+        const { data: localSub } = await supabaseClient
+          .from("subscriptions")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("mentor_id", mentorId)
+          .eq("status", "active")
+          .maybeSingle();
+        logStep("One-time mentor check", { subscribed: !!localSub });
+        return new Response(JSON.stringify({
+          subscribed: !!localSub,
+          source: "database",
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+
+    // Prefer the stored customer mapping; fall back to email lookup
+    let storedCustomerId: string | undefined;
+    const { data: userPayment } = await supabaseClient
+      .from("user_payment_config")
+      .select("stripe_customer_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (userPayment?.stripe_customer_id) {
+      storedCustomerId = userPayment.stripe_customer_id;
+    }
+
+    const customers = storedCustomerId
+      ? { data: [{ id: storedCustomerId }] }
+      : await stripe.customers.list({ email: user.email, limit: 1 });
 
     if (customers.data.length === 0) {
       logStep("No Stripe customer found");
@@ -56,7 +98,7 @@ serve(async (req) => {
           .eq("mentor_id", mentorId)
           .eq("status", "active")
           .maybeSingle();
-        
+
         return new Response(JSON.stringify({
           subscribed: !!localSub,
           source: "database",
@@ -84,14 +126,23 @@ serve(async (req) => {
     const hasActiveSub = subscriptions.data.length > 0;
     logStep("Stripe subscriptions check", { count: subscriptions.data.length });
 
-    // Sync: if Stripe has no active subs, deactivate local ones
-    if (!hasActiveSub && mentorId) {
-      await supabaseClient
+    // Sync: if Stripe has no active subs, deactivate local MONTHLY subs only.
+    // One-time purchases are lifetime access and must never be auto-cancelled.
+    if (!hasActiveSub) {
+      const { data: monthlySubs } = await supabaseClient
         .from("subscriptions")
-        .update({ status: "cancelled" })
+        .select("id, mentors!inner(payment_type)")
         .eq("user_id", user.id)
-        .eq("status", "active");
-      logStep("Deactivated local subscriptions — no active Stripe subscriptions");
+        .eq("status", "active")
+        .eq("mentors.payment_type", "monthly");
+      const staleIds = (monthlySubs ?? []).map((s) => s.id);
+      if (staleIds.length > 0) {
+        await supabaseClient
+          .from("subscriptions")
+          .update({ status: "cancelled" })
+          .in("id", staleIds);
+        logStep("Deactivated stale monthly subscriptions", { count: staleIds.length });
+      }
     }
 
     // If checking for a specific mentor, also verify local DB record exists
@@ -107,9 +158,16 @@ serve(async (req) => {
       mentorSubscribed = !!localSub;
     }
 
-    const subscriptionEnd = hasActiveSub
-      ? new Date(subscriptions.data[0].current_period_end * 1000).toISOString()
-      : null;
+    // Stripe API "basil" versions moved current_period_end from the
+    // subscription onto its items — read whichever is present.
+    let subscriptionEnd: string | null = null;
+    if (hasActiveSub) {
+      const sub = subscriptions.data[0] as any;
+      const periodEnd = sub.current_period_end ?? sub.items?.data?.[0]?.current_period_end;
+      if (typeof periodEnd === "number") {
+        subscriptionEnd = new Date(periodEnd * 1000).toISOString();
+      }
+    }
 
     return new Response(JSON.stringify({
       subscribed: mentorId ? mentorSubscribed : hasActiveSub,

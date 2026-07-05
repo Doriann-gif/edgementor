@@ -105,6 +105,25 @@ serve(async (req) => {
       description: p.description,
     }));
 
+    // Real per-month revenue from balance transactions (incoming payments
+    // and transfers only — excludes payouts and fees-only entries)
+    const monthlyRevenue: Record<string, number> = {};
+    try {
+      const txns = await stripe.balanceTransactions.list(
+        { limit: 100 },
+        { stripeAccount: connectId }
+      );
+      for (const t of txns.data) {
+        if (t.net > 0 && ["charge", "payment", "transfer"].includes(t.type)) {
+          const d = new Date(t.created * 1000);
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+          monthlyRevenue[key] = (monthlyRevenue[key] || 0) + t.net / 100;
+        }
+      }
+    } catch (txnError) {
+      logStep("Balance transactions unavailable", { message: String(txnError) });
+    }
+
     return new Response(JSON.stringify({
       onboarded: true,
       available,
@@ -113,6 +132,7 @@ serve(async (req) => {
       payouts_enabled: payoutsEnabled,
       auto_payout: paymentConfig.auto_payout,
       payout_history: payoutHistory,
+      monthly_revenue: monthlyRevenue,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

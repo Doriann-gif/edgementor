@@ -1,1 +1,6 @@
 project_id = "rwiffivagmyxncryzgmk"
+
+# Stripe calls this endpoint directly; authentication is the webhook
+# signature (STRIPE_WEBHOOK_SECRET), not a user JWT.
+[functions.stripe-webhook]
+verify_jwt = false

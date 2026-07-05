@@ -46,7 +46,8 @@ serve(async (req) => {
       .maybeSingle();
 
     let discountPercent = 0;
-    if (promoCode) {
+    let appliedPromoCode: string | null = null;
+    if (promoCode && typeof promoCode === "string") {
       const { data: code } = await supabaseClient
         .from("discount_codes")
         .select("*")
@@ -59,6 +60,7 @@ serve(async (req) => {
         const notMaxed = !code.max_uses || code.current_uses < code.max_uses;
         if (notExpired && notMaxed) {
           discountPercent = code.discount_percent;
+          appliedPromoCode = code.code;
         }
       }
     }
@@ -67,8 +69,20 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    const customers = await stripe.customers.list({ email: user.email, limit: 1 });
-    const customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
+    // Prefer the stored customer mapping; fall back to email lookup for
+    // customers created before the mapping existed.
+    let customerId: string | undefined;
+    const { data: userPayment } = await supabaseClient
+      .from("user_payment_config")
+      .select("stripe_customer_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (userPayment?.stripe_customer_id) {
+      customerId = userPayment.stripe_customer_id;
+    } else {
+      const customers = await stripe.customers.list({ email: user.email, limit: 1 });
+      customerId = customers.data.length > 0 ? customers.data[0].id : undefined;
+    }
 
     const unitAmount = Math.round(mentor.monthly_price * 100 * (1 - discountPercent / 100));
     const isOneTime = mentor.payment_type === "one_time";
@@ -88,6 +102,15 @@ serve(async (req) => {
       quantity: 1,
     };
 
+    // Attach the same metadata to the session AND the underlying
+    // subscription / payment intent so webhook events (cancellation,
+    // refund) can be mapped back to the user + mentor.
+    const flowMetadata: Record<string, string> = {
+      mentor_id: mentorId,
+      user_id: user.id,
+      ...(appliedPromoCode ? { promo_code: appliedPromoCode } : {}),
+    };
+
     const sessionParams: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
@@ -95,10 +118,10 @@ serve(async (req) => {
       mode: isOneTime ? "payment" : "subscription",
       success_url: `${req.headers.get("origin") || "https://edgementor.lovable.app"}/payment-success?mentor_id=${mentorId}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin") || "https://edgementor.lovable.app"}/subscribe/${mentorId}`,
-      metadata: {
-        mentor_id: mentorId,
-        user_id: user.id,
-      },
+      metadata: flowMetadata,
+      ...(isOneTime
+        ? { payment_intent_data: { metadata: flowMetadata } }
+        : { subscription_data: { metadata: flowMetadata } }),
     };
 
     const connectAccountId = paymentConfig?.stripe_connect_account_id;
@@ -107,11 +130,13 @@ serve(async (req) => {
       if (isOneTime) {
         const feeAmount = Math.round(unitAmount * applicationFeePercent / 100);
         sessionParams.payment_intent_data = {
+          ...sessionParams.payment_intent_data,
           application_fee_amount: feeAmount,
           transfer_data: { destination: connectAccountId },
         };
       } else {
         sessionParams.subscription_data = {
+          ...sessionParams.subscription_data,
           transfer_data: { destination: connectAccountId },
           application_fee_percent: applicationFeePercent,
         };

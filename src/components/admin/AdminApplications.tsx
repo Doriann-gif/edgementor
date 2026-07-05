@@ -60,7 +60,7 @@ const AdminApplications = () => {
         concepts: app.concepts,
         session: app.session,
         monthly_price: app.monthly_price,
-        payment_type: (app as any).payment_type || "recurring",
+        payment_type: (app as any).payment_type || "monthly",
         country: (app as any).country || null,
         social_link: (app as any).social_link || null,
         status: "approved",

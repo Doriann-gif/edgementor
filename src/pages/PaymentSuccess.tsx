@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -12,25 +13,37 @@ import confetti from "canvas-confetti";
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const mentorId = searchParams.get("mentor_id");
+  const sessionId = searchParams.get("session_id");
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const queryClient = useQueryClient();
   const [activating, setActivating] = useState(true);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
+    if (authLoading) return;
     const activateSubscription = async () => {
-      if (!user || !mentorId) {
+      if (!user || !mentorId || !sessionId) {
         setActivating(false);
         return;
       }
       try {
-        const { data: existing } = await supabase
-          .from("subscriptions").select("id")
-          .eq("user_id", user.id).eq("mentor_id", mentorId).eq("status", "active").maybeSingle();
-        if (!existing) {
-          const { error } = await supabase.from("subscriptions").insert({ user_id: user.id, mentor_id: mentorId });
-          if (error) throw error;
+        // Server-side verification: the edge function checks the Stripe
+        // session is paid and belongs to this user before granting access.
+        const { data, error } = await supabase.functions.invoke("verify-payment", {
+          body: { sessionId },
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+        if (!data?.activated) {
+          throw new Error(
+            data?.reason === "not_paid"
+              ? "Payment hasn't completed yet. If you just paid, wait a moment and refresh this page."
+              : "Could not verify your payment."
+          );
         }
+        queryClient.invalidateQueries({ queryKey: ["is-subscribed"] });
+        queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
         setDone(true);
         toast.success("Subscription activated! 🎉");
         confetti({ particleCount: 120, spread: 70, origin: { y: 0.5 } });
@@ -41,7 +54,7 @@ const PaymentSuccess = () => {
       }
     };
     activateSubscription();
-  }, [user, mentorId]);
+  }, [user, authLoading, mentorId, sessionId]);
 
   return (
     <PageTransition>
@@ -80,10 +93,10 @@ const PaymentSuccess = () => {
                 </div>
               </div>
               <h1 className="font-heading text-2xl font-bold text-foreground">
-                {!mentorId ? "Payment Received" : "Something went wrong"}
+                {!mentorId || !sessionId ? "Payment Received" : "Something went wrong"}
               </h1>
               <p className="text-muted-foreground text-sm">
-                {!mentorId
+                {!mentorId || !sessionId
                   ? "Your payment was successful but we couldn't link it to a mentor. Please check your dashboard."
                   : "There was an issue activating your subscription. Please contact support."}
               </p>

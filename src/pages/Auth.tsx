@@ -137,7 +137,8 @@ const Auth = () => {
                 </button>
               )}
             </div>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted border-border" required minLength={6} />
+            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted border-border" required minLength={isSignUp ? 8 : 6} />
+            {isSignUp && <p className="text-[11px] text-muted-foreground">At least 8 characters.</p>}
           </div>
           <Button type="submit" variant="glow" className="w-full h-11 font-semibold" disabled={loading}>
             {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}

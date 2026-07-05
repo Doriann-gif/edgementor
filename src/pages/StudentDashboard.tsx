@@ -3,7 +3,6 @@ import { Link, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptions, useMessages, useMarkMessageRead, useSavedMentors, useSendMessage } from "@/hooks/use-student";
-import { useQueryClient } from "@tanstack/react-query";
 import { useMentors } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -64,7 +63,6 @@ const StudentDashboard = () => {
   const [composeTo, setComposeTo] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeBody, setComposeBody] = useState("");
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     let isActive = true;
@@ -106,15 +104,13 @@ const StudentDashboard = () => {
     }
   };
 
+  // Stripe is the source of truth for recurring billing — cancelling only the
+  // local row would keep the card being charged. Send the user to the secure
+  // billing portal; check-subscription syncs the local status afterwards.
   const cancelSubscription = async (subId: string) => {
     setCancellingSubId(subId);
     try {
-      const { error } = await supabase.from("subscriptions").update({ status: "cancelled" }).eq("id", subId).eq("user_id", user!.id);
-      if (error) throw error;
-      toast.success("Membership cancelled successfully.");
-      queryClient.invalidateQueries({ queryKey: ["subscriptions"] });
-    } catch (err: any) {
-      toast.error(err.message || "Failed to cancel membership.");
+      await openBillingPortal();
     } finally {
       setCancellingSubId(null);
       setConfirmCancelSub(null);
@@ -136,7 +132,11 @@ const StudentDashboard = () => {
   const savedMentors = allMentors.filter((m) => savedMentorIds?.has(m.id));
   const unreadCount = messages.filter((m) => !m.is_read).length;
   const displayName = user.user_metadata?.display_name || user.email?.split("@")[0] || "Trader";
-  const totalSpend = subscriptions.reduce((sum: number, s: any) => sum + ((s.mentors as Mentor)?.monthly_price || 0), 0);
+  const totalSpend = subscriptions.reduce((sum: number, s: any) => {
+    const m = s.mentors as Mentor;
+    // One-time purchases aren't part of recurring monthly spend
+    return m?.payment_type === "one_time" ? sum : sum + (m?.monthly_price || 0);
+  }, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -263,7 +263,7 @@ const StudentDashboard = () => {
                           </Link>
                           <div className="text-right shrink-0 mr-1">
                             <span className="font-heading font-bold text-foreground text-sm">${mentor.monthly_price}</span>
-                            <span className="text-[10px] text-muted-foreground block">/month</span>
+                            <span className="text-[10px] text-muted-foreground block">{mentor.payment_type === "one_time" ? "lifetime" : "/month"}</span>
                           </div>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -282,12 +282,14 @@ const StudentDashboard = () => {
                                   <Users className="h-3.5 w-3.5" /> View Profile
                                 </Link>
                               </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive focus:text-destructive flex items-center gap-2"
-                                onClick={() => setConfirmCancelSub({ id: sub.id, mentorName: mentor.name })}
-                              >
-                                <XCircle className="h-3.5 w-3.5" /> Cancel Membership
-                              </DropdownMenuItem>
+                              {mentor.payment_type !== "one_time" && (
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive flex items-center gap-2"
+                                  onClick={() => setConfirmCancelSub({ id: sub.id, mentorName: mentor.name })}
+                                >
+                                  <XCircle className="h-3.5 w-3.5" /> Cancel Membership
+                                </DropdownMenuItem>
+                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </motion.div>
@@ -513,7 +515,7 @@ const StudentDashboard = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Cancel Membership</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to cancel your membership with <span className="font-semibold text-foreground">{confirmCancelSub?.mentorName}</span>? You'll lose access to their exclusive content immediately.
+              To cancel your membership with <span className="font-semibold text-foreground">{confirmCancelSub?.mentorName}</span>, we'll open the secure Stripe billing portal where you can cancel the subscription. Access ends after cancellation.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -523,7 +525,7 @@ const StudentDashboard = () => {
               onClick={() => confirmCancelSub && cancelSubscription(confirmCancelSub.id)}
               disabled={!!cancellingSubId}
             >
-              {cancellingSubId ? "Cancelling..." : "Yes, Cancel"}
+              {cancellingSubId ? "Opening portal..." : "Continue to Portal"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

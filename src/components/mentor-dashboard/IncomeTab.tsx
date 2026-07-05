@@ -34,6 +34,7 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
         payouts_enabled: boolean;
         auto_payout: boolean;
         payout_history?: { id: string; amount: number; status: string; created: number; arrival_date: number; description: string | null }[];
+        monthly_revenue?: Record<string, number>;
       };
     },
   });
@@ -189,19 +190,16 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
           <h2 className="font-heading font-semibold text-foreground text-sm">Monthly Revenue</h2>
         </div>
         {(() => {
+          // Real per-month revenue from Stripe balance transactions
           const months: { name: string; revenue: number }[] = [];
           const now = new Date();
           for (let i = 5; i >= 0; i--) {
             const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-            months.push({ name: d.toLocaleString("default", { month: "short" }), revenue: 0 });
-          }
-          if (months.length > 0) {
-            months[months.length - 1].revenue = balance.available + balance.pending;
-            const past = balance.total_earned - (balance.available + balance.pending);
-            if (past > 0 && months.length > 1) {
-              const perMonth = past / (months.length - 1);
-              for (let i = 0; i < months.length - 1; i++) months[i].revenue = Math.round(perMonth * 100) / 100;
-            }
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+            months.push({
+              name: d.toLocaleString("default", { month: "short" }),
+              revenue: Math.round((balance.monthly_revenue?.[key] ?? 0) * 100) / 100,
+            });
           }
           return (
             <ResponsiveContainer width="100%" height={200}>
@@ -225,7 +223,7 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
             </ResponsiveContainer>
           );
         })()}
-        <p className="text-[11px] text-muted-foreground mt-2 text-center">Estimated distribution based on total earnings</p>
+        <p className="text-[11px] text-muted-foreground mt-2 text-center">Net earnings per month from Stripe balance activity</p>
       </motion.div>
 
       {/* Withdraw Section */}
