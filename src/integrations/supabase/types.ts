@@ -10,7 +10,32 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.4"
+    PostgrestVersion: "14.5"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -224,6 +249,48 @@ export type Database = {
             foreignKeyName: "mentor_content_mentor_id_fkey"
             columns: ["mentor_id"]
             isOneToOne: false
+            referencedRelation: "mentors_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_payment_config: {
+        Row: {
+          auto_payout: boolean
+          created_at: string
+          mentor_id: string
+          payouts_enabled: boolean
+          stripe_connect_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          auto_payout?: boolean
+          created_at?: string
+          mentor_id: string
+          payouts_enabled?: boolean
+          stripe_connect_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auto_payout?: boolean
+          created_at?: string
+          mentor_id?: string
+          payouts_enabled?: boolean
+          stripe_connect_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_payment_config_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: true
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_payment_config_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: true
             referencedRelation: "mentors_public"
             referencedColumns: ["id"]
           },
@@ -562,6 +629,27 @@ export type Database = {
           },
         ]
       }
+      user_payment_config: {
+        Row: {
+          created_at: string
+          stripe_customer_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          stripe_customer_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -792,6 +880,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],

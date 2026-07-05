@@ -1,4 +1,4 @@
-project_id = "rwiffivagmyxncryzgmk"
+project_id = "fklywhkcvwncqznrnihw"
 
 # Stripe calls this endpoint directly; authentication is the webhook
 # signature (STRIPE_WEBHOOK_SECRET), not a user JWT.
