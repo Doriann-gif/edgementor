@@ -121,17 +121,17 @@ const FreeContent = () => {
     <Helmet>
       <title>Free Trading Education — EdgeMentor</title>
       <meta name="description" content="Watch free trading tutorials and educational videos on price action, ICT/SMC, order flow, risk management, and more from top trading educators." />
-      <link rel="canonical" href="https://edgementor.lovable.app/learn" />
+      <link rel="canonical" href="https://edgementor.netlify.app/learn" />
       <meta property="og:title" content="Free Trading Education — EdgeMentor" />
       <meta property="og:description" content="Watch free trading tutorials on price action, ICT/SMC, order flow, and more." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://edgementor.lovable.app/learn" />
-      <meta property="og:image" content="https://edgementor.lovable.app/og-image.jpg" />
+      <meta property="og:url" content="https://edgementor.netlify.app/learn" />
+      <meta property="og:image" content="https://edgementor.netlify.app/og-image.jpg" />
       <meta property="og:site_name" content="EdgeMentor" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="Free Trading Education — EdgeMentor" />
       <meta name="twitter:description" content="Watch free trading tutorials on price action, ICT/SMC, order flow, and more." />
-      <meta name="twitter:image" content="https://edgementor.lovable.app/og-image.jpg" />
+      <meta name="twitter:image" content="https://edgementor.netlify.app/og-image.jpg" />
     </Helmet>
     <div className="min-h-screen bg-background">
       {/* Ambient */}

@@ -7,7 +7,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithGoogle } from "@/integrations/auth/google";
 import { toast } from "sonner";
 import { Zap, ArrowLeft, CheckCircle2 } from "lucide-react";
 import confetti from "canvas-confetti";
@@ -61,16 +61,11 @@ const Auth = () => {
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        toast.error(result.error.message || "Google sign-in failed.");
-        return;
+      const { error } = await signInWithGoogle();
+      if (error) {
+        toast.error(error.message || "Google sign-in failed.");
       }
-      if (result.redirected) return;
-      toast.success("Welcome!");
-      navigate("/");
+      // On success the browser redirects to Google and back with a session.
     } catch (err: any) {
       toast.error(err.message || "Google sign-in failed.");
     } finally {

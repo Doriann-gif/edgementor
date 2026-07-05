@@ -15,7 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { signInWithGoogle } from "@/integrations/auth/google";
 import NotificationBell from "@/components/NotificationBell";
 import { toast } from "sonner";
 
@@ -217,16 +217,11 @@ const Navbar = () => {
                 onClick={async () => {
                   setMobileOpen(false);
                   try {
-                    const result = await lovable.auth.signInWithOAuth("google", {
-                      redirect_uri: window.location.origin,
-                    });
-                    if (result.error) {
-                      toast.error(result.error.message || "Google sign-in failed.");
-                      return;
+                    const { error } = await signInWithGoogle();
+                    if (error) {
+                      toast.error(error.message || "Google sign-in failed.");
                     }
-                    if (result.redirected) return;
-                    toast.success("Welcome!");
-                    navigate("/");
+                    // On success the browser redirects to Google and back.
                   } catch (err: any) {
                     toast.error(err.message || "Google sign-in failed.");
                   }

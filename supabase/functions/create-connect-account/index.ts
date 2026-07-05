@@ -72,7 +72,7 @@ serve(async (req) => {
       .maybeSingle();
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
-    const origin = req.headers.get("origin") || "https://edgementor.lovable.app";
+    const origin = req.headers.get("origin") || "https://edgementor.netlify.app";
 
     let accountId = paymentConfig?.stripe_connect_account_id;
 
