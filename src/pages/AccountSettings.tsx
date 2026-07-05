@@ -222,7 +222,7 @@ const AccountSettings = () => {
   const changePasswordMutation = useMutation({
     mutationFn: async () => {
       if (newPassword !== confirmPassword) throw new Error("Passwords don't match.");
-      if (newPassword.length < 6) throw new Error("Password must be at least 6 characters.");
+      if (newPassword.length < 8) throw new Error("Password must be at least 8 characters.");
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
     },
@@ -232,9 +232,16 @@ const AccountSettings = () => {
 
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
-      await supabase.auth.signOut();
-      toast.success("You have been signed out. Contact support to fully delete your account.");
+      const { data, error } = await supabase.functions.invoke("delete-account");
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
+    onSuccess: async () => {
+      toast.success("Your account and all data have been permanently deleted.");
+      await supabase.auth.signOut();
+      window.location.href = "/";
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to delete account. Please contact support."),
   });
 
   const addContent = async () => {
@@ -662,8 +669,8 @@ const AccountSettings = () => {
               </div>
               {newPassword && (
                 <div className="flex gap-2">
-                  {["Length (6+)", "Match"].map((rule) => {
-                    const pass = rule === "Length (6+)" ? newPassword.length >= 6 : (newPassword === confirmPassword && confirmPassword.length > 0);
+                  {["Length (8+)", "Match"].map((rule) => {
+                    const pass = rule === "Length (8+)" ? newPassword.length >= 8 : (newPassword === confirmPassword && confirmPassword.length > 0);
                     return (
                       <span key={rule} className={`inline-flex items-center gap-1 text-[11px] rounded-full px-2.5 py-1 border ${pass ? "border-primary/30 bg-primary/5 text-primary" : "border-border bg-muted text-muted-foreground"}`}>
                         <CheckCircle2 className={`h-3 w-3 ${pass ? "text-primary" : "text-muted-foreground/40"}`} />
