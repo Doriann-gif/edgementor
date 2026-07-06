@@ -2,6 +2,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMentor } from "@/hooks/use-mentors";
 import { useMentorContent, useIsSubscribed } from "@/hooks/use-mentor-content";
+import { priceSuffix, subscribeVerb } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft, Lock, Video, Link2, MessageCircle, Calendar,
@@ -61,7 +62,7 @@ const MentorContent = () => {
             Subscribe to {mentor.name} to unlock their exclusive mentorship content, group links, videos, and scheduled calls.
           </p>
           <Link to={`/subscribe/${id}`}>
-            <Button variant="glow" className="font-semibold">Subscribe for ${mentor.monthly_price}/mo</Button>
+            <Button variant="glow" className="font-semibold">{subscribeVerb(mentor)} for ${mentor.monthly_price}{priceSuffix(mentor)}</Button>
           </Link>
         </div>
       </div>

@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/popover";
 
 const NotificationBell = () => {
-  const { user } = useAuth();
+  const { user, isMentor } = useAuth();
   const navigate = useNavigate();
+  const inboxPath = isMentor ? "/mentor-dashboard" : "/dashboard";
   const queryClient = useQueryClient();
   const [hasNew, setHasNew] = useState(false);
 
@@ -89,7 +90,7 @@ const NotificationBell = () => {
             unreadMessages.map((msg) => (
               <button
                 key={msg.id}
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate(inboxPath)}
                 className="w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors border-b border-border/50 last:border-0"
               >
                 <div className="flex items-center gap-2 mb-0.5">
@@ -106,7 +107,7 @@ const NotificationBell = () => {
         </div>
         {count > 0 && (
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate(inboxPath)}
             className="w-full text-center py-2.5 text-xs font-medium text-primary hover:bg-primary/5 transition-colors border-t border-border"
           >
             View all messages

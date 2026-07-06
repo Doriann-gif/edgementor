@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { useMentors } from "@/hooks/use-mentors";
 import TierBadge from "@/components/TierBadge";
 import PageTransition from "@/components/PageTransition";
+import { priceSuffix } from "@/lib/pricing";
 import type { Mentor, MentorTier } from "@/types/mentor";
 
 const ALL_INSTRUMENTS = ["Futures", "Forex", "Crypto", "Options"];
@@ -130,7 +131,7 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
         <div className="flex items-center justify-between pt-4 border-t border-border/50">
           <div>
             <span className="font-heading font-bold text-xl text-foreground">${mentor.monthly_price}</span>
-            <span className="text-xs text-muted-foreground ml-0.5">/mo</span>
+            <span className="text-xs text-muted-foreground ml-0.5">{priceSuffix(mentor)}</span>
           </div>
           <div className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-300 ${
             isElite
@@ -192,7 +193,7 @@ const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
 
               <div className="flex items-center justify-between">
                 <span className="font-heading font-bold text-foreground">
-                  ${mentor.monthly_price}<span className="text-xs text-muted-foreground font-normal">/mo</span>
+                  ${mentor.monthly_price}<span className="text-xs text-muted-foreground font-normal">{priceSuffix(mentor)}</span>
                 </span>
                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">
                   Explore <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
@@ -233,6 +234,18 @@ const MentorListingPage = () => {
   const sorted = sortMentors(filtered, sortBy);
   const activeFilterCount = activeInstruments.length + activeConcepts.length + activeCountries.length + (priceRange[0] < 500 ? 1 : 0);
 
+  // Real headline stats derived from live mentor data (no fabricated numbers)
+  const totalStudents = mentors.reduce((sum, m) => sum + (m.students || 0), 0);
+  const avgRating = mentors.length
+    ? (mentors.reduce((sum, m) => sum + (m.rating || 0), 0) / mentors.length).toFixed(1)
+    : "—";
+  const formatCount = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K+` : `${n}`);
+  const heroStats = [
+    { value: `${mentors.length}`, label: mentors.length === 1 ? "Mentor" : "Mentors" },
+    { value: avgRating, label: "Avg Rating" },
+    { value: formatCount(totalStudents), label: "Students" },
+  ];
+
   const clearFilters = () => {
     setActiveInstruments([]);
     setActiveConcepts([]);
@@ -266,7 +279,7 @@ const MentorListingPage = () => {
         "isPartOf": { "@type": "WebSite", "name": "EdgeMentor", "url": "https://edgementor.pages.dev" }
       })}</script>
     </Helmet>
-    <div className="min-h-screen bg-background border-pink-100 text-pink-50">
+    <div className="min-h-screen bg-background">
       {/* Ambient background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/[0.03] rounded-full blur-[120px]" />
@@ -297,11 +310,7 @@ const MentorListingPage = () => {
 
           {/* Quick stats */}
           <div className="flex items-center justify-center gap-10 mt-10">
-            {[
-              { value: `${mentors.length}`, label: "Mentors" },
-              { value: "4.8", label: "Avg Rating" },
-              { value: "1.2K+", label: "Students" },
-            ].map((stat, i) => (
+            {heroStats.map((stat, i) => (
               <motion.div
                 key={stat.label}
                 className="text-center"

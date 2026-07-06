@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
+import { useAuth } from "@/contexts/AuthContext";
 import confetti from "canvas-confetti";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -61,6 +63,8 @@ const STEPS = [
 
 const MentorApplicationForm = () => {
   const reduced = useReducedMotion();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [step, setStep] = useState(0);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -114,9 +118,14 @@ const MentorApplicationForm = () => {
       toast.error("Please fill in all required fields.");
       return;
     }
+    if (!user) {
+      toast.error("Please sign in first so we can link your application to your account.");
+      // Preserve the entered email for a smoother sign-in
+      navigate(`/auth?redirect=/apply${email ? `&email=${encodeURIComponent(email)}` : ""}`);
+      return;
+    }
     setSubmitting(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       const { error } = await supabase.from("mentor_applications").insert({
         full_name: fullName,
         email,

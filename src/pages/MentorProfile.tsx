@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMentor, useMentorReviews, useFeaturedMentors } from "@/hooks/use-mentors";
+import { priceSuffix, planLabel, isOneTime, subscribeVerb } from "@/lib/pricing";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -105,7 +106,7 @@ const MentorNotFound = () => {
                         <span className="font-heading font-semibold text-sm text-foreground block truncate">{m.name}</span>
                         <div className="flex items-center gap-2 mt-0.5">
                           <span className="flex items-center gap-0.5 text-xs text-amber-500"><Star className="h-3 w-3 fill-current" /> {m.rating}</span>
-                          <span className="text-xs text-muted-foreground">${m.monthly_price}/mo</span>
+                          <span className="text-xs text-muted-foreground">${m.monthly_price}{priceSuffix(m)}</span>
                         </div>
                       </div>
                       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -230,18 +231,17 @@ const MentorProfile = () => {
           <meta property="og:description" content={mentor.bio} />
           <meta property="og:type" content="profile" />
           <meta property="og:url" content={`https://edgementor.pages.dev/mentor/${id}`} />
-          {mentor.avatar && <meta property="og:image" content={mentor.avatar} />}
+          <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
           <meta property="og:site_name" content="EdgeMentor" />
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={`${mentor.name} — Trading Mentor`} />
           <meta name="twitter:description" content={mentor.bio} />
-          {mentor.avatar && <meta name="twitter:image" content={mentor.avatar} />}
+          <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
           <script type="application/ld+json">{JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
             "name": mentor.name,
             "description": mentor.bio,
-            "image": mentor.avatar,
             "jobTitle": "Trading Mentor",
             ...(mentor.country ? { "nationality": mentor.country } : {}),
             "url": `https://edgementor.pages.dev/mentor/${id}`,
@@ -501,8 +501,8 @@ const MentorProfile = () => {
                   isElite ? "border-slate-600/40 bg-slate-800/30" : "border-primary/20 bg-primary/[0.03]"
                 }`}>
                   <div>
-                    <p className="text-sm text-muted-foreground">Monthly subscription</p>
-                    <p className="font-heading text-3xl font-bold text-foreground">${mentor.monthly_price}<span className="text-base font-normal text-muted-foreground">/mo</span></p>
+                    <p className="text-sm text-muted-foreground">{planLabel(mentor)}{isOneTime(mentor) ? " access" : " subscription"}</p>
+                    <p className="font-heading text-3xl font-bold text-foreground">${mentor.monthly_price}<span className="text-base font-normal text-muted-foreground">{priceSuffix(mentor)}</span></p>
                   </div>
                   {isSubscribed ? (
                     <Link to={`/mentorship/${mentor.id}`}>
@@ -619,10 +619,10 @@ const MentorProfile = () => {
         >
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
             <div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Monthly subscription</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">{planLabel(mentor)}{isOneTime(mentor) ? " access" : " subscription"}</p>
               <div className="flex items-baseline gap-1">
                 <span className="font-heading text-2xl sm:text-3xl font-bold text-foreground">${mentor.monthly_price}</span>
-                <span className="text-sm text-muted-foreground">/mo</span>
+                <span className="text-sm text-muted-foreground">{priceSuffix(mentor)}</span>
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
@@ -644,7 +644,7 @@ const MentorProfile = () => {
               ) : (
                 <Link to={`/subscribe/${mentor.id}`}>
                   <Button variant="glow" className={`h-11 px-5 sm:px-8 font-semibold text-sm sm:text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : ""}`}>
-                    Subscribe Now <ChevronRight className="h-4 w-4 ml-1" />
+                    {subscribeVerb(mentor)} <ChevronRight className="h-4 w-4 ml-1" />
                   </Button>
                 </Link>
               )}

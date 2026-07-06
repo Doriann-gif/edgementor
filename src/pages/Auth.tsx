@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,8 +14,10 @@ import confetti from "canvas-confetti";
 import PageTransition from "@/components/PageTransition";
 
 const Auth = () => {
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || "/";
   const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(searchParams.get("email") || "");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,7 @@ const Auth = () => {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back!");
-        navigate("/");
+        navigate(redirectTo);
       }
     } catch (err: any) {
       toast.error(err.message || "Authentication failed.");
@@ -176,7 +178,7 @@ const Auth = () => {
       {/* Success Dialog */}
       <Dialog open={showSuccess} onOpenChange={(open) => {
         setShowSuccess(open);
-        if (!open) navigate("/");
+        if (!open) navigate(redirectTo);
       }}>
         <DialogContent className="sm:max-w-sm text-center">
           <DialogHeader className="items-center">
@@ -188,7 +190,7 @@ const Auth = () => {
               Welcome to EdgeMentor! Your account has been created successfully. Start exploring mentors and level up your trading.
             </DialogDescription>
           </DialogHeader>
-          <Button className="w-full font-semibold" onClick={() => { setShowSuccess(false); navigate("/"); }}>
+          <Button className="w-full font-semibold" onClick={() => { setShowSuccess(false); navigate(redirectTo); }}>
             Get Started
           </Button>
         </DialogContent>

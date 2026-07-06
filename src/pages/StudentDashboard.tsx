@@ -332,7 +332,7 @@ const StudentDashboard = () => {
                               <h3 className="font-heading font-semibold text-foreground text-sm truncate">{mentor.name}</h3>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                 <span className="flex items-center gap-1"><Star className="h-3 w-3" /> {mentor.rating}</span>
-                                <span>${mentor.monthly_price}/mo</span>
+                                <span>${mentor.monthly_price}{mentor.payment_type === "one_time" ? "" : "/mo"}</span>
                                 <span>{mentor.students} students</span>
                               </div>
                             </div>
