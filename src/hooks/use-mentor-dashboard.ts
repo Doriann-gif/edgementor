@@ -42,9 +42,10 @@ export const useMentorStudents = (mentorId: string | undefined) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subscriptions")
-        .select("*, profiles:user_id(id, display_name, avatar_url, country, age, trading_experience)")
+        .select("*, profiles:user_id(id, display_name, avatar_url, country, age, trading_experience, timezone, bio, trading_interests)")
         .eq("mentor_id", mentorId!)
-        .eq("status", "active");
+        .eq("status", "active")
+        .order("started_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -56,17 +57,21 @@ export const useMentorEarnings = (mentorId: string | undefined, monthlyPrice: nu
     queryKey: ["mentor-earnings", mentorId],
     enabled: !!mentorId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("id, started_at, status")
-        .eq("mentor_id", mentorId!)
-        .eq("status", "active");
-      if (error) throw error;
-      const activeCount = data?.length ?? 0;
+      // Active subs (current students) and all-time count (any status)
+      const [activeRes, allRes] = await Promise.all([
+        supabase.from("subscriptions").select("id", { count: "exact", head: true })
+          .eq("mentor_id", mentorId!).eq("status", "active"),
+        supabase.from("subscriptions").select("id", { count: "exact", head: true })
+          .eq("mentor_id", mentorId!),
+      ]);
+      if (activeRes.error) throw activeRes.error;
+      if (allRes.error) throw allRes.error;
+      const activeCount = activeRes.count ?? 0;
       return {
         activeStudents: activeCount,
-        monthlyRevenue: activeCount * monthlyPrice,
-        allTimeSubs: activeCount, // simplified
+        monthlyRevenue: activeCount * monthlyPrice,        // gross, before 20% platform fee
+        monthlyNet: Math.round(activeCount * monthlyPrice * 0.8),
+        allTimeSubs: allRes.count ?? 0,
       };
     },
   });

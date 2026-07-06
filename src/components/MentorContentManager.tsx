@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Video, Link2, MessageCircle, Calendar, BookOpen, FileUp,
-  Plus, Trash2, ExternalLink, GripVertical, Upload,
+  Plus, Trash2, ExternalLink, Upload, Pencil, ArrowUp, ArrowDown, Check,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -48,12 +48,18 @@ interface MentorContentManagerProps {
 const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [contentType, setContentType] = useState("link");
   const [contentUrl, setContentUrl] = useState("");
   const [uploadingFile, setUploadingFile] = useState(false);
   const contentFileRef = useRef<HTMLInputElement>(null);
+
+  const resetForm = () => {
+    setTitle(""); setDescription(""); setContentType("link"); setContentUrl("");
+    setEditingId(null); setShowForm(false);
+  };
 
   const handleFileUpload = async (file: File) => {
     if (file.size > 50 * 1024 * 1024) {
@@ -93,28 +99,27 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
     },
   });
 
-  const addMutation = useMutation({
+  const saveMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("mentor_content").insert({
-        mentor_id: mentorId,
-        title,
-        description,
-        content_type: contentType,
-        content_url: contentUrl,
-        display_order: content.length,
-      });
-      if (error) throw error;
+      if (editingId) {
+        const { error } = await supabase.from("mentor_content").update({
+          title, description, content_type: contentType, content_url: contentUrl,
+        }).eq("id", editingId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("mentor_content").insert({
+          mentor_id: mentorId, title, description, content_type: contentType,
+          content_url: contentUrl, display_order: content.length,
+        });
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mentor-content", mentorId] });
-      toast.success("Content added!");
-      setTitle("");
-      setDescription("");
-      setContentType("link");
-      setContentUrl("");
-      setShowForm(false);
+      toast.success(editingId ? "Content updated!" : "Content added!");
+      resetForm();
     },
-    onError: () => toast.error("Failed to add content."),
+    onError: () => toast.error("Failed to save content."),
   });
 
   const deleteMutation = useMutation({
@@ -129,13 +134,40 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
     onError: () => toast.error("Failed to delete content."),
   });
 
+  // Reorder by swapping display_order with the neighbour
+  const reorderMutation = useMutation({
+    mutationFn: async ({ index, dir }: { index: number; dir: -1 | 1 }) => {
+      const target = index + dir;
+      if (target < 0 || target >= content.length) return;
+      const a = content[index];
+      const b = content[target];
+      const [r1, r2] = await Promise.all([
+        supabase.from("mentor_content").update({ display_order: b.display_order }).eq("id", a.id),
+        supabase.from("mentor_content").update({ display_order: a.display_order }).eq("id", b.id),
+      ]);
+      if (r1.error) throw r1.error;
+      if (r2.error) throw r2.error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mentor-content", mentorId] }),
+    onError: () => toast.error("Failed to reorder."),
+  });
+
+  const startEdit = (item: MentorContentItem) => {
+    setEditingId(item.id);
+    setTitle(item.title);
+    setDescription(item.description || "");
+    setContentType(item.content_type);
+    setContentUrl(item.content_url);
+    setShowForm(true);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !contentUrl.trim()) {
       toast.error("Title and URL are required.");
       return;
     }
-    addMutation.mutate();
+    saveMutation.mutate();
   };
 
   const getTypeInfo = (type: string) => {
@@ -150,7 +182,7 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
           <p className="text-xs text-muted-foreground mt-0.5">Add videos, links, discord invites, and more for your subscribers.</p>
         </div>
         {!showForm && (
-          <Button size="sm" className="text-xs" onClick={() => setShowForm(true)}>
+          <Button size="sm" className="text-xs" onClick={() => { setEditingId(null); setTitle(""); setDescription(""); setContentType("link"); setContentUrl(""); setShowForm(true); }}>
             <Plus className="h-3.5 w-3.5 mr-1" /> Add Content
           </Button>
         )}
@@ -158,6 +190,7 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="rounded-2xl border border-primary/20 bg-card p-5 mb-6 space-y-4">
+          <p className="text-xs font-semibold text-foreground">{editingId ? "Edit content" : "New content"}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs">Title</Label>
@@ -216,10 +249,10 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
             />
           </div>
           <div className="flex gap-2">
-            <Button type="submit" size="sm" className="text-xs" disabled={addMutation.isPending}>
-              {addMutation.isPending ? "Adding..." : "Add Content"}
+            <Button type="submit" size="sm" className="text-xs" disabled={saveMutation.isPending}>
+              {saveMutation.isPending ? "Saving..." : editingId ? (<><Check className="h-3.5 w-3.5 mr-1" /> Save Changes</>) : "Add Content"}
             </Button>
-            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => setShowForm(false)}>
+            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={resetForm}>
               Cancel
             </Button>
           </div>
@@ -236,14 +269,31 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
         </div>
       ) : (
         <div className="space-y-2">
-          {content.map((item) => {
+          {content.map((item, index) => {
             const typeInfo = getTypeInfo(item.content_type);
             const Icon = typeInfo.icon;
             const colorClass = TYPE_COLORS[item.content_type] || "text-primary bg-primary/10";
 
             return (
               <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 group">
-                <GripVertical className="h-4 w-4 text-muted-foreground/30 shrink-0" />
+                <div className="flex flex-col shrink-0 -my-1">
+                  <button
+                    onClick={() => reorderMutation.mutate({ index, dir: -1 })}
+                    disabled={index === 0 || reorderMutation.isPending}
+                    className="text-muted-foreground/50 hover:text-foreground disabled:opacity-20 disabled:hover:text-muted-foreground/50"
+                    aria-label="Move up"
+                  >
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => reorderMutation.mutate({ index, dir: 1 })}
+                    disabled={index === content.length - 1 || reorderMutation.isPending}
+                    className="text-muted-foreground/50 hover:text-foreground disabled:opacity-20 disabled:hover:text-muted-foreground/50"
+                    aria-label="Move down"
+                  >
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  </button>
+                </div>
                 <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${colorClass}`}>
                   <Icon className="h-4 w-4" />
                 </div>
@@ -263,15 +313,27 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
                     )}
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive"
-                  onClick={() => deleteMutation.mutate(item.id)}
-                  disabled={deleteMutation.isPending}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                    onClick={() => startEdit(item)}
+                    aria-label="Edit"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive hover:text-destructive"
+                    onClick={() => deleteMutation.mutate(item.id)}
+                    disabled={deleteMutation.isPending}
+                    aria-label="Delete"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
             );
           })}
