@@ -132,6 +132,7 @@ const AccountSettings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
   const [uploading, setUploading] = useState(false);
   const [bannerColor, setBannerColor] = useState("");
   const [showBannerPicker, setShowBannerPicker] = useState(false);
@@ -228,6 +229,42 @@ const AccountSettings = () => {
     },
     onSuccess: () => { setNewPassword(""); setConfirmPassword(""); toast.success("Password updated!"); },
     onError: (err: any) => toast.error(err.message || "Failed to change password."),
+  });
+
+  const changeEmailMutation = useMutation({
+    mutationFn: async () => {
+      const email = newEmail.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Enter a valid email address.");
+      if (email === user!.email?.toLowerCase()) throw new Error("That's already your email.");
+      // Supabase sends a confirmation link to the NEW address; the change
+      // only takes effect once that link is clicked.
+      const { error } = await supabase.auth.updateUser(
+        { email },
+        { emailRedirectTo: `${window.location.origin}/settings` }
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setNewEmail("");
+      toast.success("Confirmation sent — check your new inbox to finish the change.");
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to update email."),
+  });
+
+  // Mentors can pause/resume taking new students (mentors.available).
+  // Not blocked by the protect_mentor_columns trigger.
+  const toggleAvailabilityMutation = useMutation({
+    mutationFn: async (next: boolean) => {
+      if (!mentorProfile) throw new Error("No mentor profile");
+      const { error } = await supabase.from("mentors").update({ available: next }).eq("id", mentorProfile.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-mentor-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["mentors"] });
+      toast.success("Availability updated.");
+    },
+    onError: (err: any) => toast.error(err.message || "Failed to update availability."),
   });
 
   const deleteAccountMutation = useMutation({
@@ -584,7 +621,7 @@ const AccountSettings = () => {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium">Email Address</Label>
                   <Input value={user.email || ""} disabled className="bg-muted/50 border-border text-sm text-muted-foreground" />
-                  <p className="text-[10px] text-muted-foreground">Email cannot be changed directly.</p>
+                  <p className="text-[10px] text-muted-foreground">Current email — change it below.</p>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-medium">Country <span className="text-muted-foreground">(optional)</span></Label>
@@ -608,6 +645,28 @@ const AccountSettings = () => {
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <Label className="text-xs font-medium">Change Email</Label>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="bg-muted border-border text-sm flex-1"
+                      placeholder="new@email.com"
+                    />
+                    <Button
+                      variant="outline"
+                      className="text-sm shrink-0"
+                      disabled={!newEmail.trim() || changeEmailMutation.isPending}
+                      onClick={() => changeEmailMutation.mutate()}
+                    >
+                      <Mail className="h-3.5 w-3.5 mr-1.5" />
+                      {changeEmailMutation.isPending ? "Sending..." : "Update Email"}
+                    </Button>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">We'll email a confirmation link to the new address. The change applies once you click it.</p>
+                </div>
               </div>
 
               <div className="flex items-center justify-between pt-2">
@@ -621,6 +680,29 @@ const AccountSettings = () => {
                 </Button>
               </div>
             </motion.div>
+
+            {/* Mentor availability (mentors only) */}
+            {isMentor && mentorProfile && (
+              <motion.div variants={fadeIn} initial="hidden" animate="show" custom={3.5}
+                className="rounded-2xl border border-border bg-card p-6"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="font-heading font-semibold text-foreground text-sm">Accepting New Students</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {(mentorProfile as any).available
+                        ? "Your profile shows as available — students can subscribe."
+                        : "Paused — your profile is marked unavailable to new students."}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={!!(mentorProfile as any).available}
+                    disabled={toggleAvailabilityMutation.isPending}
+                    onCheckedChange={(v) => toggleAvailabilityMutation.mutate(v)}
+                  />
+                </div>
+              </motion.div>
+            )}
 
             {/* Quick Actions */}
             <motion.div variants={fadeIn} initial="hidden" animate="show" custom={4}
@@ -688,28 +770,23 @@ const AccountSettings = () => {
 
           {/* ──────────── NOTIFICATIONS TAB ──────────── */}
           <TabsContent value="notifications">
-            <div className="rounded-2xl border border-border bg-card p-6 space-y-6">
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
               <div className="flex items-center gap-2 mb-1">
                 <Bell className="h-4 w-4 text-primary" />
-                <h3 className="font-heading font-semibold text-foreground">Notification Preferences</h3>
+                <h3 className="font-heading font-semibold text-foreground">Notifications</h3>
               </div>
-              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
-                <div>
-                  <h3 className="font-heading font-semibold text-foreground text-sm">Email Notifications</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Receive notifications about messages and mentor updates.</p>
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border">
+                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Bell className="h-4 w-4 text-primary" />
                 </div>
-                <Switch checked={emailNotifications} onCheckedChange={setEmailNotifications} />
-              </div>
-              <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
                 <div>
-                  <h3 className="font-heading font-semibold text-foreground text-sm">Marketing Emails</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Tips, new mentors, and platform updates.</p>
+                  <h3 className="font-heading font-semibold text-foreground text-sm">In-app notifications</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    New messages appear in real time under the bell icon in the top bar — no setup needed.
+                  </p>
                 </div>
-                <Switch checked={marketingEmails} onCheckedChange={setMarketingEmails} />
               </div>
-              <Button onClick={() => updateProfileMutation.mutate()} disabled={updateProfileMutation.isPending} className="text-sm font-semibold">
-                <Save className="h-3.5 w-3.5 mr-1.5" /> Save Preferences
-              </Button>
+              <p className="text-[11px] text-muted-foreground">Email notifications are coming soon.</p>
             </div>
           </TabsContent>
 
