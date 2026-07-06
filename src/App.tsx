@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { MotionConfig } from "framer-motion";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -56,6 +57,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
     <AuthProvider>
+      <MotionConfig reducedMotion="user">
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -91,6 +93,7 @@ const App = () => (
           <CookieConsent />
         </BrowserRouter>
       </TooltipProvider>
+      </MotionConfig>
     </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>

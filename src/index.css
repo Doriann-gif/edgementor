@@ -227,7 +227,11 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
-/* Disable backdrop-blur on mobile for performance */
+/* Mobile performance: disable repaint-heavy animations.
+   backdrop-blur, infinite box-shadow pulses and background-position
+   (gradient text) animations force full repaints every frame and are the
+   main cause of scroll jank on phones. Transform/opacity animations stay —
+   they are GPU-composited and cheap. */
 @media (max-width: 767px) {
   .backdrop-blur-sm,
   .backdrop-blur-md,
@@ -237,5 +241,32 @@ input[type="range"]::-moz-range-thumb {
   .backdrop-blur-3xl {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
+  }
+
+  /* Stop infinite box-shadow pulses on glow buttons — keep a static shadow */
+  .btn-glow {
+    animation: none !important;
+    box-shadow: 0 0 12px hsl(var(--primary) / 0.25) !important;
+  }
+  .btn-pink-glow {
+    animation: none !important;
+    box-shadow: 0 0 12px hsl(var(--pink) / 0.18) !important;
+  }
+
+  /* Stop the animated gradient text (background-position repaint) */
+  [class*="gradient-shift"] {
+    animation: none !important;
+  }
+}
+
+/* Respect the OS "reduce motion" accessibility setting everywhere */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }

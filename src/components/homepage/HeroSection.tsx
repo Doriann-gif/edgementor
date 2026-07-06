@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Shield, Target, Globe, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/hooks/use-reduced-motion";
 
 const staggerContainer = {
   hidden: {},
@@ -18,7 +19,9 @@ const scaleIn = {
   show: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" as const } },
 };
 
-const HeroSection = () => (
+const HeroSection = () => {
+  const reduced = useReducedMotion();
+  return (
   <motion.section className="py-32 sm:py-44 px-4 sm:px-6 relative">
     <motion.div
       className="max-w-4xl mx-auto text-center relative"
@@ -29,15 +32,15 @@ const HeroSection = () => (
       <motion.div variants={scaleIn}>
         <motion.div
           className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-5 py-2 text-xs font-medium text-primary mb-8 shadow-lg shadow-primary/5"
-          animate={{ boxShadow: ["0 0 0 0 hsl(var(--primary) / 0)", "0 0 15px 3px hsl(var(--primary) / 0.08)", "0 0 0 0 hsl(var(--primary) / 0)"] }}
-          transition={{ duration: 4, repeat: Infinity, repeatDelay: 1 }}
+          animate={reduced ? undefined : { boxShadow: ["0 0 0 0 hsl(var(--primary) / 0)", "0 0 15px 3px hsl(var(--primary) / 0.08)", "0 0 0 0 hsl(var(--primary) / 0)"] }}
+          transition={reduced ? undefined : { duration: 4, repeat: Infinity, repeatDelay: 1 }}
         >
           <Sparkles className="h-3.5 w-3.5" />
           <span>The #1 Trading Mentorship Platform</span>
           <motion.span
             className="h-2 w-2 rounded-full bg-primary"
-            animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={reduced ? undefined : { scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+            transition={reduced ? undefined : { duration: 2, repeat: Infinity }}
           />
         </motion.div>
       </motion.div>
@@ -111,6 +114,7 @@ const HeroSection = () => (
       </motion.div>
     </motion.div>
   </motion.section>
-);
+  );
+};
 
 export default HeroSection;
