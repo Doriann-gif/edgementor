@@ -516,37 +516,46 @@ export type Database = {
         Row: {
           age: number | null
           avatar_url: string | null
+          bio: string | null
           country: string | null
           created_at: string
           display_name: string | null
           email_notifications: boolean
           id: string
           marketing_emails: boolean
+          timezone: string | null
           trading_experience: string | null
+          trading_interests: string[]
           updated_at: string
         }
         Insert: {
           age?: number | null
           avatar_url?: string | null
+          bio?: string | null
           country?: string | null
           created_at?: string
           display_name?: string | null
           email_notifications?: boolean
           id: string
           marketing_emails?: boolean
+          timezone?: string | null
           trading_experience?: string | null
+          trading_interests?: string[]
           updated_at?: string
         }
         Update: {
           age?: number | null
           avatar_url?: string | null
+          bio?: string | null
           country?: string | null
           created_at?: string
           display_name?: string | null
           email_notifications?: boolean
           id?: string
           marketing_emails?: boolean
+          timezone?: string | null
           trading_experience?: string | null
+          trading_interests?: string[]
           updated_at?: string
         }
         Relationships: []

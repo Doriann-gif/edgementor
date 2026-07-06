@@ -14,12 +14,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { COUNTRIES, TIMEZONES, TRADING_MARKETS } from "@/lib/profile-options";
 import {
   ArrowLeft, User, Lock, Bell, CreditCard, Trash2, Save, LogOut,
   Camera, Upload, BookOpen, Plus, GripVertical, Pencil, Trash, X,
   Shield, CalendarDays, Star, Award, CheckCircle2, Mail, Sparkles,
   Eye, EyeOff, BadgeCheck, Activity, Palette, ShieldCheck, Moon, Sun, Monitor,
-  Clock, TrendingUp, Download, Globe, Heart, Loader2,
+  Clock, TrendingUp, Download, Globe, Heart, Loader2, ChevronsUpDown, Check,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -127,6 +130,10 @@ const AccountSettings = () => {
   const [country, setCountry] = useState("");
   const [age, setAge] = useState("");
   const [tradingExperience, setTradingExperience] = useState("");
+  const [bio, setBio] = useState("");
+  const [timezone, setTimezone] = useState("");
+  const [tradingInterests, setTradingInterests] = useState<string[]>([]);
+  const [countryOpen, setCountryOpen] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -175,6 +182,9 @@ const AccountSettings = () => {
       setCountry((profile as any).country || "");
       setAge((profile as any).age ? String((profile as any).age) : "");
       setTradingExperience((profile as any).trading_experience || "");
+      setBio((profile as any).bio || "");
+      setTimezone((profile as any).timezone || "");
+      setTradingInterests((profile as any).trading_interests || []);
       setEmailNotifications(profile.email_notifications ?? true);
       setMarketingEmails(profile.marketing_emails ?? false);
     }
@@ -211,6 +221,9 @@ const AccountSettings = () => {
         country: country || null,
         age: age ? parseInt(age, 10) : null,
         trading_experience: tradingExperience || null,
+        bio: bio.trim() || null,
+        timezone: timezone || null,
+        trading_interests: tradingInterests,
         email_notifications: emailNotifications, marketing_emails: marketingEmails,
         updated_at: new Date().toISOString(),
       } as any).eq("id", user!.id);
@@ -335,7 +348,7 @@ const AccountSettings = () => {
   const activeSubCount = subscriptions.filter((s: any) => s.status === "active").length;
 
   // Profile completeness
-  const profileFields = [displayName, avatarUrl, country, age, tradingExperience, emailNotifications !== undefined];
+  const profileFields = [displayName, avatarUrl, country, age, tradingExperience, bio, timezone, tradingInterests.length > 0];
   const completeness = Math.round((profileFields.filter(Boolean).length / profileFields.length) * 100);
 
   return (
@@ -400,27 +413,26 @@ const AccountSettings = () => {
             >
               {/* Banner */}
               <div
-                className="h-28 sm:h-32 relative cursor-pointer group/banner"
+                className={`h-24 sm:h-28 relative group/banner ${isMentor ? "cursor-pointer" : ""}`}
                 style={isMentor && bannerColor ? { background: bannerColor } : undefined}
                 onClick={() => isMentor && setShowBannerPicker(!showBannerPicker)}
               >
                 {!isMentor && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-muted via-card to-muted" />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-transparent pointer-events-none" />
                 {isMentor && (
                   <>
-                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-full bg-black/40 backdrop-blur-sm px-3 py-1 opacity-0 group-hover/banner:opacity-100 transition-opacity">
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                    <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-md bg-black/40 backdrop-blur-sm px-2.5 py-1 opacity-0 group-hover/banner:opacity-100 transition-opacity">
                       <Palette className="h-3 w-3 text-white" />
-                      <span className="text-[11px] text-white font-medium">Change Banner</span>
+                      <span className="text-[11px] text-white font-medium">Change banner</span>
                     </div>
                   </>
                 )}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,hsl(var(--primary)/0.15),transparent_60%)]" />
                 {isMentor && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-primary/20 backdrop-blur-sm border border-primary/30 px-3 py-1">
-                    <BadgeCheck className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-[11px] font-semibold text-primary">Verified Mentor</span>
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-md bg-black/30 backdrop-blur-sm border border-white/15 px-2.5 py-1">
+                    <BadgeCheck className="h-3.5 w-3.5 text-white" />
+                    <span className="text-[11px] font-semibold text-white">Verified Mentor</span>
                   </div>
                 )}
               </div>
@@ -554,8 +566,8 @@ const AccountSettings = () => {
                 { label: "Saved Mentors", value: savedCount, icon: Award, color: "text-pink-400 bg-pink-400/10" },
                 { label: "Messages", value: messageStats.total, icon: Mail, color: messageStats.unread > 0 ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted" },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-xl border border-border bg-card p-4 hover:border-primary/30 transition-colors group">
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${stat.color} mb-2.5 group-hover:scale-110 transition-transform`}>
+                <div key={stat.label} className="rounded-xl border border-border bg-card p-4 hover:border-border/80 transition-colors">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${stat.color} mb-2.5`}>
                     <stat.icon className="h-4 w-4" />
                   </div>
                   <p className="font-heading text-xl font-bold text-foreground">{stat.value}</p>
@@ -575,8 +587,8 @@ const AccountSettings = () => {
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <h3 className="font-heading font-semibold text-sm text-foreground">Profile Completeness</h3>
+                  <BadgeCheck className="h-4 w-4 text-primary" />
+                  <h3 className="font-heading font-semibold text-sm text-foreground">Profile completion</h3>
                 </div>
                 <span className={`text-xs font-bold ${completeness === 100 ? "text-primary" : "text-muted-foreground"}`}>
                   {completeness}%
@@ -590,7 +602,10 @@ const AccountSettings = () => {
                   { done: true, label: "Email verified" },
                   { done: !!country, label: "Country" },
                   { done: !!age, label: "Age" },
-                  { done: !!tradingExperience, label: "Trading experience" },
+                  { done: !!tradingExperience, label: "Experience level" },
+                  { done: !!bio, label: "Bio" },
+                  { done: !!timezone, label: "Timezone" },
+                  { done: tradingInterests.length > 0, label: "Markets" },
                 ].map((item) => (
                   <span key={item.label} className={`inline-flex items-center gap-1 text-[11px] rounded-full px-2.5 py-1 border ${
                     item.done
@@ -610,29 +625,75 @@ const AccountSettings = () => {
             >
               <div className="flex items-center gap-2 mb-1">
                 <User className="h-4 w-4 text-primary" />
-                <h3 className="font-heading font-semibold text-foreground">Edit Profile</h3>
+                <h3 className="font-heading font-semibold text-foreground">Edit profile</h3>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium">Display Name</Label>
-                  <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="bg-muted border-border text-sm" placeholder="Your name" />
+              {/* Basic information */}
+              <div className="space-y-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Basic information</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Display name</Label>
+                    <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} className="bg-muted border-border text-sm" placeholder="Your name" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Country</Label>
+                    <Popover open={countryOpen} onOpenChange={setCountryOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" role="combobox" className="w-full justify-between bg-muted border-border font-normal text-sm h-10">
+                          <span className={country ? "" : "text-muted-foreground"}>{country || "Select country"}</span>
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search country..." />
+                          <CommandList>
+                            <CommandEmpty>No country found.</CommandEmpty>
+                            <CommandGroup>
+                              {country && (
+                                <CommandItem value="__clear__" onSelect={() => { setCountry(""); setCountryOpen(false); }} className="text-muted-foreground">
+                                  Clear selection
+                                </CommandItem>
+                              )}
+                              {COUNTRIES.map((c) => (
+                                <CommandItem key={c} value={c} onSelect={() => { setCountry(c); setCountryOpen(false); }}>
+                                  <Check className={`mr-2 h-4 w-4 ${country === c ? "opacity-100" : "opacity-0"}`} />
+                                  {c}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Timezone</Label>
+                    <Select value={timezone} onValueChange={setTimezone}>
+                      <SelectTrigger className="bg-muted border-border text-sm">
+                        <SelectValue placeholder="Select timezone" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-64">
+                        {TIMEZONES.map((tz) => (
+                          <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[10px] text-muted-foreground">Helps mentors schedule sessions in your local time.</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Age <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                    <Input type="number" min="13" max="120" value={age} onChange={(e) => setAge(e.target.value)} className="bg-muted border-border text-sm" placeholder="e.g. 25" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium">Email Address</Label>
-                  <Input value={user.email || ""} disabled className="bg-muted/50 border-border text-sm text-muted-foreground" />
-                  <p className="text-[10px] text-muted-foreground">Current email — change it below.</p>
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium">Country <span className="text-muted-foreground">(optional)</span></Label>
-                  <Input value={country} onChange={(e) => setCountry(e.target.value)} className="bg-muted border-border text-sm" placeholder="e.g. United States" />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-xs font-medium">Age <span className="text-muted-foreground">(optional)</span></Label>
-                  <Input type="number" min="13" max="120" value={age} onChange={(e) => setAge(e.target.value)} className="bg-muted border-border text-sm" placeholder="e.g. 25" />
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label className="text-xs font-medium">Trading Experience <span className="text-muted-foreground">(optional)</span></Label>
+              </div>
+
+              {/* Trading profile */}
+              <div className="space-y-4 pt-2">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Trading profile</p>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Experience level</Label>
                   <Select value={tradingExperience} onValueChange={setTradingExperience}>
                     <SelectTrigger className="bg-muted border-border text-sm">
                       <SelectValue placeholder="Select your experience level" />
@@ -645,38 +706,82 @@ const AccountSettings = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label className="text-xs font-medium">Change Email</Label>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Input
-                      type="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      className="bg-muted border-border text-sm flex-1"
-                      placeholder="new@email.com"
-                    />
-                    <Button
-                      variant="outline"
-                      className="text-sm shrink-0"
-                      disabled={!newEmail.trim() || changeEmailMutation.isPending}
-                      onClick={() => changeEmailMutation.mutate()}
-                    >
-                      <Mail className="h-3.5 w-3.5 mr-1.5" />
-                      {changeEmailMutation.isPending ? "Sending..." : "Update Email"}
-                    </Button>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">Markets you trade</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {TRADING_MARKETS.map((m) => {
+                      const active = tradingInterests.includes(m);
+                      return (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setTradingInterests((prev) => active ? prev.filter((x) => x !== m) : [...prev, m])}
+                          className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+                            active
+                              ? "border-primary/40 bg-primary/10 text-primary"
+                              : "border-border bg-muted text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {m}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <p className="text-[10px] text-muted-foreground">We'll email a confirmation link to the new address. The change applies once you click it.</p>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium">Bio</Label>
+                    <span className="text-[10px] text-muted-foreground">{bio.length}/300</span>
+                  </div>
+                  <Textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value.slice(0, 300))}
+                    className="bg-muted border-border text-sm min-h-[90px] resize-none"
+                    placeholder="A short intro about you and your trading goals."
+                  />
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-2">
+              {/* Account email */}
+              <div className="space-y-4 pt-4 border-t border-border">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Account email</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Current email</Label>
+                    <Input value={user.email || ""} disabled className="bg-muted/50 border-border text-sm text-muted-foreground" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium">Change email</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="email"
+                        value={newEmail}
+                        onChange={(e) => setNewEmail(e.target.value)}
+                        className="bg-muted border-border text-sm flex-1"
+                        placeholder="new@email.com"
+                      />
+                      <Button
+                        variant="outline"
+                        className="text-sm shrink-0"
+                        disabled={!newEmail.trim() || changeEmailMutation.isPending}
+                        onClick={() => changeEmailMutation.mutate()}
+                      >
+                        {changeEmailMutation.isPending ? "Sending..." : "Update"}
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">A confirmation link is sent to the new address; the change applies once you click it.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-border">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Shield className="h-3.5 w-3.5" />
-                  <span>Your data is securely stored and encrypted</span>
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  <span>Your data is stored securely.</span>
                 </div>
                 <Button onClick={() => updateProfileMutation.mutate()} disabled={updateProfileMutation.isPending} className="text-sm font-semibold">
                   <Save className="h-3.5 w-3.5 mr-1.5" />
-                  {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                  {updateProfileMutation.isPending ? "Saving..." : "Save changes"}
                 </Button>
               </div>
             </motion.div>
