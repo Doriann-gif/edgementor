@@ -4,15 +4,19 @@ import type { Mentor, MentorReview } from "@/types/mentor";
 
 // Only select public-safe columns — never fetch stripe_connect_account_id, payouts_enabled, auto_payout
 const PUBLIC_MENTOR_COLUMNS =
-  "id, name, avatar, bio, full_bio, experience, instruments, concepts, session, monthly_price, payment_type, rating, students, highlights, status, tier, banner_color, country, social_link, available, created_at";
+  "id, name, avatar, bio, full_bio, experience, instruments, concepts, session, monthly_price, payment_type, rating, students, highlights, status, tier, banner_color, country, social_link, available, created_at, proof_track_record_url, proof_verified_at, response_time, timezone, languages, ideal_for";
 
 export const useMentors = () =>
   useQuery({
     queryKey: ["mentors"],
     queryFn: async () => {
+      // RLS already limits public reads to approved mentors; the explicit
+      // filter is defense in depth so a future policy change can't leak
+      // pending/demo mentors onto the public site.
       const { data, error } = await supabase
         .from("mentors")
         .select(PUBLIC_MENTOR_COLUMNS)
+        .eq("status", "approved")
         .order("rating", { ascending: false });
       if (error) throw error;
       return data as Mentor[];
@@ -56,6 +60,7 @@ export const useFeaturedMentors = () =>
       const { data, error } = await supabase
         .from("mentors")
         .select(PUBLIC_MENTOR_COLUMNS)
+        .eq("status", "approved")
         .order("rating", { ascending: false })
         .limit(3);
       if (error) throw error;

@@ -14,6 +14,7 @@ import { useMentors } from "@/hooks/use-mentors";
 import TierBadge from "@/components/TierBadge";
 import PageTransition from "@/components/PageTransition";
 import { priceSuffix } from "@/lib/pricing";
+import { computeMarketplaceStats, formatStatCount } from "@/lib/stats";
 import type { Mentor, MentorTier } from "@/types/mentor";
 
 const ALL_INSTRUMENTS = ["Futures", "Forex", "Crypto", "Options"];
@@ -235,15 +236,11 @@ const MentorListingPage = () => {
   const activeFilterCount = activeInstruments.length + activeConcepts.length + activeCountries.length + (priceRange[0] < 500 ? 1 : 0);
 
   // Real headline stats derived from live mentor data (no fabricated numbers)
-  const totalStudents = mentors.reduce((sum, m) => sum + (m.students || 0), 0);
-  const avgRating = mentors.length
-    ? (mentors.reduce((sum, m) => sum + (m.rating || 0), 0) / mentors.length).toFixed(1)
-    : "—";
-  const formatCount = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(1)}K+` : `${n}`);
+  const marketStats = computeMarketplaceStats(mentors);
   const heroStats = [
-    { value: `${mentors.length}`, label: mentors.length === 1 ? "Mentor" : "Mentors" },
-    { value: avgRating, label: "Avg Rating" },
-    { value: formatCount(totalStudents), label: "Students" },
+    { value: `${marketStats.mentorCount}`, label: marketStats.mentorCount === 1 ? "Mentor" : "Mentors" },
+    { value: marketStats.avgRating != null ? `${marketStats.avgRating}` : "—", label: "Avg Rating" },
+    { value: formatStatCount(marketStats.totalStudents), label: "Students" },
   ];
 
   const clearFilters = () => {

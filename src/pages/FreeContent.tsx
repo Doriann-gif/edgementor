@@ -2,11 +2,13 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
-import { Play, Clock, Eye, Star, Search, TrendingUp, BookOpen, BarChart3, Zap, ArrowUpDown } from "lucide-react";
+import { Play, Clock, Eye, Star, Search, TrendingUp, BookOpen, BarChart3, Zap, ArrowUpDown, Mail, CheckCircle2, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import PageTransition from "@/components/PageTransition";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const CATEGORIES = ["All", "Price Action", "ICT / SMC", "Order Flow", "Risk Management", "Psychology", "Crypto"];
 
@@ -81,6 +83,75 @@ const fadeUp = {
     y: 0,
     transition: { delay: i * 0.06, duration: 0.4, ease: "easeOut" as const },
   }),
+};
+
+/** Lead magnet: turn free-library visitors into an email list.
+ *  Stored in Supabase (email_subscribers, insert-only for the public).
+ *  TODO: sync new rows to an email provider (Resend/Mailchimp) for actual sends. */
+const EmailCaptureCard = () => {
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  const subscribe = async () => {
+    const trimmed = email.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmed)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+    setSubmitting(true);
+    const { error } = await supabase.from("email_subscribers").insert({ email: trimmed, source: "learn" });
+    setSubmitting(false);
+    if (error) {
+      // 23505 = unique violation: already on the list — treat as success
+      if (error.code === "23505") {
+        setSubscribed(true);
+        toast.success("You're already on the list!");
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+      return;
+    }
+    setSubscribed(true);
+    toast.success("You're in! New lessons land in your inbox.");
+  };
+
+  return (
+    <motion.div
+      className="mt-14 rounded-2xl border border-primary/20 bg-primary/[0.04] p-8 text-center"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+    >
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 mx-auto mb-4">
+        <Mail className="h-5 w-5 text-primary" />
+      </div>
+      <h2 className="font-heading text-xl font-bold text-foreground mb-2">Free lessons, straight to your inbox</h2>
+      <p className="text-sm text-muted-foreground mb-5 max-w-md mx-auto">
+        Get new curated tutorials and be first to know when a newly verified mentor joins. No spam, unsubscribe anytime.
+      </p>
+      {subscribed ? (
+        <div className="flex items-center justify-center gap-2 text-sm font-medium text-primary">
+          <CheckCircle2 className="h-4 w-4" /> You're subscribed!
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+          <Input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && subscribe()}
+            className="bg-background border-border flex-1"
+          />
+          <Button className="font-semibold shrink-0" onClick={subscribe} disabled={submitting}>
+            {submitting ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Mail className="h-4 w-4 mr-1.5" />}
+            Subscribe
+          </Button>
+        </div>
+      )}
+    </motion.div>
+  );
 };
 
 const FreeContent = () => {
@@ -310,9 +381,12 @@ const FreeContent = () => {
           </motion.div>
         )}
 
+        {/* Email capture — the free library doubles as a lead magnet */}
+        <EmailCaptureCard />
+
         {/* CTA */}
         <motion.div
-          className="text-center mt-14 rounded-2xl border border-border bg-card p-8"
+          className="text-center mt-8 rounded-2xl border border-border bg-card p-8"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}

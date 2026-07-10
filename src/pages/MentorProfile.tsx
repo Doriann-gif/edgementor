@@ -4,10 +4,12 @@ import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import {
   ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp,
   CheckCircle2, MessageSquare, Heart, Crown, ChevronRight,
   Sparkles, Shield, Award, Send, ImageIcon, ExternalLink, Zap, BookOpen,
+  ShieldCheck, CalendarClock, Languages, Timer,
 } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMentor, useMentorReviews, useFeaturedMentors } from "@/hooks/use-mentors";
@@ -19,9 +21,49 @@ import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
 import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import TierBadge from "@/components/TierBadge";
+import VerifiedBadgePopover from "@/components/VerifiedBadgePopover";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
+import type { Mentor } from "@/types/mentor";
+
+/** Low-risk entry point: free intro request before committing to a paid plan.
+ *  TODO: replace the mailto placeholder with a real booking integration
+ *  (Calendly embed or an intro_requests table + mentor notification). */
+const IntroCallDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: boolean; onOpenChange: (o: boolean) => void }) => (
+  <Dialog open={open} onOpenChange={onOpenChange}>
+    <DialogContent className="sm:max-w-md">
+      <DialogHeader>
+        <DialogTitle className="font-heading flex items-center gap-2">
+          <CalendarClock className="h-5 w-5 text-primary" /> Free 15-min intro with {mentor.name}
+        </DialogTitle>
+        <DialogDescription className="text-sm leading-relaxed pt-1">
+          Not ready to subscribe? Request a free 15-minute intro call to ask questions,
+          see if the mentorship fits your goals, and meet {mentor.name} before paying anything.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-3">
+        <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-2">
+          {["No payment or card required", "Ask about strategy, markets, and schedule", "Zero obligation to continue"].map((line) => (
+            <div key={line} className="flex items-center gap-2 text-xs text-muted-foreground">
+              <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> {line}
+            </div>
+          ))}
+        </div>
+        <a
+          href={`mailto:intro@edgementor.com?subject=${encodeURIComponent(`Free intro request — ${mentor.name}`)}&body=${encodeURIComponent(`Hi, I'd like to book a free 15-minute intro call with ${mentor.name}.\n\nMy trading background: \nWhat I want to ask about: \nMy timezone: `)}`}
+          className="block"
+        >
+          <Button variant="glow" className="w-full font-semibold">
+            <Send className="h-4 w-4 mr-2" /> Request Intro Call
+          </Button>
+        </a>
+        <p className="text-[10px] text-muted-foreground text-center">
+          We'll pass your request to the mentor and reply within 24 hours.
+        </p>
+      </div>
+    </DialogContent>
+  </Dialog>
+);
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -137,6 +179,7 @@ const MentorProfile = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
   const [showAllImages, setShowAllImages] = useState(false);
+  const [introOpen, setIntroOpen] = useState(false);
 
   const hasReviewed = reviews.some((r: any) => r.user_id === user?.id);
 
@@ -327,10 +370,10 @@ const MentorProfile = () => {
               <motion.div className="mt-4 space-y-2" variants={fadeUp}>
                 <div className="flex items-center justify-center gap-2">
                   <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground">{mentor.name}</h1>
-                  <TierBadge tier={tier} size="md" showLabel={false} />
+                  <VerifiedBadgePopover mentor={mentor} size="md" showLabel={false} />
                 </div>
                 <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
-                  <TierBadge tier={tier} size="sm" />
+                  <VerifiedBadgePopover mentor={mentor} size="sm" />
                   {mentor.country && (
                     <span className="flex items-center gap-1">
                       <Globe className="h-3.5 w-3.5" />
@@ -350,6 +393,15 @@ const MentorProfile = () => {
               {/* Quick action row */}
               <motion.div className="flex items-center gap-3 mt-5 flex-wrap justify-center" variants={fadeUp}>
                 {socialLink && <SocialButton url={socialLink} isElite={isElite} />}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`rounded-xl px-4 ${isElite ? "border-slate-600/50 hover:bg-slate-800" : "border-primary/30 text-primary hover:bg-primary/10"}`}
+                  onClick={() => setIntroOpen(true)}
+                >
+                  <CalendarClock className="h-4 w-4 mr-1.5" />
+                  Free 15-min intro
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -381,6 +433,28 @@ const MentorProfile = () => {
                   </span>
                 ))}
               </motion.div>
+
+              {/* Quick facts — render only what the mentor has filled in */}
+              {(mentor.response_time || mentor.timezone || (mentor.languages && mentor.languages.length > 0)) && (
+                <motion.div className="flex flex-wrap justify-center gap-x-5 gap-y-1.5 mt-4 text-xs text-muted-foreground" variants={fadeUp}>
+                  {mentor.response_time && (
+                    <span className="flex items-center gap-1.5"><Timer className="h-3.5 w-3.5 text-primary/70" /> Responds {mentor.response_time}</span>
+                  )}
+                  {mentor.timezone && (
+                    <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-primary/70" /> {mentor.timezone}</span>
+                  )}
+                  {mentor.languages && mentor.languages.length > 0 && (
+                    <span className="flex items-center gap-1.5"><Languages className="h-3.5 w-3.5 text-primary/70" /> {mentor.languages.join(", ")}</span>
+                  )}
+                </motion.div>
+              )}
+
+              {/* Who this is for */}
+              {mentor.ideal_for && (
+                <motion.p className={`mt-4 max-w-xl text-sm italic leading-relaxed ${isElite ? "text-slate-400" : "text-muted-foreground"}`} variants={fadeUp}>
+                  "{mentor.ideal_for}"
+                </motion.p>
+              )}
             </motion.div>
           </div>
         </div>
@@ -409,8 +483,57 @@ const MentorProfile = () => {
           </motion.div>
         </div>
 
+        {/* ===== PROOF OF PROFITABILITY ===== */}
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8">
+          <motion.div
+            className={`rounded-2xl border p-5 sm:p-6 ${
+              mentor.proof_verified_at
+                ? "border-emerald-500/30 bg-emerald-500/[0.04]"
+                : isElite ? "border-slate-600/40 bg-slate-900/70" : "border-border bg-card"
+            }`}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:justify-between">
+              <div className="flex items-start gap-3.5">
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                  mentor.proof_verified_at ? "bg-emerald-500/15 text-emerald-400" : "bg-muted text-muted-foreground/60"
+                }`}>
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-heading text-base font-semibold text-foreground">Proof of Profitability</h2>
+                    {mentor.proof_verified_at && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wide">
+                        <CheckCircle2 className="h-3 w-3" /> Verified
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                    {mentor.proof_verified_at
+                      ? `Track record reviewed and verified by EdgeMentor on ${new Date(mentor.proof_verified_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}.`
+                      : mentor.proof_track_record_url
+                        ? "This mentor has submitted a track record — verification by EdgeMentor is in progress."
+                        : "This mentor hasn't submitted a verified track record yet."}{" "}
+                    <Link to="/verification" className="text-primary hover:underline">How verification works</Link>
+                  </p>
+                </div>
+              </div>
+              {mentor.proof_track_record_url && mentor.proof_verified_at && (
+                <a href={mentor.proof_track_record_url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                  <Button variant="outline" size="sm" className="rounded-xl text-xs font-semibold border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10">
+                    <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> View Track Record
+                  </Button>
+                </a>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
         {/* ===== TABBED CONTENT ===== */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8 pb-32">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-6 pb-32">
           <Tabs defaultValue="about" className="w-full">
             <TabsList className={`w-full justify-start rounded-xl h-12 p-1 mb-6 ${isElite ? "bg-slate-900/80 border border-slate-700/50" : "bg-muted/50 border border-border"}`}>
               <TabsTrigger value="about" className="rounded-lg text-sm font-medium data-[state=active]:shadow-sm gap-1.5">
@@ -511,11 +634,20 @@ const MentorProfile = () => {
                       </Button>
                     </Link>
                   ) : (
-                    <Link to={`/subscribe/${mentor.id}`}>
-                      <Button variant="glow" className={`h-11 px-6 font-semibold ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : ""}`}>
-                        Get Started <ChevronRight className="h-4 w-4 ml-1" />
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                      <Button
+                        variant="outline"
+                        className={`h-11 px-5 font-semibold ${isElite ? "border-slate-600/50 hover:bg-slate-800" : "border-primary/30 text-primary hover:bg-primary/10"}`}
+                        onClick={() => setIntroOpen(true)}
+                      >
+                        <CalendarClock className="h-4 w-4 mr-2" /> Free 15-min intro
                       </Button>
-                    </Link>
+                      <Link to={`/subscribe/${mentor.id}`}>
+                        <Button variant="glow" className={`h-11 px-6 font-semibold w-full ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : ""}`}>
+                          Get Started <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </Link>
+                    </div>
                   )}
                 </div>
               </motion.div>
@@ -605,6 +737,8 @@ const MentorProfile = () => {
             </TabsContent>
           </Tabs>
         </div>
+
+        <IntroCallDialog mentor={mentor} open={introOpen} onOpenChange={setIntroOpen} />
 
         {/* ===== STICKY SUBSCRIBE BAR ===== */}
         <motion.div

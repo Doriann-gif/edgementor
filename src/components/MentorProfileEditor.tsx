@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MultiSelect from "@/components/MultiSelect";
+import { TIMEZONES, LANGUAGES, RESPONSE_TIMES } from "@/lib/profile-options";
 import TierBadge from "@/components/TierBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -43,6 +46,11 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
   const [editHighlights, setEditHighlights] = useState<string[]>([...mentor.highlights]);
   const [newHighlight, setNewHighlight] = useState("");
   const [editSocialLink, setEditSocialLink] = useState(mentor.social_link || "");
+  const [editResponseTime, setEditResponseTime] = useState(mentor.response_time || "");
+  const [editTimezone, setEditTimezone] = useState(mentor.timezone || "");
+  const [editLanguages, setEditLanguages] = useState<string[]>(mentor.languages || []);
+  const [editIdealFor, setEditIdealFor] = useState(mentor.ideal_for || "");
+  const [editProofUrl, setEditProofUrl] = useState(mentor.proof_track_record_url || "");
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { data: showcaseImages = [] } = useQuery({
@@ -92,6 +100,11 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
     setEditPrice(String(mentor.monthly_price));
     setEditHighlights([...mentor.highlights]);
     setEditSocialLink(mentor.social_link || "");
+    setEditResponseTime(mentor.response_time || "");
+    setEditTimezone(mentor.timezone || "");
+    setEditLanguages(mentor.languages || []);
+    setEditIdealFor(mentor.ideal_for || "");
+    setEditProofUrl(mentor.proof_track_record_url || "");
     setEditing(true);
   };
 
@@ -103,6 +116,13 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
         monthly_price: parseInt(editPrice, 10),
         highlights: editHighlights.filter(Boolean),
         social_link: editSocialLink.trim() || null,
+        response_time: editResponseTime || null,
+        timezone: editTimezone || null,
+        languages: editLanguages.length > 0 ? editLanguages : null,
+        ideal_for: editIdealFor.trim() || null,
+        // proof_verified_at is admin-only (enforced by DB trigger) — mentors
+        // submit the link, the platform stamps the verification.
+        proof_track_record_url: editProofUrl.trim() || null,
       });
       setEditing(false);
       toast.success("Profile updated!");
@@ -217,6 +237,65 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
                 placeholder="https://instagram.com/yourhandle"
                 className="bg-muted border-border text-sm"
               />
+            </div>
+            <div>
+              <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Who is this mentorship for?</label>
+              <Input
+                value={editIdealFor}
+                onChange={(e) => setEditIdealFor(e.target.value)}
+                placeholder="e.g. Intermediate futures traders who struggle with entries"
+                maxLength={140}
+                className="bg-muted border-border text-sm"
+              />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Typical response time</label>
+                <Select value={editResponseTime} onValueChange={setEditResponseTime}>
+                  <SelectTrigger className="bg-muted border-border text-sm">
+                    <SelectValue placeholder="Select…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {RESPONSE_TIMES.map((rt) => (
+                      <SelectItem key={rt} value={rt}>{rt}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-muted-foreground mb-1 block">Timezone</label>
+                <Select value={editTimezone} onValueChange={setEditTimezone}>
+                  <SelectTrigger className="bg-muted border-border text-sm">
+                    <SelectValue placeholder="Select…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIMEZONES.map((tz) => (
+                      <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <MultiSelect
+              label="Languages you teach in"
+              options={LANGUAGES}
+              selected={editLanguages}
+              onChange={setEditLanguages}
+            />
+            <div>
+              <label className="text-[11px] font-medium text-muted-foreground mb-1 block flex items-center gap-1.5">
+                <LinkIcon className="h-3 w-3" /> Track record link
+                <span className="text-muted-foreground/60 font-normal">(Myfxbook, broker-verified account, prop-firm payouts)</span>
+              </label>
+              <Input
+                value={editProofUrl}
+                onChange={(e) => setEditProofUrl(e.target.value)}
+                placeholder="https://www.myfxbook.com/members/youraccount"
+                className="bg-muted border-border text-sm"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Submitting a link starts track-record verification — the Verified badge appears once EdgeMentor reviews it.
+              </p>
             </div>
           </div>
         ) : (

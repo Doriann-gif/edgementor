@@ -35,9 +35,9 @@ const WhyUsSection = () => (
 
       <motion.div className="grid grid-cols-1 sm:grid-cols-3 gap-8" initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} variants={staggerContainer}>
         {[
-          { icon: Shield, title: "Verified Only", desc: "Every mentor provides proof of profitability. No fake gurus, no unproven strategies.", gradient: "from-primary/15 to-primary/5", hoverGlow: "group-hover:shadow-primary/10" },
-          { icon: BarChart3, title: "Real Strategies", desc: "Learn proven methodologies — ICT, order flow, price action — from traders who use them daily.", gradient: "from-pink-400/15 to-pink-400/5", hoverGlow: "group-hover:shadow-pink-400/10" },
-          { icon: Users, title: "Active Community", desc: "Join thousands of traders sharing setups, analysis, and support every single day.", gradient: "from-primary/15 to-pink-400/10", hoverGlow: "group-hover:shadow-primary/10" },
+          { icon: Shield, title: "Verified Only", desc: "Mentors earn their badge through identity and track-record verification — the badge on each profile shows exactly what we checked.", gradient: "from-primary/15 to-primary/5", hoverGlow: "group-hover:shadow-primary/10" },
+          { icon: BarChart3, title: "Real Strategies", desc: "Learn working methodologies — ICT, order flow, price action — from traders who use them daily.", gradient: "from-pink-400/15 to-pink-400/5", hoverGlow: "group-hover:shadow-pink-400/10" },
+          { icon: Users, title: "Active Community", desc: "Every mentorship includes a private community of traders sharing setups, analysis, and support.", gradient: "from-primary/15 to-pink-400/10", hoverGlow: "group-hover:shadow-primary/10" },
         ].map((item, i) => (
           <motion.div key={item.title} variants={fadeUp} custom={i}>
             <motion.div

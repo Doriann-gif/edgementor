@@ -28,7 +28,7 @@ const About = () => (
       <meta name="description" content="EdgeMentor connects aspiring traders with verified mentors. Learn about our mission, how the platform works, and find answers to common questions." />
       <link rel="canonical" href="https://edgementor.pages.dev/about" />
       <meta property="og:title" content="About EdgeMentor — Learn From Real Traders" />
-      <meta property="og:description" content="Learn about our mission to connect aspiring traders with verified mentors who have proven track records." />
+      <meta property="og:description" content="Learn about our mission to connect aspiring traders with mentors vetted through identity and track-record verification." />
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://edgementor.pages.dev/about" />
       <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
@@ -57,7 +57,7 @@ const About = () => (
           About EdgeMentor
         </motion.h1>
         <motion.p variants={fade} initial="hidden" animate="show" className="text-muted-foreground mb-12 leading-relaxed">
-          We're building the #1 platform for trading mentorship — connecting aspiring traders with verified mentors who have real, proven track records.
+          We're building the #1 platform for trading mentorship — connecting aspiring traders with mentors vetted through identity and track-record verification.
         </motion.p>
 
         {/* Values */}

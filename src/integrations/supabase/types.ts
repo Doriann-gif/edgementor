@@ -125,6 +125,27 @@ export type Database = {
           },
         ]
       }
+      email_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+        }
+        Relationships: []
+      }
       feed_posts: {
         Row: {
           author_name: string
@@ -399,16 +420,22 @@ export type Database = {
           full_bio: string
           highlights: string[]
           id: string
+          ideal_for: string | null
           instruments: string[]
+          languages: string[] | null
           monthly_price: number
           name: string
           payment_type: string
+          proof_track_record_url: string | null
+          proof_verified_at: string | null
           rating: number
+          response_time: string | null
           session: string
           social_link: string | null
           status: string
           students: number
           tier: string
+          timezone: string | null
           user_id: string | null
         }
         Insert: {
@@ -423,16 +450,22 @@ export type Database = {
           full_bio?: string
           highlights?: string[]
           id?: string
+          ideal_for?: string | null
           instruments?: string[]
+          languages?: string[] | null
           monthly_price: number
           name: string
           payment_type?: string
+          proof_track_record_url?: string | null
+          proof_verified_at?: string | null
           rating?: number
+          response_time?: string | null
           session: string
           social_link?: string | null
           status?: string
           students?: number
           tier?: string
+          timezone?: string | null
           user_id?: string | null
         }
         Update: {
@@ -447,16 +480,22 @@ export type Database = {
           full_bio?: string
           highlights?: string[]
           id?: string
+          ideal_for?: string | null
           instruments?: string[]
+          languages?: string[] | null
           monthly_price?: number
           name?: string
           payment_type?: string
+          proof_track_record_url?: string | null
+          proof_verified_at?: string | null
           rating?: number
+          response_time?: string | null
           session?: string
           social_link?: string | null
           status?: string
           students?: number
           tier?: string
+          timezone?: string | null
           user_id?: string | null
         }
         Relationships: []

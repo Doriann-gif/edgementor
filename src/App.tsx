@@ -18,7 +18,7 @@ import Navbar from "./components/Navbar";
 import Homepage from "./pages/Homepage";
 
 // Lazy-load all other pages to reduce initial bundle size
-const Index = lazy(() => import("./pages/Index"));
+const BecomeAMentor = lazy(() => import("./pages/BecomeAMentor"));
 const MentorListing = lazy(() => import("./pages/MentorListing"));
 const MentorProfile = lazy(() => import("./pages/MentorProfile"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
@@ -32,6 +32,8 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const About = lazy(() => import("./pages/About"));
+const Verification = lazy(() => import("./pages/Verification"));
+const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const MentorContentPage = lazy(() => import("./pages/MentorContent"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const FreeContent = lazy(() => import("./pages/FreeContent"));
@@ -71,7 +73,7 @@ const App = () => (
               <Route path="/mentors" element={<MentorListing />} />
               <Route path="/mentor/:id" element={<MentorProfile />} />
               <Route path="/subscribe/:id" element={<Subscribe />} />
-              <Route path="/apply" element={<Index />} />
+              <Route path="/apply" element={<BecomeAMentor />} />
               <Route path="/learn" element={<FreeContent />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<AdminDashboard />} />
@@ -83,6 +85,8 @@ const App = () => (
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/about" element={<About />} />
+              <Route path="/verification" element={<Verification />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/mentorship/:id" element={<MentorContentPage />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

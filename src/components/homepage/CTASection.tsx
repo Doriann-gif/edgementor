@@ -43,7 +43,7 @@ const CTASection = () => (
         your trading?
       </motion.h2>
       <motion.p variants={fadeUp} className="text-muted-foreground mb-12 max-w-lg mx-auto text-base leading-relaxed">
-        Join hundreds of traders already learning from the best. Find your mentor today.
+        Every mentor here passed identity and track-record vetting. Find the one that fits your trading.
       </motion.p>
       <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
         <Link to="/mentors">

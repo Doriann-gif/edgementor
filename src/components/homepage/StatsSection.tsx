@@ -1,6 +1,7 @@
 import { Users, Award, Star, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Mentor } from "@/types/mentor";
+import { computeMarketplaceStats } from "@/lib/stats";
 
 const staggerContainer = {
   hidden: {},
@@ -12,7 +13,9 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
 
-const StatsSection = ({ allMentors }: { allMentors: Mentor[] }) => (
+const StatsSection = ({ allMentors }: { allMentors: Mentor[] }) => {
+  const stats = computeMarketplaceStats(allMentors);
+  return (
   <section className="border-y border-border/30 bg-card/40 py-16 px-4 sm:px-6 relative overflow-hidden">
     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-500/[0.03] to-transparent pointer-events-none" />
     <motion.div
@@ -23,10 +26,10 @@ const StatsSection = ({ allMentors }: { allMentors: Mentor[] }) => (
       variants={staggerContainer}
     >
       {[
-        { label: "Active Traders", value: allMentors.reduce((sum, m) => sum + m.students, 0), suffix: "+", icon: Users },
-        { label: "Verified Mentors", value: allMentors.length, suffix: "", icon: Award },
-        { label: "Avg. Rating", value: allMentors.length ? +(allMentors.reduce((sum, m) => sum + Number(m.rating), 0) / allMentors.length).toFixed(1) : 0, suffix: "", icon: Star },
-        { label: "Countries", value: 40, suffix: "+", icon: Globe },
+        { label: "Active Traders", value: stats.totalStudents, suffix: stats.totalStudents > 0 ? "+" : "", icon: Users },
+        { label: "Verified Mentors", value: stats.mentorCount, suffix: "", icon: Award },
+        { label: "Avg. Rating", value: stats.avgRating ?? "—", suffix: "", icon: Star },
+        { label: "Countries", value: stats.countryCount, suffix: "", icon: Globe },
       ].map((stat) => (
         <motion.div key={stat.label} className="text-center group" variants={fadeUp}>
           <motion.div
@@ -49,6 +52,7 @@ const StatsSection = ({ allMentors }: { allMentors: Mentor[] }) => (
       ))}
     </motion.div>
   </section>
-);
+  );
+};
 
 export default StatsSection;

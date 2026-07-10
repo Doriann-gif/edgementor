@@ -35,3 +35,12 @@ export const TIMEZONES = [
 
 // Markets a trader follows — used for context and future mentor matching.
 export const TRADING_MARKETS = ["Futures", "Forex", "Crypto", "Options", "Stocks", "Indices", "Commodities"];
+
+// Languages mentors commonly teach in — MultiSelect allows custom "Other" values.
+export const LANGUAGES = [
+  "English", "Spanish", "Portuguese", "French", "German", "Italian", "Dutch",
+  "Russian", "Arabic", "Hindi", "Mandarin", "Japanese", "Korean", "Turkish", "Croatian",
+];
+
+// How fast a mentor typically replies — shown as "Responds within 24 hours" on the profile.
+export const RESPONSE_TIMES = ["within a few hours", "within 24 hours", "within 2–3 days", "within a week"];

@@ -96,9 +96,9 @@ const HeroSection = () => {
         transition={{ delay: 1.2, duration: 0.8 }}
       >
         {[
-          { icon: Shield, text: "100% Verified Mentors" },
-          { icon: Target, text: "Proven Strategies" },
-          { icon: Globe, text: "40+ Countries" },
+          { icon: Shield, text: "Identity-Verified Mentors" },
+          { icon: Target, text: "Track Records Reviewed" },
+          { icon: Globe, text: "Cancel Anytime" },
         ].map((item, i) => (
           <motion.div
             key={item.text}

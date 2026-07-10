@@ -42,7 +42,7 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
           <h2 className="font-heading text-2xl sm:text-4xl font-bold text-foreground tracking-tight">
             Featured <span className="bg-gradient-to-r from-primary to-pink-400 bg-clip-text text-transparent">Mentors</span>
           </h2>
-          <p className="text-sm text-muted-foreground mt-2 max-w-md">Top-rated traders with proven track records and active communities.</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-md">Top-rated mentors, each vetted through our verification process.</p>
         </div>
         <Link to="/mentors" className="hidden sm:flex items-center gap-1 text-sm text-primary hover:underline font-medium">
           View all <ChevronRight className="h-4 w-4" />
