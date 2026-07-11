@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Ban, Trash2, Search, RotateCcw, Pencil, Eye, DollarSign, Shield } from "lucide-react";
+import { Ban, Trash2, Search, RotateCcw, Pencil, Eye, DollarSign, Shield, ShieldCheck, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import TierBadge from "@/components/TierBadge";
 import type { MentorTier } from "@/types/mentor";
@@ -40,6 +40,8 @@ type Mentor = {
   user_id: string | null;
   created_at: string;
   highlights: string[];
+  proof_track_record_url: string | null;
+  proof_verified_at: string | null;
 };
 
 const AdminMentors = () => {
@@ -141,6 +143,23 @@ const AdminMentors = () => {
     onError: () => toast.error("Failed to update mentor."),
   });
 
+  // Stamp or revoke the Verified Track Record badge (admin-only column,
+  // enforced by the protect_mentor_columns trigger).
+  const proofMutation = useMutation({
+    mutationFn: async ({ id, verify }: { id: string; verify: boolean }) => {
+      const { error } = await supabase
+        .from("mentors")
+        .update({ proof_verified_at: verify ? new Date().toISOString() : null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { verify }) => {
+      invalidateAll();
+      toast.success(verify ? "Track record verified — badge is live." : "Verification revoked.");
+    },
+    onError: () => toast.error("Failed to update verification."),
+  });
+
   const handleConfirm = () => {
     if (!confirmAction) return;
     const { type, mentor } = confirmAction;
@@ -219,6 +238,7 @@ const AdminMentors = () => {
               <TableHead>Mentor</TableHead>
               <TableHead>Tier</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Proof</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Students</TableHead>
               <TableHead>Rating</TableHead>
@@ -228,7 +248,7 @@ const AdminMentors = () => {
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-12">No mentors found.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center text-muted-foreground py-12">No mentors found.</TableCell></TableRow>
             ) : filtered.map((m) => (
               <TableRow key={m.id} className={m.status === "removed" ? "opacity-50" : ""}>
                 <TableCell>
@@ -258,6 +278,45 @@ const AdminMentors = () => {
                   </Select>
                 </TableCell>
                 <TableCell>{getStatusBadge(m)}</TableCell>
+                <TableCell>
+                  {/* Track-record verification: link to review the proof, then stamp/revoke */}
+                  <div className="flex items-center gap-1">
+                    {m.proof_track_record_url ? (
+                      <>
+                        <a href={m.proof_track_record_url} target="_blank" rel="noopener noreferrer" title="Open submitted track record">
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-blue-400 hover:text-blue-300">
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </Button>
+                        </a>
+                        {m.proof_verified_at ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-[11px] text-emerald-400 border-emerald-500/30 hover:text-destructive hover:border-destructive/40"
+                            title={`Verified ${new Date(m.proof_verified_at).toLocaleDateString()} — click to revoke`}
+                            onClick={() => proofMutation.mutate({ id: m.id, verify: false })}
+                            disabled={proofMutation.isPending}
+                          >
+                            <ShieldCheck className="h-3 w-3 mr-1" /> Verified
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-[11px] text-amber-400 border-amber-500/30"
+                            title="Review the link, then verify"
+                            onClick={() => proofMutation.mutate({ id: m.id, verify: true })}
+                            disabled={proofMutation.isPending}
+                          >
+                            <Shield className="h-3 w-3 mr-1" /> Verify
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-[10px] text-muted-foreground">No proof</span>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="text-xs font-medium">${m.monthly_price}/mo</TableCell>
                 <TableCell className="text-xs">{m.students}</TableCell>
                 <TableCell className="text-xs">{Number(m.rating).toFixed(1)}</TableCell>

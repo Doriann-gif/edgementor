@@ -170,6 +170,47 @@ export type Database = {
         }
         Relationships: []
       }
+      intro_requests: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          message: string | null
+          requester_email: string
+          requester_name: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          message?: string | null
+          requester_email: string
+          requester_name: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          message?: string | null
+          requester_email?: string
+          requester_name?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "intro_requests_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_applications: {
         Row: {
           bio: string

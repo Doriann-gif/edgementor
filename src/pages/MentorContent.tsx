@@ -4,26 +4,8 @@ import { useMentor } from "@/hooks/use-mentors";
 import { useMentorContent, useIsSubscribed } from "@/hooks/use-mentor-content";
 import { priceSuffix, subscribeVerb } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft, Lock, Video, Link2, MessageCircle, Calendar,
-  BookOpen, ExternalLink, Star, Crown,
-} from "lucide-react";
-
-const CONTENT_ICONS: Record<string, typeof Video> = {
-  video: Video,
-  link: Link2,
-  discord: MessageCircle,
-  call: Calendar,
-  resource: BookOpen,
-};
-
-const CONTENT_COLORS: Record<string, string> = {
-  video: "text-red-400 bg-red-400/10",
-  link: "text-blue-400 bg-blue-400/10",
-  discord: "text-indigo-400 bg-indigo-400/10",
-  call: "text-amber-400 bg-amber-400/10",
-  resource: "text-primary bg-primary/10",
-};
+import { ArrowLeft, Lock, BookOpen, ExternalLink, Star, Crown } from "lucide-react";
+import { CONTENT_SECTION_ORDER, getContentType } from "@/lib/content-types";
 
 const MentorContent = () => {
   const { id } = useParams<{ id: string }>();
@@ -69,20 +51,10 @@ const MentorContent = () => {
     );
   }
 
-  const grouped: Record<string, typeof content> = {};
-  content.forEach((item) => {
-    const type = item.content_type || "link";
-    if (!grouped[type]) grouped[type] = [];
-    grouped[type].push(item);
-  });
-
-  const typeLabels: Record<string, string> = {
-    video: "Videos & Recordings",
-    link: "Resources & Links",
-    discord: "Community & Discord",
-    call: "Scheduled Calls",
-    resource: "Course Materials",
-  };
+  // Same section definitions and order the mentor sees in their content hub
+  const grouped = CONTENT_SECTION_ORDER
+    .map((type) => ({ type, def: getContentType(type), items: content.filter((c) => (c.content_type || "link") === type) }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,43 +102,39 @@ const MentorContent = () => {
           </div>
         ) : (
           <div className="space-y-8">
-            {Object.entries(grouped).map(([type, items]) => {
-              const Icon = CONTENT_ICONS[type] || Link2;
-              const colorClass = CONTENT_COLORS[type] || "text-primary bg-primary/10";
-              return (
-                <div key={type}>
-                  <div className="flex items-center gap-2.5 mb-4">
-                    <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${colorClass}`}>
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <h2 className="font-heading font-semibold text-foreground">{typeLabels[type] || type}</h2>
-                    <span className="text-xs text-muted-foreground">({items.length})</span>
+            {grouped.map(({ type, def, items }) => (
+              <div key={type}>
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${def.color}`}>
+                    <def.icon className="h-4 w-4" />
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {items.map((item) => (
-                      <a
-                        key={item.id}
-                        href={item.content_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
-                      >
-                        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${colorClass} mt-0.5`}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors truncate">{item.title}</h3>
-                          {item.description && (
-                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
-                          )}
-                        </div>
-                        <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1" />
-                      </a>
-                    ))}
-                  </div>
+                  <h2 className="font-heading font-semibold text-foreground">{def.sectionLabel}</h2>
+                  <span className="text-xs text-muted-foreground">({items.length})</span>
                 </div>
-              );
-            })}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {items.map((item) => (
+                    <a
+                      key={item.id}
+                      href={item.content_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"
+                    >
+                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${def.color} mt-0.5`}>
+                        <def.icon className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-sm text-foreground group-hover:text-primary transition-colors truncate">{item.title}</h3>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
+                        )}
+                      </div>
+                      <ExternalLink className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

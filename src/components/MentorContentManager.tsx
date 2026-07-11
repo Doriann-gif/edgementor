@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Video, Link2, MessageCircle, Calendar, BookOpen, FileUp,
-  Plus, Trash2, ExternalLink, Upload, Pencil, ArrowUp, ArrowDown, Check,
+  Plus, Trash2, ExternalLink, Upload, Pencil, ArrowUp, ArrowDown,
+  Check, ArrowLeft, Eye, Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { CONTENT_TYPES, CONTENT_SECTION_ORDER, getContentType } from "@/lib/content-types";
 
 interface MentorContentItem {
   id: string;
@@ -23,31 +23,17 @@ interface MentorContentItem {
   created_at: string;
 }
 
-const CONTENT_TYPES = [
-  { value: "video", label: "Video / Recording", icon: Video },
-  { value: "link", label: "Resource / Link", icon: Link2 },
-  { value: "discord", label: "Discord / Community", icon: MessageCircle },
-  { value: "call", label: "Scheduled Call", icon: Calendar },
-  { value: "resource", label: "Course Material", icon: BookOpen },
-  { value: "file", label: "File Upload", icon: FileUp },
-];
-
-const TYPE_COLORS: Record<string, string> = {
-  video: "text-red-400 bg-red-400/10",
-  link: "text-blue-400 bg-blue-400/10",
-  discord: "text-indigo-400 bg-indigo-400/10",
-  call: "text-amber-400 bg-amber-400/10",
-  resource: "text-primary bg-primary/10",
-  file: "text-emerald-400 bg-emerald-400/10",
-};
-
 interface MentorContentManagerProps {
   mentorId: string;
 }
 
+// Guided posting flow: pick what you're sharing first (big visual cards),
+// then fill a short type-specific form. The list mirrors the sections
+// students see on their content page.
 const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
   const queryClient = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
+  // view: "list" | "pick" | "form"
+  const [view, setView] = useState<"list" | "pick" | "form">("list");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -56,9 +42,20 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
   const [uploadingFile, setUploadingFile] = useState(false);
   const contentFileRef = useRef<HTMLInputElement>(null);
 
+  const typeDef = getContentType(contentType);
+
   const resetForm = () => {
     setTitle(""); setDescription(""); setContentType("link"); setContentUrl("");
-    setEditingId(null); setShowForm(false);
+    setEditingId(null); setView("list");
+  };
+
+  const openTypeForm = (type: string) => {
+    setContentType(type);
+    setEditingId(null);
+    setTitle("");
+    setDescription("");
+    setContentUrl("");
+    setView("form");
   };
 
   const handleFileUpload = async (file: File) => {
@@ -78,6 +75,7 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
         .from("mentor-content")
         .getPublicUrl(filePath);
       setContentUrl(publicUrl);
+      if (!title.trim()) setTitle(file.name.replace(/\.[^.]+$/, "").replace(/[-_]/g, " "));
       toast.success("File uploaded!");
     } catch (err: any) {
       toast.error(err.message || "Upload failed.");
@@ -116,7 +114,7 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mentor-content", mentorId] });
-      toast.success(editingId ? "Content updated!" : "Content added!");
+      toast.success(editingId ? "Content updated!" : "Posted! Your subscribers can see it now.");
       resetForm();
     },
     onError: () => toast.error("Failed to save content."),
@@ -134,13 +132,9 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
     onError: () => toast.error("Failed to delete content."),
   });
 
-  // Reorder by swapping display_order with the neighbour
+  // Reorder within a section by swapping display_order with the neighbour
   const reorderMutation = useMutation({
-    mutationFn: async ({ index, dir }: { index: number; dir: -1 | 1 }) => {
-      const target = index + dir;
-      if (target < 0 || target >= content.length) return;
-      const a = content[index];
-      const b = content[target];
+    mutationFn: async ({ a, b }: { a: MentorContentItem; b: MentorContentItem }) => {
       const [r1, r2] = await Promise.all([
         supabase.from("mentor_content").update({ display_order: b.display_order }).eq("id", a.id),
         supabase.from("mentor_content").update({ display_order: a.display_order }).eq("id", b.id),
@@ -158,79 +152,112 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
     setDescription(item.description || "");
     setContentType(item.content_type);
     setContentUrl(item.content_url);
-    setShowForm(true);
+    setView("form");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !contentUrl.trim()) {
-      toast.error("Title and URL are required.");
+      toast.error(typeDef.allowUpload ? "Title and a link or file are required." : "Title and link are required.");
       return;
     }
     saveMutation.mutate();
   };
 
-  const getTypeInfo = (type: string) => {
-    return CONTENT_TYPES.find((t) => t.value === type) || CONTENT_TYPES[1];
-  };
+  // Group content into the same sections students see
+  const grouped = CONTENT_SECTION_ORDER
+    .map((type) => ({ type, def: getContentType(type), items: content.filter((c) => (c.content_type || "link") === type) }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <div>
+      {/* ===== HEADER ===== */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="font-heading font-semibold text-foreground">Exclusive Content</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">Add videos, links, discord invites, and more for your subscribers.</p>
+          <h2 className="font-heading font-semibold text-foreground">Your Content Hub</h2>
+          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+            <Eye className="h-3 w-3" />
+            Subscribers see everything below, grouped exactly like this.
+          </p>
         </div>
-        {!showForm && (
-          <Button size="sm" className="text-xs" onClick={() => { setEditingId(null); setTitle(""); setDescription(""); setContentType("link"); setContentUrl(""); setShowForm(true); }}>
-            <Plus className="h-3.5 w-3.5 mr-1" /> Add Content
+        {view === "list" && (
+          <Button size="sm" className="text-xs font-semibold" onClick={() => setView("pick")}>
+            <Plus className="h-3.5 w-3.5 mr-1" /> Post Content
           </Button>
         )}
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSubmit} className="rounded-2xl border border-primary/20 bg-card p-5 mb-6 space-y-4">
-          <p className="text-xs font-semibold text-foreground">{editingId ? "Edit content" : "New content"}</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs">Title</Label>
-              <Input
-                placeholder="e.g. Discord Server Invite"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="bg-muted border-border text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs">Content Type</Label>
-              <Select value={contentType} onValueChange={setContentType}>
-                <SelectTrigger className="bg-muted border-border text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CONTENT_TYPES.map((t) => (
-                    <SelectItem key={t.value} value={t.value}>
-                      <span className="flex items-center gap-2">
-                        <t.icon className="h-3.5 w-3.5" /> {t.label}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      {/* ===== STEP 1: TYPE PICKER ===== */}
+      {view === "pick" && (
+        <div className="rounded-2xl border border-primary/20 bg-card p-5 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-semibold text-foreground">What are you sharing?</p>
+            <Button variant="ghost" size="sm" className="text-xs h-8" onClick={resetForm}>Cancel</Button>
           </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {CONTENT_TYPES.map((t) => (
+              <button
+                key={t.value}
+                type="button"
+                onClick={() => openTypeForm(t.value)}
+                className="group rounded-xl border border-border bg-muted/30 p-4 text-left transition-all hover:border-primary/40 hover:bg-primary/5 hover:-translate-y-0.5"
+              >
+                <div className={`flex h-9 w-9 items-center justify-center rounded-lg mb-2.5 ${t.color}`}>
+                  <t.icon className="h-4 w-4" />
+                </div>
+                <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">{t.label}</p>
+                <p className="text-[11px] text-muted-foreground leading-snug mt-1">{t.hint}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ===== STEP 2: FOCUSED FORM ===== */}
+      {view === "form" && (
+        <form onSubmit={handleSubmit} className="rounded-2xl border border-primary/20 bg-card p-5 mb-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              {!editingId && (
+                <button type="button" onClick={() => setView("pick")} className="text-muted-foreground hover:text-foreground" aria-label="Back to type picker">
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+              )}
+              <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${typeDef.color}`}>
+                <typeDef.icon className="h-4 w-4" />
+              </div>
+              <p className="text-sm font-semibold text-foreground">
+                {editingId ? `Edit ${typeDef.label}` : `Add ${/^[AEIOU]/i.test(typeDef.label) ? "an" : "a"} ${typeDef.label}`}
+              </p>
+            </div>
+            <Button type="button" variant="ghost" size="sm" className="text-xs h-8" onClick={resetForm}>Cancel</Button>
+          </div>
+
           <div className="space-y-2">
-            <Label className="text-xs">URL or File</Label>
+            <Label className="text-xs">Title</Label>
+            <Input
+              placeholder={typeDef.titlePlaceholder}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="bg-muted border-border text-sm"
+              autoFocus
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">{typeDef.urlLabel}</Label>
             <div className="flex gap-2">
               <Input
-                placeholder="https://..."
+                placeholder={typeDef.urlPlaceholder}
                 value={contentUrl}
                 onChange={(e) => setContentUrl(e.target.value)}
                 className="bg-muted border-border text-sm flex-1"
               />
-              <Button type="button" variant="outline" size="sm" className="text-xs shrink-0" onClick={() => contentFileRef.current?.click()} disabled={uploadingFile}>
-                <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading..." : "Upload File"}
-              </Button>
+              {typeDef.allowUpload && (
+                <Button type="button" variant="outline" size="sm" className="text-xs shrink-0 h-10" onClick={() => contentFileRef.current?.click()} disabled={uploadingFile}>
+                  <Upload className="h-3.5 w-3.5 mr-1" /> {uploadingFile ? "Uploading…" : "Upload"}
+                </Button>
+              )}
               <input ref={contentFileRef} type="file" className="hidden" onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) handleFileUpload(f);
@@ -238,105 +265,129 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
               }} />
             </div>
           </div>
+
           <div className="space-y-2">
-            <Label className="text-xs">Description (optional)</Label>
+            <Label className="text-xs">Description <span className="text-muted-foreground/60 font-normal">(optional)</span></Label>
             <Textarea
-              placeholder="Brief description of what this content is about..."
+              placeholder="One line about what this is…"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
               className="bg-muted border-border text-sm resize-none"
             />
           </div>
-          <div className="flex gap-2">
-            <Button type="submit" size="sm" className="text-xs" disabled={saveMutation.isPending}>
-              {saveMutation.isPending ? "Saving..." : editingId ? (<><Check className="h-3.5 w-3.5 mr-1" /> Save Changes</>) : "Add Content"}
-            </Button>
-            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={resetForm}>
-              Cancel
-            </Button>
-          </div>
+
+          <Button type="submit" size="sm" className="text-xs font-semibold" disabled={saveMutation.isPending}>
+            {saveMutation.isPending ? "Saving…" : editingId ? (<><Check className="h-3.5 w-3.5 mr-1" /> Save Changes</>) : (<><Plus className="h-3.5 w-3.5 mr-1" /> Post to Subscribers</>)}
+          </Button>
         </form>
       )}
 
+      {/* ===== CONTENT LIST — sectioned like the student page ===== */}
       {isLoading ? (
-        <p className="text-sm text-muted-foreground text-center py-8">Loading content...</p>
-      ) : content.length === 0 && !showForm ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
-          <BookOpen className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground mb-1">No exclusive content yet.</p>
-          <p className="text-xs text-muted-foreground">Add videos, discord links, call schedules, and resources for your subscribers.</p>
+        <p className="text-sm text-muted-foreground text-center py-8">Loading content…</p>
+      ) : content.length === 0 && view === "list" ? (
+        <div className="rounded-2xl border border-dashed border-border bg-card/50 p-8 text-center">
+          <Sparkles className="h-8 w-8 text-primary/40 mx-auto mb-3" />
+          <p className="text-sm font-medium text-foreground mb-1">Nothing posted yet</p>
+          <p className="text-xs text-muted-foreground mb-5 max-w-sm mx-auto">
+            Most mentors start with these three — takes about two minutes:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto">
+            {["discord", "video", "file"].map((v) => {
+              const t = getContentType(v);
+              return (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => openTypeForm(v)}
+                  className="group rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/40 hover:-translate-y-0.5"
+                >
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg mx-auto mb-2 ${t.color}`}>
+                    <t.icon className="h-4 w-4" />
+                  </div>
+                  <p className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors">
+                    {v === "discord" ? "Post your Discord invite" : v === "video" ? "Add your first video" : "Share a PDF guide"}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
         </div>
       ) : (
-        <div className="space-y-2">
-          {content.map((item, index) => {
-            const typeInfo = getTypeInfo(item.content_type);
-            const Icon = typeInfo.icon;
-            const colorClass = TYPE_COLORS[item.content_type] || "text-primary bg-primary/10";
-
-            return (
-              <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 group">
-                <div className="flex flex-col shrink-0 -my-1">
-                  <button
-                    onClick={() => reorderMutation.mutate({ index, dir: -1 })}
-                    disabled={index === 0 || reorderMutation.isPending}
-                    className="text-muted-foreground/50 hover:text-foreground disabled:opacity-20 disabled:hover:text-muted-foreground/50"
-                    aria-label="Move up"
-                  >
-                    <ArrowUp className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    onClick={() => reorderMutation.mutate({ index, dir: 1 })}
-                    disabled={index === content.length - 1 || reorderMutation.isPending}
-                    className="text-muted-foreground/50 hover:text-foreground disabled:opacity-20 disabled:hover:text-muted-foreground/50"
-                    aria-label="Move down"
-                  >
-                    <ArrowDown className="h-3.5 w-3.5" />
-                  </button>
+        <div className="space-y-6">
+          {grouped.map(({ type, def, items }) => (
+            <div key={type}>
+              <div className="flex items-center gap-2 mb-2.5">
+                <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${def.color}`}>
+                  <def.icon className="h-3.5 w-3.5" />
                 </div>
-                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${colorClass}`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-foreground truncate">{item.title}</h4>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] text-muted-foreground capitalize">{typeInfo.label}</span>
-                    {item.content_url && (
-                      <a
-                        href={item.content_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[10px] text-primary hover:underline inline-flex items-center gap-0.5"
-                      >
-                        Open <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                    onClick={() => startEdit(item)}
-                    aria-label="Edit"
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => deleteMutation.mutate(item.id)}
-                    disabled={deleteMutation.isPending}
-                    aria-label="Delete"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
+                <h3 className="font-heading text-sm font-semibold text-foreground">{def.sectionLabel}</h3>
+                <span className="text-xs text-muted-foreground">({items.length})</span>
               </div>
-            );
-          })}
+              <div className="space-y-2">
+                {items.map((item, idx) => (
+                  <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 group">
+                    <div className="flex flex-col shrink-0 -my-1">
+                      <button
+                        onClick={() => reorderMutation.mutate({ a: items[idx], b: items[idx - 1] })}
+                        disabled={idx === 0 || reorderMutation.isPending}
+                        className="text-muted-foreground/50 hover:text-foreground disabled:opacity-20 disabled:hover:text-muted-foreground/50"
+                        aria-label="Move up"
+                      >
+                        <ArrowUp className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => reorderMutation.mutate({ a: items[idx], b: items[idx + 1] })}
+                        disabled={idx === items.length - 1 || reorderMutation.isPending}
+                        className="text-muted-foreground/50 hover:text-foreground disabled:opacity-20 disabled:hover:text-muted-foreground/50"
+                        aria-label="Move down"
+                      >
+                        <ArrowDown className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-medium text-foreground truncate">{item.title}</h4>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {item.description && <span className="text-[10px] text-muted-foreground truncate max-w-[240px]">{item.description}</span>}
+                        {item.content_url && (
+                          <a
+                            href={item.content_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-primary hover:underline inline-flex items-center gap-0.5 shrink-0"
+                          >
+                            Open <ExternalLink className="h-2.5 w-2.5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        onClick={() => startEdit(item)}
+                        aria-label="Edit"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        onClick={() => deleteMutation.mutate(item.id)}
+                        disabled={deleteMutation.isPending}
+                        aria-label="Delete"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

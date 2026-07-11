@@ -10,7 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import {
   DollarSign, TrendingUp, CreditCard, Users, Search, ArrowUpDown,
   CalendarDays, Clock, CheckCircle2, XCircle, AlertCircle, Ban, Trash2,
-  Download, Wallet, Loader2,
+  Download, Wallet, Loader2, ExternalLink,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -28,7 +28,7 @@ const AdminBilling = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subscriptions")
-        .select("*, mentors(name, monthly_price, avatar)")
+        .select("*, mentors(name, monthly_price, payment_type, avatar)")
         .order("started_at", { ascending: false });
       if (error) throw error;
       return data || [];
@@ -44,6 +44,17 @@ const AdminBilling = () => {
       return data || [];
     },
   });
+
+  // user -> Stripe customer mapping, used to deep-link refunds into Stripe
+  const { data: paymentConfigs = [] } = useQuery({
+    queryKey: ["admin-billing-payment-configs"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("user_payment_config").select("user_id, stripe_customer_id");
+      if (error) throw error;
+      return data || [];
+    },
+  });
+  const customerMap = new Map(paymentConfigs.map((c) => [c.user_id, c.stripe_customer_id]));
 
   const cancelMutation = useMutation({
     mutationFn: async (subId: string) => {
@@ -426,7 +437,10 @@ const AdminBilling = () => {
 
                   <div className="col-span-2">
                     <p className="text-sm font-semibold text-foreground">
-                      ${mentor?.monthly_price || 0}<span className="text-xs text-muted-foreground font-normal">/mo</span>
+                      ${mentor?.monthly_price || 0}
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {mentor?.payment_type === "one_time" ? " one-time" : "/mo"}
+                      </span>
                     </p>
                   </div>
 
@@ -452,6 +466,21 @@ const AdminBilling = () => {
 
                   {/* Actions */}
                   <div className="col-span-1 flex items-center gap-1">
+                    {/* Refund helper: opens this user's Stripe customer page where
+                        the charge can be refunded. The charge.refunded webhook then
+                        revokes access automatically. */}
+                    {customerMap.get(sub.user_id) && (
+                      <a
+                        href={`https://dashboard.stripe.com/customers/${customerMap.get(sub.user_id)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Open in Stripe to refund — access revokes automatically via webhook"
+                      >
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary">
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </Button>
+                      </a>
+                    )}
                     {sub.status === "active" ? (
                       <AlertDialog>
                         <AlertDialogTrigger asChild>

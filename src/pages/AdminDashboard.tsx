@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Tag, ClipboardList, Users, GraduationCap, MessageSquare, BarChart3, Crown, DollarSign } from "lucide-react";
+import { ArrowLeft, LogOut, Tag, ClipboardList, Users, GraduationCap, MessageSquare, BarChart3, Crown, DollarSign, Inbox } from "lucide-react";
 import AdminApplications from "@/components/admin/AdminApplications";
 import AdminMentors from "@/components/admin/AdminMentors";
 import AdminStudents from "@/components/admin/AdminStudents";
@@ -10,6 +10,7 @@ import AdminFeed from "@/components/admin/AdminFeed";
 import AdminStats from "@/components/admin/AdminStats";
 import AdminContent from "@/components/admin/AdminContent";
 import AdminBilling from "@/components/admin/AdminBilling";
+import AdminLeads from "@/components/admin/AdminLeads";
 
 const AdminDashboard = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
@@ -60,6 +61,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="students" className="text-xs gap-1.5"><GraduationCap className="h-3.5 w-3.5" /> Students</TabsTrigger>
             <TabsTrigger value="feed" className="text-xs gap-1.5"><MessageSquare className="h-3.5 w-3.5" /> Feed</TabsTrigger>
             <TabsTrigger value="billing" className="text-xs gap-1.5"><DollarSign className="h-3.5 w-3.5" /> Billing</TabsTrigger>
+            <TabsTrigger value="leads" className="text-xs gap-1.5"><Inbox className="h-3.5 w-3.5" /> Leads</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stats"><AdminStats /></TabsContent>
@@ -69,6 +71,7 @@ const AdminDashboard = () => {
           <TabsContent value="students"><AdminStudents /></TabsContent>
           <TabsContent value="feed"><AdminFeed /></TabsContent>
           <TabsContent value="billing"><AdminBilling /></TabsContent>
+          <TabsContent value="leads"><AdminLeads /></TabsContent>
         </Tabs>
       </div>
     </div>

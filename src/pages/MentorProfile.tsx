@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -27,43 +28,86 @@ import { motion } from "framer-motion";
 import type { Mentor } from "@/types/mentor";
 
 /** Low-risk entry point: free intro request before committing to a paid plan.
- *  TODO: replace the mailto placeholder with a real booking integration
- *  (Calendly embed or an intro_requests table + mentor notification). */
-const IntroCallDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: boolean; onOpenChange: (o: boolean) => void }) => (
-  <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle className="font-heading flex items-center gap-2">
-          <CalendarClock className="h-5 w-5 text-primary" /> Free 15-min intro with {mentor.name}
-        </DialogTitle>
-        <DialogDescription className="text-sm leading-relaxed pt-1">
-          Not ready to subscribe? Request a free 15-minute intro call to ask questions,
-          see if the mentorship fits your goals, and meet {mentor.name} before paying anything.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="space-y-3">
-        <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-2">
-          {["No payment or card required", "Ask about strategy, markets, and schedule", "Zero obligation to continue"].map((line) => (
-            <div key={line} className="flex items-center gap-2 text-xs text-muted-foreground">
-              <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> {line}
+ *  Requests land in intro_requests — mentors see their own, admins see all. */
+const IntroCallDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: boolean; onOpenChange: (o: boolean) => void }) => {
+  const { user } = useAuth();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const submitIntro = useMutation({
+    mutationFn: async () => {
+      const trimmedEmail = (email || user?.email || "").trim().toLowerCase();
+      if (!name.trim()) throw new Error("Please tell us your name.");
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail)) throw new Error("Please enter a valid email.");
+      const { error } = await supabase.from("intro_requests").insert({
+        mentor_id: mentor.id,
+        requester_name: name.trim(),
+        requester_email: trimmedEmail,
+        message: message.trim() || null,
+        user_id: user?.id ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => setSent(true),
+    onError: (err: any) => toast.error(err.message || "Failed to send request."),
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) setSent(false); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-heading flex items-center gap-2">
+            <CalendarClock className="h-5 w-5 text-primary" /> Free 15-min intro with {mentor.name}
+          </DialogTitle>
+          <DialogDescription className="text-sm leading-relaxed pt-1">
+            Not ready to subscribe? Request a free 15-minute intro call to ask questions,
+            see if the mentorship fits your goals, and meet {mentor.name} before paying anything.
+          </DialogDescription>
+        </DialogHeader>
+        {sent ? (
+          <div className="py-6 text-center space-y-3">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <CheckCircle2 className="h-6 w-6 text-primary" />
             </div>
-          ))}
-        </div>
-        <a
-          href={`mailto:intro@edgementor.com?subject=${encodeURIComponent(`Free intro request — ${mentor.name}`)}&body=${encodeURIComponent(`Hi, I'd like to book a free 15-minute intro call with ${mentor.name}.\n\nMy trading background: \nWhat I want to ask about: \nMy timezone: `)}`}
-          className="block"
-        >
-          <Button variant="glow" className="w-full font-semibold">
-            <Send className="h-4 w-4 mr-2" /> Request Intro Call
-          </Button>
-        </a>
-        <p className="text-[10px] text-muted-foreground text-center">
-          We'll pass your request to the mentor and reply within 24 hours.
-        </p>
-      </div>
-    </DialogContent>
-  </Dialog>
-);
+            <p className="font-heading font-semibold text-foreground">Request sent!</p>
+            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+              {mentor.name} will reach out to <span className="text-foreground font-medium">{(email || user?.email || "").trim()}</span> to schedule your intro call.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-2">
+              {["No payment or card required", "Ask about strategy, markets, and schedule", "Zero obligation to continue"].map((line) => (
+                <div key={line} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> {line}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <Input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} className="bg-muted border-border text-sm" />
+              <Input type="email" placeholder={user?.email || "you@example.com"} value={email} onChange={(e) => setEmail(e.target.value)} className="bg-muted border-border text-sm" />
+            </div>
+            <Textarea
+              placeholder="What do you want to ask about? (optional)"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              maxLength={1000}
+              className="bg-muted border-border text-sm min-h-[70px] resize-none"
+            />
+            <Button variant="glow" className="w-full font-semibold" onClick={() => submitIntro.mutate()} disabled={submitIntro.isPending}>
+              <Send className="h-4 w-4 mr-2" /> {submitIntro.isPending ? "Sending…" : "Request Intro Call"}
+            </Button>
+            <p className="text-[10px] text-muted-foreground text-center">
+              Your request goes straight to the mentor's dashboard.
+            </p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
