@@ -18,7 +18,7 @@ const faqs = [
   { q: "Is my payment information secure?", a: "Absolutely. All payments are processed through Stripe, a PCI Level 1 certified payment processor. We never store your card details." },
   { q: "What kind of content do mentors provide?", a: "Mentors share trading strategies, market analysis, educational videos, live sessions, and community access. Content varies by mentor." },
   { q: "Do you guarantee trading profits?", a: "No. Trading involves significant risk of loss. EdgeMentor is an educational platform — we do not provide financial advice or guarantee results." },
-  { q: "How do I contact support?", a: "Email us at support@edgementor.com and we'll get back to you within 24 hours." },
+  { q: "How do I contact support?", a: "Email us at support@edgementor.net and we'll get back to you within 24 hours." },
 ];
 
 const About = () => (

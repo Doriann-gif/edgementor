@@ -15,12 +15,12 @@ const sections = [
   { title: "3. Data Sharing", body: "We share data only with: Stripe (payment processing), mentors you subscribe to (your display name only), and service providers who help us operate the Platform. We never sell personal data to third parties." },
   { title: "4. Cookies & Tracking", body: "We use essential cookies to keep you logged in and remember your preferences. We may use analytics cookies to understand how the Platform is used. You can manage cookie preferences through your browser settings." },
   { title: "5. Data Security", body: "We implement industry-standard security measures including encryption in transit (TLS), secure password hashing, and regular security audits. Payment data is handled entirely by Stripe and never stored on our servers." },
-  { title: "6. Your Rights", body: "You have the right to: access your personal data, request corrections, delete your account and data, export your data, and opt out of marketing emails. Contact us at support@edgementor.com to exercise these rights." },
+  { title: "6. Your Rights", body: "You have the right to: access your personal data, request corrections, delete your account and data, export your data, and opt out of marketing emails. Contact us at support@edgementor.net to exercise these rights." },
   { title: "7. Data Retention", body: "We retain your data for as long as your account is active. After account deletion, we remove personal data within 30 days, except where retention is required by law (e.g., financial records)." },
   { title: "8. Children's Privacy", body: "EdgeMentor is not intended for users under 18. We do not knowingly collect data from minors. If you believe a minor has provided us with personal data, please contact us." },
   { title: "9. International Data", body: "Your data may be processed in countries outside your own. We ensure appropriate safeguards are in place for international data transfers in compliance with applicable regulations." },
   { title: "10. Changes to This Policy", body: "We may update this Privacy Policy from time to time. We will notify you of significant changes via email or a notice on the Platform." },
-  { title: "11. Contact Us", body: "For privacy-related questions, contact us at support@edgementor.com." },
+  { title: "11. Contact Us", body: "For privacy-related questions, contact us at support@edgementor.net." },
 ];
 
 const Privacy = () => (

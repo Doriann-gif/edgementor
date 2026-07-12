@@ -33,7 +33,7 @@ const Terms = () => (
           { title: "8. Limitation of Liability", body: "EdgeMentor is an educational platform. We do not provide financial advice. Trading involves significant risk of loss. We are not liable for any trading losses." },
           { title: "9. Termination", body: "We reserve the right to suspend or terminate accounts that violate these Terms. Users may delete their accounts at any time through Account Settings." },
           { title: "10. Changes to Terms", body: "We may update these Terms at any time. Continued use of the Platform constitutes acceptance of the updated Terms." },
-          { title: "11. Contact", body: "For questions about these Terms, contact us at support@edgementor.com." },
+          { title: "11. Contact", body: "For questions about these Terms, contact us at support@edgementor.net." },
         ].map((section) => (
           <motion.section key={section.title} variants={sectionFade}>
             <h2>{section.title}</h2>
