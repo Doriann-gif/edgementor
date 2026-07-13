@@ -13,9 +13,11 @@ import AdminBilling from "@/components/admin/AdminBilling";
 import AdminLeads from "@/components/admin/AdminLeads";
 
 const AdminDashboard = () => {
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, loading, rolesLoading, signOut } = useAuth();
 
-  if (loading) {
+  // Wait for the role check too — redirecting while it's in flight bounced
+  // admins to the homepage on every hard refresh.
+  if (loading || rolesLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
   }
 
