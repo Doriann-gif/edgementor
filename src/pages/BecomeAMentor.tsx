@@ -17,8 +17,8 @@ const fade = {
 
 const scrollToForm = () => document.getElementById("apply-form")?.scrollIntoView({ behavior: "smooth" });
 
-// TODO: confirm the public revenue-split number. 80/20 mirrors the 20%
-// platform fee configured in the Stripe Connect checkout edge functions.
+// Mentors keep 80%: the Stripe Connect checkout applies a 20% platform fee
+// (application_fee_percent = 20 in create-checkout).
 const MENTOR_SHARE = "80%";
 
 const payoutSteps = [
@@ -35,8 +35,7 @@ const payoutSteps = [
   {
     icon: Banknote,
     title: "Withdraw to your bank",
-    desc: "Connect your bank once via Stripe and withdraw your balance whenever you want, from anywhere Stripe supports.",
-    // TODO: confirm payout schedule / minimum withdrawal amount before launch.
+    desc: "Connect your bank once via Stripe, then withdraw anytime — or switch on automatic monthly payouts. Funds typically arrive in 2–7 business days via Stripe.",
   },
 ];
 

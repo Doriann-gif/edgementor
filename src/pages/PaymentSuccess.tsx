@@ -98,11 +98,16 @@ const PaymentSuccess = () => {
               <p className="text-muted-foreground text-sm">
                 {!mentorId || !sessionId
                   ? "Your payment was successful but we couldn't link it to a mentor. Please check your dashboard."
-                  : "There was an issue activating your subscription. Please contact support."}
+                  : "There was an issue activating your subscription. If you were charged, email support and we'll sort it out fast."}
               </p>
-              <Link to="/dashboard">
-                <Button variant="outline" className="w-full">Go to Dashboard</Button>
-              </Link>
+              <div className="flex flex-col gap-3">
+                <Link to="/dashboard">
+                  <Button variant="outline" className="w-full">Go to Dashboard</Button>
+                </Link>
+                <a href="mailto:support@edgementor.net?subject=Payment%20issue" className="text-xs text-primary hover:underline">
+                  Contact support@edgementor.net
+                </a>
+              </div>
             </motion.div>
           )}
         </div>

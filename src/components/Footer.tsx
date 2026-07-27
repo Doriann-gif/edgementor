@@ -39,12 +39,14 @@ const Footer = () => (
           </ul>
         </div>
 
-        {/* Legal */}
+        {/* Legal & Support */}
         <div>
-          <h4 className="font-heading text-sm font-semibold text-foreground mb-3">Legal</h4>
+          <h4 className="font-heading text-sm font-semibold text-foreground mb-3">Legal & Support</h4>
           <ul className="space-y-2 text-xs text-muted-foreground">
             <li><Link to="/terms" className="hover:text-foreground transition-colors">Terms & Conditions</Link></li>
             <li><Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link></li>
+            <li><Link to="/about" className="hover:text-foreground transition-colors">FAQ</Link></li>
+            <li><a href="mailto:support@edgementor.net" className="hover:text-foreground transition-colors">Contact Support</a></li>
           </ul>
         </div>
       </div>
