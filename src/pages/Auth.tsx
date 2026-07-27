@@ -9,9 +9,11 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/integrations/auth/google";
 import { toast } from "sonner";
-import { Zap, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Zap, ArrowLeft, CheckCircle2, ShieldCheck, Loader2 } from "lucide-react";
 import confetti from "canvas-confetti";
 import PageTransition from "@/components/PageTransition";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -23,6 +25,9 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [mfaStep, setMfaStep] = useState(false);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaVerifying, setMfaVerifying] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,6 +55,13 @@ const Auth = () => {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        // If the account has 2FA enabled, the session is only aal1 until a
+        // TOTP code is verified — gate entry behind the second factor.
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
+          setMfaStep(true);
+          return;
+        }
         toast.success("Welcome back!");
         navigate(redirectTo);
       }
@@ -58,6 +70,40 @@ const Auth = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const verifyMfa = async () => {
+    if (mfaCode.length !== 6) return;
+    setMfaVerifying(true);
+    try {
+      const { data: factors, error: listErr } = await supabase.auth.mfa.listFactors();
+      if (listErr) throw listErr;
+      const totp = factors.totp?.[0];
+      if (!totp) throw new Error("No 2FA device is registered on this account.");
+      const { data: challenge, error: chErr } = await supabase.auth.mfa.challenge({ factorId: totp.id });
+      if (chErr) throw chErr;
+      const { error: vErr } = await supabase.auth.mfa.verify({
+        factorId: totp.id,
+        challengeId: challenge.id,
+        code: mfaCode,
+      });
+      if (vErr) throw vErr;
+      toast.success("Welcome back!");
+      navigate(redirectTo);
+    } catch (err: any) {
+      toast.error(err.message || "That code didn't match. Try again.");
+      setMfaCode("");
+    } finally {
+      setMfaVerifying(false);
+    }
+  };
+
+  // Abandoning the 2FA step must not leave a half-authenticated (aal1) session.
+  const cancelMfa = async () => {
+    await supabase.auth.signOut();
+    setMfaStep(false);
+    setMfaCode("");
+    setLoading(false);
   };
 
   const handleGoogleSignIn = async () => {
@@ -193,6 +239,45 @@ const Auth = () => {
           <Button className="w-full font-semibold" onClick={() => { setShowSuccess(false); navigate(redirectTo); }}>
             Get Started
           </Button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Two-factor challenge */}
+      <Dialog open={mfaStep} onOpenChange={(open) => { if (!open) void cancelMfa(); }}>
+        <DialogContent className="sm:max-w-sm text-center">
+          <DialogHeader className="items-center">
+            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <ShieldCheck className="h-7 w-7 text-primary" />
+            </div>
+            <DialogTitle className="font-heading text-xl">Two-Factor Verification</DialogTitle>
+            <DialogDescription className="text-sm">
+              Enter the 6-digit code from your authenticator app to finish signing in.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-2">
+            <InputOTP
+              maxLength={6}
+              pattern={REGEXP_ONLY_DIGITS}
+              value={mfaCode}
+              onChange={setMfaCode}
+              onComplete={verifyMfa}
+              disabled={mfaVerifying}
+              autoFocus
+            >
+              <InputOTPGroup>
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <InputOTPSlot key={i} index={i} />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+          </div>
+          <Button className="w-full font-semibold" onClick={verifyMfa} disabled={mfaVerifying || mfaCode.length !== 6}>
+            {mfaVerifying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}
+            Verify
+          </Button>
+          <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={cancelMfa}>
+            Cancel and sign out
+          </button>
         </DialogContent>
       </Dialog>
     </div>

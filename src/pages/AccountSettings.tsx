@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TwoFactorSettings from "@/components/TwoFactorSettings";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
@@ -870,6 +871,9 @@ const AccountSettings = () => {
               <Button onClick={() => changePasswordMutation.mutate()} disabled={changePasswordMutation.isPending} className="text-sm font-semibold">
                 <Lock className="h-3.5 w-3.5 mr-1.5" /> Update Password
               </Button>
+            </div>
+            <div className="mt-6">
+              <TwoFactorSettings />
             </div>
           </TabsContent>
 
