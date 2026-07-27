@@ -21,7 +21,7 @@ import { COUNTRIES, TIMEZONES, TRADING_MARKETS } from "@/lib/profile-options";
 import { getAnimationsEnabled, setAnimationsEnabled } from "@/hooks/use-reduced-motion";
 import {
   ArrowLeft, User, Lock, Bell, CreditCard, Trash2, Save, LogOut,
-  Camera, Upload, BookOpen, Plus, GripVertical, Pencil, Trash, X,
+  Camera, Upload, BookOpen, Plus, Pencil, Trash, X,
   Shield, CalendarDays, Star, Award, CheckCircle2, Mail, Sparkles,
   Eye, EyeOff, BadgeCheck, Activity, Palette, ShieldCheck, Moon, Sun, Monitor,
   Clock, TrendingUp, Download, Globe, Heart, Loader2, ChevronsUpDown, Check,
@@ -1698,7 +1698,6 @@ const AccountSettings = () => {
                           </div>
                         ) : (
                           <>
-                            <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0" />
                             <div className="flex-1 min-w-0">
                               <h4 className="font-medium text-foreground text-sm truncate">{item.title}</h4>
                               <div className="flex items-center gap-2 mt-0.5">

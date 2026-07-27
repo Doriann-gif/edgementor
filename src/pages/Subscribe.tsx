@@ -228,6 +228,21 @@ const Subscribe = () => {
           {!isOneTime && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Cancel anytime</span>}
           <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> Instant access</span>
         </div>
+
+        {/* Point-of-sale billing disclosure — legally required for recurring
+            charges in many jurisdictions; shown before the user commits. */}
+        {!alreadySubscribed && (
+          <p className="text-[11px] leading-relaxed text-muted-foreground text-center mt-4 px-2">
+            {isOneTime ? (
+              <>This is a single one-time payment of <span className="text-foreground font-medium">${finalPrice}</span> for lifetime access — no recurring charges.</>
+            ) : (
+              <>By subscribing, you authorize EdgeMentor to charge <span className="text-foreground font-medium">${finalPrice}/month</span> to your payment method until you cancel. Your subscription renews automatically each month; cancel anytime from your dashboard.</>
+            )}{" "}
+            By continuing you agree to our{" "}
+            <Link to="/terms" className="text-primary hover:underline">Terms</Link> and{" "}
+            <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+          </p>
+        )}
       </div>
     </div>
     </PageTransition>

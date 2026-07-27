@@ -24,6 +24,7 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [agreed, setAgreed] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [mfaStep, setMfaStep] = useState(false);
@@ -39,6 +40,11 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Age + terms gate: must confirm before an account can be created.
+    if (isSignUp && !agreed) {
+      toast.error("Please confirm you're 18 or older and agree to the Terms.");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -194,7 +200,24 @@ const Auth = () => {
             </div>
             {isSignUp && <p className="text-[11px] text-muted-foreground">At least 8 characters.</p>}
           </div>
-          <Button type="submit" variant="glow" className="w-full h-11 font-semibold" disabled={loading}>
+
+          {isSignUp && (
+            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => setAgreed(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary cursor-pointer"
+              />
+              <span className="text-[11px] leading-relaxed text-muted-foreground">
+                I confirm I'm 18 or older and agree to EdgeMentor's{" "}
+                <Link to="/terms" className="text-primary hover:underline">Terms</Link> and{" "}
+                <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+              </span>
+            </label>
+          )}
+
+          <Button type="submit" variant="glow" className="w-full h-11 font-semibold" disabled={loading || (isSignUp && !agreed)}>
             {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
           </Button>
 
@@ -222,6 +245,12 @@ const Auth = () => {
             </svg>
             {googleLoading ? "Signing in..." : "Continue with Google"}
           </Button>
+
+          <p className="text-center text-[10px] text-muted-foreground leading-relaxed">
+            By continuing you confirm you're 18+ and agree to our{" "}
+            <Link to="/terms" className="text-primary hover:underline">Terms</Link> and{" "}
+            <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+          </p>
 
           <p className="text-center text-xs text-muted-foreground">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
