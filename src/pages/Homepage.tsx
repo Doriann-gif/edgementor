@@ -45,22 +45,22 @@ const Homepage = () => {
       <Helmet>
         <title>EdgeMentor — Find Your Trading Mentor</title>
         <meta name="description" content="Connect with elite trading mentors in futures, forex, crypto & options. Get personalized 1-on-1 mentorship to accelerate your trading journey." />
-        <link rel="canonical" href="https://edgementor.pages.dev/" />
+        <link rel="canonical" href="https://edgementor.net/" />
         <meta property="og:title" content="EdgeMentor — Find Your Trading Mentor" />
         <meta property="og:description" content="Connect with elite trading mentors in futures, forex, crypto & options. Personalized 1-on-1 mentorship." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://edgementor.pages.dev/" />
-        <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
+        <meta property="og:url" content="https://edgementor.net/" />
+        <meta property="og:image" content="https://edgementor.net/og-image.jpg" />
         <meta property="og:site_name" content="EdgeMentor" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="EdgeMentor — Find Your Trading Mentor" />
         <meta name="twitter:description" content="Connect with elite trading mentors. Personalized 1-on-1 mentorship in futures, forex, crypto & options." />
-        <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
+        <meta name="twitter:image" content="https://edgementor.net/og-image.jpg" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org", "@type": "WebSite", "name": "EdgeMentor",
-          "url": "https://edgementor.pages.dev",
+          "url": "https://edgementor.net",
           "description": "Connect with elite trading mentors in futures, forex, crypto & options.",
-          "potentialAction": { "@type": "SearchAction", "target": "https://edgementor.pages.dev/mentors?q={search_term_string}", "query-input": "required name=search_term_string" }
+          "potentialAction": { "@type": "SearchAction", "target": "https://edgementor.net/mentors?q={search_term_string}", "query-input": "required name=search_term_string" }
         })}</script>
       </Helmet>
 

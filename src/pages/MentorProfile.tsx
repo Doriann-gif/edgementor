@@ -313,17 +313,17 @@ const MentorProfile = () => {
         <Helmet>
           <title>{`${mentor.name} — Trading Mentor | EdgeMentor`}</title>
           <meta name="description" content={`Learn from ${mentor.name}. ${mentor.bio} ${mentor.instruments?.join(", ")} mentor with ${mentor.students} students.`} />
-          <link rel="canonical" href={`https://edgementor.pages.dev/mentor/${id}`} />
+          <link rel="canonical" href={`https://edgementor.net/mentor/${id}`} />
           <meta property="og:title" content={`${mentor.name} — Trading Mentor | EdgeMentor`} />
           <meta property="og:description" content={mentor.bio} />
           <meta property="og:type" content="profile" />
-          <meta property="og:url" content={`https://edgementor.pages.dev/mentor/${id}`} />
-          <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
+          <meta property="og:url" content={`https://edgementor.net/mentor/${id}`} />
+          <meta property="og:image" content="https://edgementor.net/og-image.jpg" />
           <meta property="og:site_name" content="EdgeMentor" />
           <meta name="twitter:card" content="summary_large_image" />
           <meta name="twitter:title" content={`${mentor.name} — Trading Mentor`} />
           <meta name="twitter:description" content={mentor.bio} />
-          <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
+          <meta name="twitter:image" content="https://edgementor.net/og-image.jpg" />
           <script type="application/ld+json">{JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
@@ -331,8 +331,8 @@ const MentorProfile = () => {
             "description": mentor.bio,
             "jobTitle": "Trading Mentor",
             ...(mentor.country ? { "nationality": mentor.country } : {}),
-            "url": `https://edgementor.pages.dev/mentor/${id}`,
-            "memberOf": { "@type": "Organization", "name": "EdgeMentor", "url": "https://edgementor.pages.dev" },
+            "url": `https://edgementor.net/mentor/${id}`,
+            "memberOf": { "@type": "Organization", "name": "EdgeMentor", "url": "https://edgementor.net" },
             ...(reviews.length > 0 ? {
               "aggregateRating": {
                 "@type": "AggregateRating",

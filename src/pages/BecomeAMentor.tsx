@@ -60,17 +60,17 @@ const BecomeAMentor = () => (
     <Helmet>
       <title>Become a Mentor — EdgeMentor</title>
       <meta name="description" content={`Turn your trading edge into recurring revenue. Keep ${MENTOR_SHARE} of every subscription, get payments, community, and content tools out of the box.`} />
-      <link rel="canonical" href="https://edgementor.pages.dev/apply" />
+      <link rel="canonical" href="https://edgementor.net/apply" />
       <meta property="og:title" content="Become a Mentor — EdgeMentor" />
       <meta property="og:description" content="Turn your trading edge into recurring revenue with payments, community, and content tools out of the box." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://edgementor.pages.dev/apply" />
-      <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
+      <meta property="og:url" content="https://edgementor.net/apply" />
+      <meta property="og:image" content="https://edgementor.net/og-image.jpg" />
       <meta property="og:site_name" content="EdgeMentor" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="Become a Mentor — EdgeMentor" />
       <meta name="twitter:description" content="Turn your trading edge into recurring revenue." />
-      <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
+      <meta name="twitter:image" content="https://edgementor.net/og-image.jpg" />
     </Helmet>
 
     <div className="min-h-screen bg-background">

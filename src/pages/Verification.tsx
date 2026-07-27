@@ -59,17 +59,17 @@ const Verification = () => (
     <Helmet>
       <title>How Verification Works — EdgeMentor</title>
       <meta name="description" content="Every EdgeMentor badge is earned, not bought. See exactly how we vet mentor identities and trading track records before they can teach." />
-      <link rel="canonical" href="https://edgementor.pages.dev/verification" />
+      <link rel="canonical" href="https://edgementor.net/verification" />
       <meta property="og:title" content="How Verification Works — EdgeMentor" />
       <meta property="og:description" content="See exactly how we vet mentor identities and trading track records." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://edgementor.pages.dev/verification" />
-      <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
+      <meta property="og:url" content="https://edgementor.net/verification" />
+      <meta property="og:image" content="https://edgementor.net/og-image.jpg" />
       <meta property="og:site_name" content="EdgeMentor" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="How Verification Works — EdgeMentor" />
       <meta name="twitter:description" content="Every badge is earned, not bought." />
-      <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
+      <meta name="twitter:image" content="https://edgementor.net/og-image.jpg" />
     </Helmet>
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-20">

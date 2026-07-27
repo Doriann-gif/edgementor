@@ -44,17 +44,17 @@ const HowItWorks = () => (
     <Helmet>
       <title>How It Works — EdgeMentor</title>
       <meta name="description" content="How EdgeMentor works: browse verified trading mentors, check their proof, start with a free intro call, and subscribe only when it fits." />
-      <link rel="canonical" href="https://edgementor.pages.dev/how-it-works" />
+      <link rel="canonical" href="https://edgementor.net/how-it-works" />
       <meta property="og:title" content="How It Works — EdgeMentor" />
       <meta property="og:description" content="Browse verified mentors, check their proof, start with a free intro." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://edgementor.pages.dev/how-it-works" />
-      <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
+      <meta property="og:url" content="https://edgementor.net/how-it-works" />
+      <meta property="og:image" content="https://edgementor.net/og-image.jpg" />
       <meta property="og:site_name" content="EdgeMentor" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="How It Works — EdgeMentor" />
       <meta name="twitter:description" content="Browse verified mentors, check their proof, start with a free intro." />
-      <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
+      <meta name="twitter:image" content="https://edgementor.net/og-image.jpg" />
     </Helmet>
     <div className="min-h-screen bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-20">

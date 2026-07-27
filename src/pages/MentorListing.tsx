@@ -256,24 +256,24 @@ const MentorListingPage = () => {
     <Helmet>
       <title>Browse Trading Mentors — EdgeMentor</title>
       <meta name="description" content="Explore verified trading mentors specializing in futures, forex, crypto & options. Filter by instrument, concept, and price to find your perfect mentor." />
-      <link rel="canonical" href="https://edgementor.pages.dev/mentors" />
+      <link rel="canonical" href="https://edgementor.net/mentors" />
       <meta property="og:title" content="Browse Trading Mentors — EdgeMentor" />
       <meta property="og:description" content="Explore verified trading mentors specializing in futures, forex, crypto & options." />
       <meta property="og:type" content="website" />
-      <meta property="og:url" content="https://edgementor.pages.dev/mentors" />
-      <meta property="og:image" content="https://edgementor.pages.dev/og-image.jpg" />
+      <meta property="og:url" content="https://edgementor.net/mentors" />
+      <meta property="og:image" content="https://edgementor.net/og-image.jpg" />
       <meta property="og:site_name" content="EdgeMentor" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="Browse Trading Mentors — EdgeMentor" />
       <meta name="twitter:description" content="Explore verified trading mentors in futures, forex, crypto & options." />
-      <meta name="twitter:image" content="https://edgementor.pages.dev/og-image.jpg" />
+      <meta name="twitter:image" content="https://edgementor.net/og-image.jpg" />
       <script type="application/ld+json">{JSON.stringify({
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         "name": "Trading Mentors",
         "description": "Browse and connect with elite trading mentors.",
-        "url": "https://edgementor.pages.dev/mentors",
-        "isPartOf": { "@type": "WebSite", "name": "EdgeMentor", "url": "https://edgementor.pages.dev" }
+        "url": "https://edgementor.net/mentors",
+        "isPartOf": { "@type": "WebSite", "name": "EdgeMentor", "url": "https://edgementor.net" }
       })}</script>
     </Helmet>
     <div className="min-h-screen bg-background">
