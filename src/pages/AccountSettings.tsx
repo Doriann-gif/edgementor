@@ -18,6 +18,7 @@ import { Progress } from "@/components/ui/progress";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { COUNTRIES, TIMEZONES, TRADING_MARKETS } from "@/lib/profile-options";
+import { getAnimationsEnabled, setAnimationsEnabled } from "@/hooks/use-reduced-motion";
 import {
   ArrowLeft, User, Lock, Bell, CreditCard, Trash2, Save, LogOut,
   Camera, Upload, BookOpen, Plus, GripVertical, Pencil, Trash, X,
@@ -39,8 +40,11 @@ const fadeIn = {
 const AccountSettings = () => {
   const { user, loading: authLoading, signOut, isMentor } = useAuth();
   const queryClient = useQueryClient();
-  const [searchParams] = useSearchParams();
-  const defaultTab = searchParams.get("tab") || "profile";
+  // Controlled tabs synced with ?tab= so navbar links work while already on
+  // /settings, and the browser back button walks through tab changes.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("tab") || "profile";
+  const setActiveTab = (tab: string) => setSearchParams(tab === "profile" ? {} : { tab });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [connectLoading, setConnectLoading] = useState(false);
 
@@ -144,6 +148,9 @@ const AccountSettings = () => {
   const [uploading, setUploading] = useState(false);
   const [bannerColor, setBannerColor] = useState("");
   const [showBannerPicker, setShowBannerPicker] = useState(false);
+  const { preference: themePreference, setPreference: setThemePreference } = useTheme();
+  const [animationsOn, setAnimationsOn] = useState(getAnimationsEnabled);
+  const [exportingData, setExportingData] = useState(false);
 
   // Content editing state
   const [editingContent, setEditingContent] = useState<any | null>(null);
@@ -341,7 +348,7 @@ const AccountSettings = () => {
   if (authLoading || profileLoading) {
     return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
   }
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/auth?redirect=%2Fsettings" replace />;
 
   const initials = (displayName || user.email || "?").split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
   const memberSince = user.created_at ? new Date(user.created_at) : new Date();
@@ -375,7 +382,7 @@ const AccountSettings = () => {
           </Button>
         </div>
 
-        <Tabs defaultValue={defaultTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-secondary border border-border rounded-xl p-1 h-auto flex-wrap">
             <TabsTrigger value="profile" className="rounded-lg text-xs data-[state=active]:bg-card data-[state=active]:text-foreground px-4 py-2">
               <User className="h-3.5 w-3.5 mr-1.5" /> Profile
@@ -1396,14 +1403,12 @@ const AccountSettings = () => {
                   Update
                 </Button>
               </div>
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/30 border border-border">
-                <div className="flex h-10 w-16 items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white text-[10px] font-bold tracking-wider">
-                  VISA
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground">•••• •••• •••• ••••</p>
-                  <p className="text-xs text-muted-foreground">Update via billing portal</p>
-                </div>
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/30 border border-border">
+                <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Your card details are stored securely by Stripe — EdgeMentor never sees them.
+                  Use the button above to view or update your payment method in the Stripe billing portal.
+                </p>
               </div>
             </motion.div>
           </TabsContent>
@@ -1418,12 +1423,11 @@ const AccountSettings = () => {
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { value: "dark", label: "Dark", icon: Moon, desc: "Easy on the eyes" },
-                    { value: "light", label: "Light", icon: Sun, desc: "Classic look" },
-                    { value: "system", label: "System", icon: Monitor, desc: "Match device" },
+                    { value: "dark" as const, label: "Dark", icon: Moon, desc: "Easy on the eyes" },
+                    { value: "light" as const, label: "Light", icon: Sun, desc: "Classic look" },
+                    { value: "system" as const, label: "System", icon: Monitor, desc: "Match device" },
                   ].map((opt) => {
-                    const currentTheme = localStorage.getItem("edgementor-theme") || "dark";
-                    const isActive = currentTheme === opt.value;
+                    const isActive = themePreference === opt.value;
                     return (
                       <motion.button
                         key={opt.value}
@@ -1434,19 +1438,7 @@ const AccountSettings = () => {
                         }`}
                         whileHover={{ y: -2 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          if (opt.value === "system") {
-                            const sys = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-                            localStorage.setItem("edgementor-theme", sys);
-                            document.documentElement.classList.remove("light", "dark");
-                            document.documentElement.classList.add(sys);
-                          } else {
-                            localStorage.setItem("edgementor-theme", opt.value);
-                            document.documentElement.classList.remove("light", "dark");
-                            document.documentElement.classList.add(opt.value);
-                          }
-                          window.location.reload();
-                        }}
+                        onClick={() => setThemePreference(opt.value)}
                       >
                         <opt.icon className={`h-5 w-5 mb-2 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
                         <p className="font-heading font-semibold text-sm text-foreground">{opt.label}</p>
@@ -1462,21 +1454,19 @@ const AccountSettings = () => {
                   <Globe className="h-4 w-4 text-primary" />
                   <h3 className="font-heading font-semibold text-foreground">Display Preferences</h3>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
-                    <div>
-                      <h4 className="font-heading font-semibold text-foreground text-sm">Compact Mode</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">Reduce spacing for more content density</p>
-                    </div>
-                    <Switch defaultChecked={false} />
+                <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
+                  <div>
+                    <h4 className="font-heading font-semibold text-foreground text-sm">Animations</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">Turn off to disable decorative animations across the site</p>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
-                    <div>
-                      <h4 className="font-heading font-semibold text-foreground text-sm">Animations</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">Enable smooth transitions and effects</p>
-                    </div>
-                    <Switch defaultChecked={true} />
-                  </div>
+                  <Switch
+                    checked={animationsOn}
+                    onCheckedChange={(v) => {
+                      setAnimationsOn(v);
+                      setAnimationsEnabled(v);
+                      toast.success(v ? "Animations enabled." : "Animations reduced.");
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -1545,44 +1535,48 @@ const AccountSettings = () => {
             <div className="space-y-6">
               <div className="rounded-2xl border border-border bg-card p-6">
                 <div className="flex items-center gap-2 mb-5">
-                  <ShieldCheck className="h-4 w-4 text-primary" />
-                  <h3 className="font-heading font-semibold text-foreground">Privacy Settings</h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
-                    <div>
-                      <h4 className="font-heading font-semibold text-foreground text-sm">Profile Visibility</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">Allow other users to see your profile info</p>
-                    </div>
-                    <Switch defaultChecked={true} />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
-                    <div>
-                      <h4 className="font-heading font-semibold text-foreground text-sm">Show Online Status</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">Let mentors see when you're online</p>
-                    </div>
-                    <Switch defaultChecked={true} />
-                  </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 border border-border">
-                    <div>
-                      <h4 className="font-heading font-semibold text-foreground text-sm">Share Activity</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">Share your learning activity with your mentor</p>
-                    </div>
-                    <Switch defaultChecked={false} />
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-border bg-card p-6">
-                <div className="flex items-center gap-2 mb-5">
                   <Download className="h-4 w-4 text-primary" />
                   <h3 className="font-heading font-semibold text-foreground">Data & Export</h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Download a copy of your account data including profile info, subscriptions, and activity.
+                  Download a copy of your account data — profile info, subscriptions, saved mentors, and messages — as a JSON file.
                 </p>
-                <Button variant="outline" size="sm" className="text-xs font-semibold" onClick={() => toast.info("Data export requested. You'll receive an email when ready.")}>
-                  <Download className="h-3.5 w-3.5 mr-1.5" /> Request Data Export
+                <Button
+                  variant="outline" size="sm" className="text-xs font-semibold"
+                  disabled={exportingData}
+                  onClick={async () => {
+                    setExportingData(true);
+                    try {
+                      const [subs, saved, msgs] = await Promise.all([
+                        supabase.from("subscriptions").select("status, started_at, mentors(name, monthly_price)").eq("user_id", user.id),
+                        supabase.from("saved_mentors").select("mentor_id, created_at").eq("user_id", user.id),
+                        supabase.from("messages").select("subject, body, sender_name, created_at, is_read").or(`recipient_id.eq.${user.id},sender_user_id.eq.${user.id}`),
+                      ]);
+                      const exportData = {
+                        exported_at: new Date().toISOString(),
+                        account: { email: user.email, created_at: user.created_at },
+                        profile,
+                        subscriptions: subs.data ?? [],
+                        saved_mentors: saved.data ?? [],
+                        messages: msgs.data ?? [],
+                      };
+                      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url;
+                      a.download = `edgementor-data-${new Date().toISOString().slice(0, 10)}.json`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      toast.success("Your data export has been downloaded.");
+                    } catch {
+                      toast.error("Failed to export data. Please try again.");
+                    } finally {
+                      setExportingData(false);
+                    }
+                  }}
+                >
+                  {exportingData ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Download className="h-3.5 w-3.5 mr-1.5" />}
+                  {exportingData ? "Preparing…" : "Download My Data"}
                 </Button>
               </div>
 

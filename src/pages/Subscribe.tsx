@@ -48,7 +48,8 @@ const Subscribe = () => {
   const handleSubscribe = async () => {
     if (!user) {
       toast.error("Please sign in first.");
-      navigate("/auth");
+      // Preserve the checkout intent so sign-in returns the user here.
+      navigate(`/auth?redirect=${encodeURIComponent(`/subscribe/${id}`)}`);
       return;
     }
     if (!mentor || !id) return;

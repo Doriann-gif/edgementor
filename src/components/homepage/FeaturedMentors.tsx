@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Star, Users, TrendingUp, ChevronRight, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { priceSuffix } from "@/lib/pricing";
 import type { Mentor } from "@/types/mentor";
 
 const staggerContainer = {
@@ -144,7 +145,7 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
                   <div className="flex items-center justify-between pt-4 border-t border-border/50">
                     <div>
                       <span className="font-heading text-xl font-bold text-foreground">${mentor.monthly_price}</span>
-                      <span className="text-xs text-muted-foreground">/mo</span>
+                      <span className="text-xs text-muted-foreground">{priceSuffix(mentor)}</span>
                     </div>
                     <motion.span className="flex items-center gap-1 text-sm text-primary font-medium" whileHover={{ x: 4 }}>
                       View Profile

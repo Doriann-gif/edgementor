@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,7 @@ const sortMentors = (mentors: Mentor[], sort: SortOption): Mentor[] => {
     case "featured":
       return sorted.sort((a, b) => (TIER_ORDER[a.tier || "verified"] ?? 2) - (TIER_ORDER[b.tier || "verified"] ?? 2) || b.rating - a.rating);
     case "newest":
-      return sorted.sort((a, b) => b.id.localeCompare(a.id));
+      return sorted.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
     case "top_rated":
       return sorted.sort((a, b) => b.rating - a.rating);
     case "most_students":
@@ -93,6 +94,11 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
             <div className="flex items-center gap-2 mb-1">
               <h3 className="font-heading font-bold text-foreground truncate text-base">{mentor.name}</h3>
               <TierBadge tier={tier} size="sm" showLabel={false} />
+              {mentor.available === false && (
+                <span className="rounded-full bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 text-[9px] font-bold text-amber-400 uppercase tracking-wide shrink-0">
+                  Paused
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -209,7 +215,14 @@ const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
 };
 
 const MentorListingPage = () => {
-  const [search, setSearch] = useState("");
+  // Support deep-linked searches (/mentors?q=...) — also the target of the
+  // SearchAction advertised in the homepage structured data.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get("q") || "");
+  const updateSearch = (value: string) => {
+    setSearch(value);
+    setSearchParams(value ? { q: value } : {}, { replace: true });
+  };
   const [activeInstruments, setActiveInstruments] = useState<string[]>([]);
   const [activeConcepts, setActiveConcepts] = useState<string[]>([]);
   const [activeCountries, setActiveCountries] = useState<string[]>([]);
@@ -248,7 +261,7 @@ const MentorListingPage = () => {
     setActiveConcepts([]);
     setActiveCountries([]);
     setPriceRange([500]);
-    setSearch("");
+    updateSearch("");
   };
 
   return (
@@ -334,9 +347,18 @@ const MentorListingPage = () => {
               <Input
                 placeholder="Search by name, strategy, or instrument..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-secondary/50 border-border/50 h-11 text-sm rounded-xl"
+                onChange={(e) => updateSearch(e.target.value)}
+                className="pl-10 pr-9 bg-secondary/50 border-border/50 h-11 text-sm rounded-xl"
               />
+              {search && (
+                <button
+                  onClick={() => updateSearch("")}
+                  aria-label="Clear search"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
 
             <Sheet>

@@ -127,7 +127,7 @@ const StudentDashboard = () => {
       </div>
     );
   }
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to="/auth?redirect=%2Fdashboard" replace />;
 
   const savedMentors = allMentors.filter((m) => savedMentorIds?.has(m.id));
   const unreadCount = messages.filter((m) => !m.is_read).length;

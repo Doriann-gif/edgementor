@@ -1,6 +1,6 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, useNavigationType } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { MotionConfig } from "framer-motion";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -47,6 +47,18 @@ const PageLoader = () => (
   </div>
 );
 
+// SPA navigations keep the previous scroll position by default — a footer
+// link would open the next page already scrolled to the bottom. Only browser
+// back/forward (POP) keeps its position, matching native behavior.
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  const navigationType = useNavigationType();
+  useEffect(() => {
+    if (navigationType !== "POP") window.scrollTo(0, 0);
+  }, [pathname, navigationType]);
+  return null;
+};
+
 const HideFooterOnAdmin = () => {
   const location = useLocation();
   const hideOn = ["/admin", "/mentor-dashboard", "/settings"];
@@ -64,6 +76,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ScrollToTop />
           <PinkGlow />
           <UptrendLine />
           <Navbar />

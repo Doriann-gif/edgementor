@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import {
   ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp,
   CheckCircle2, MessageSquare, Heart, Crown, ChevronRight,
   Sparkles, Shield, Award, Send, ImageIcon, ExternalLink, Zap, BookOpen,
-  ShieldCheck, CalendarClock, Languages, Timer,
+  ShieldCheck, CalendarClock, Languages, Timer, Share2, PauseCircle,
 } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMentor, useMentorReviews, useFeaturedMentors } from "@/hooks/use-mentors";
@@ -220,10 +220,12 @@ const MentorProfile = () => {
   const reduced = useReducedMotion();
   const queryClient = useQueryClient();
 
+  const navigate = useNavigate();
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
   const [showAllImages, setShowAllImages] = useState(false);
   const [introOpen, setIntroOpen] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState<{ url: string; caption?: string | null } | null>(null);
 
   const hasReviewed = reviews.some((r: any) => r.user_id === user?.id);
 
@@ -268,9 +270,33 @@ const MentorProfile = () => {
   });
 
   const handleSave = () => {
-    if (!user) { toast.error("Sign in to save mentors"); return; }
+    if (!user) {
+      toast.error("Sign in to save mentors", {
+        action: { label: "Sign in", onClick: () => navigate(`/auth?redirect=${encodeURIComponent(`/mentor/${id}`)}`) },
+      });
+      return;
+    }
     if (!id) return;
     toggleSave.mutate({ mentorId: id, isSaved });
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/mentor/${id}`;
+    // Native share sheet on mobile, clipboard everywhere else.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: `${mentor?.name} — Trading Mentor | EdgeMentor`, url });
+        return;
+      } catch {
+        // user dismissed the sheet — fall through to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Profile link copied to clipboard!");
+    } catch {
+      toast.error("Couldn't copy the link.");
+    }
   };
 
   if (isLoading) {
@@ -299,6 +325,9 @@ const MentorProfile = () => {
   const isElite = tier === "elite";
   const socialLink = (mentor as any).social_link;
   const bannerColor = (mentor as any).banner_color || "#6d28d9";
+  // Mentors can pause new signups from their settings — reflect it publicly
+  // instead of letting students pay for a mentorship that isn't taking students.
+  const isPaused = mentor.available === false;
 
   const stats = [
     { label: "Students", value: mentor.students, icon: Users, color: "text-primary bg-primary/10" },
@@ -456,6 +485,14 @@ const MentorProfile = () => {
                   <Heart className={`h-4 w-4 mr-1.5 transition-all ${isSaved ? "fill-pink-400 text-pink-400" : "text-muted-foreground"}`} />
                   {isSaved ? "Saved" : "Save"}
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`rounded-xl px-4 ${isElite ? "border-slate-600/50 hover:bg-slate-800" : ""}`}
+                  onClick={handleShare}
+                >
+                  <Share2 className="h-4 w-4 mr-1.5 text-muted-foreground" /> Share
+                </Button>
               </motion.div>
 
               {/* Tags */}
@@ -526,6 +563,25 @@ const MentorProfile = () => {
             ))}
           </motion.div>
         </div>
+
+        {/* ===== PAUSED NOTICE ===== */}
+        {isPaused && !isSubscribed && (
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8">
+            <motion.div
+              className="rounded-2xl border border-amber-400/30 bg-amber-400/[0.05] p-4 flex items-start gap-3"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <PauseCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Not accepting new students right now</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {mentor.name} has paused new signups. You can still request a free intro call to get in line for when spots open up.
+                </p>
+              </div>
+            </motion.div>
+          </div>
+        )}
 
         {/* ===== PROOF OF PROFITABILITY ===== */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-8">
@@ -611,12 +667,14 @@ const MentorProfile = () => {
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {(showAllImages ? showcaseImages : showcaseImages.slice(0, 3)).map((img: any) => (
-                        <div
+                        <button
                           key={img.id}
+                          type="button"
+                          onClick={() => setLightboxImage({ url: img.image_url, caption: img.caption })}
                           className="rounded-xl overflow-hidden border border-border aspect-video bg-muted group cursor-pointer"
                         >
                           <img src={img.image_url} alt={img.caption || "Showcase"} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        </div>
+                        </button>
                       ))}
                     </div>
                     {showcaseImages.length > 3 && !showAllImages && (
@@ -686,11 +744,17 @@ const MentorProfile = () => {
                       >
                         <CalendarClock className="h-4 w-4 mr-2" /> Free 15-min intro
                       </Button>
-                      <Link to={`/subscribe/${mentor.id}`}>
-                        <Button variant="glow" className={`h-11 px-6 font-semibold w-full ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : ""}`}>
-                          Get Started <ChevronRight className="h-4 w-4 ml-1" />
+                      {isPaused ? (
+                        <Button variant="outline" className="h-11 px-6 font-semibold text-muted-foreground" disabled>
+                          <PauseCircle className="h-4 w-4 mr-2" /> Not Accepting Students
                         </Button>
-                      </Link>
+                      ) : (
+                        <Link to={`/subscribe/${mentor.id}`}>
+                          <Button variant="glow" className={`h-11 px-6 font-semibold w-full ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : ""}`}>
+                            Get Started <ChevronRight className="h-4 w-4 ml-1" />
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   )}
                 </div>
@@ -784,6 +848,20 @@ const MentorProfile = () => {
 
         <IntroCallDialog mentor={mentor} open={introOpen} onOpenChange={setIntroOpen} />
 
+        {/* Gallery lightbox */}
+        <Dialog open={!!lightboxImage} onOpenChange={(o) => !o && setLightboxImage(null)}>
+          <DialogContent className="max-w-3xl p-2 sm:p-3 bg-background/95">
+            {lightboxImage && (
+              <figure className="space-y-2">
+                <img src={lightboxImage.url} alt={lightboxImage.caption || "Showcase"} className="w-full max-h-[75vh] object-contain rounded-lg" />
+                {lightboxImage.caption && (
+                  <figcaption className="text-center text-xs text-muted-foreground pb-1">{lightboxImage.caption}</figcaption>
+                )}
+              </figure>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* ===== STICKY SUBSCRIBE BAR ===== */}
         <motion.div
           className={`fixed bottom-0 left-0 right-0 z-50 border-t backdrop-blur-xl ${
@@ -819,6 +897,10 @@ const MentorProfile = () => {
                     <Crown className="h-4 w-4 mr-1.5" /> Access
                   </Button>
                 </Link>
+              ) : isPaused ? (
+                <Button variant="outline" className="h-11 px-4 sm:px-6 font-semibold text-sm text-muted-foreground" disabled>
+                  <PauseCircle className="h-4 w-4 mr-1.5" /> Not Accepting Students
+                </Button>
               ) : (
                 <Link to={`/subscribe/${mentor.id}`}>
                   <Button variant="glow" className={`h-11 px-5 sm:px-8 font-semibold text-sm sm:text-base ${isElite ? "bg-slate-200 text-slate-900 hover:bg-white" : ""}`}>

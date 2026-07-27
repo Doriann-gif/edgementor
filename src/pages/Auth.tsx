@@ -9,7 +9,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/integrations/auth/google";
 import { toast } from "sonner";
-import { Zap, ArrowLeft, CheckCircle2, ShieldCheck, Loader2 } from "lucide-react";
+import { Zap, ArrowLeft, CheckCircle2, ShieldCheck, Loader2, Eye, EyeOff } from "lucide-react";
 import confetti from "canvas-confetti";
 import PageTransition from "@/components/PageTransition";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -23,6 +23,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [mfaStep, setMfaStep] = useState(false);
@@ -180,7 +181,17 @@ const Auth = () => {
                 </button>
               )}
             </div>
-            <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted border-border" required minLength={isSignUp ? 8 : 6} />
+            <div className="relative">
+              <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="bg-muted border-border pr-10" required minLength={isSignUp ? 8 : 6} />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {isSignUp && <p className="text-[11px] text-muted-foreground">At least 8 characters.</p>}
           </div>
           <Button type="submit" variant="glow" className="w-full h-11 font-semibold" disabled={loading}>

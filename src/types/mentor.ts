@@ -30,6 +30,9 @@ export interface Mentor {
   languages?: string[] | null;
   /** One-line "who this mentorship is for" */
   ideal_for?: string | null;
+  /** False when the mentor has paused taking new students */
+  available?: boolean | null;
+  created_at?: string | null;
 }
 
 export interface MentorReview {

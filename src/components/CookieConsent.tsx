@@ -15,8 +15,8 @@ const CookieConsent = () => {
     }
   }, []);
 
-  const accept = () => {
-    localStorage.setItem("cookie-consent", "accepted");
+  const respond = (choice: "accepted" | "dismissed") => {
+    localStorage.setItem("cookie-consent", choice);
     setVisible(false);
   };
 
@@ -39,10 +39,10 @@ const CookieConsent = () => {
                   <Link to="/privacy" className="text-primary hover:underline">Learn more</Link>
                 </p>
                 <div className="flex gap-2">
-                  <Button size="sm" className="text-xs h-7 px-3" onClick={accept}>
+                  <Button size="sm" className="text-xs h-7 px-3" onClick={() => respond("accepted")}>
                     Accept
                   </Button>
-                  <Button size="sm" variant="ghost" className="text-xs h-7 px-3" onClick={accept}>
+                  <Button size="sm" variant="ghost" className="text-xs h-7 px-3" onClick={() => respond("dismissed")}>
                     Dismiss
                   </Button>
                 </div>

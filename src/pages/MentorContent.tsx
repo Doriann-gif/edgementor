@@ -22,7 +22,7 @@ const MentorContent = () => {
     );
   }
 
-  if (!user) return <Navigate to="/auth" replace />;
+  if (!user) return <Navigate to={`/auth?redirect=${encodeURIComponent(`/mentorship/${id}`)}`} replace />;
 
   if (!mentor) {
     return (

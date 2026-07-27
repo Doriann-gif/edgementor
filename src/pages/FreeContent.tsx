@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Helmet } from "react-helmet-async";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
@@ -396,11 +397,11 @@ const FreeContent = () => {
             Get direct access to pro traders with custom content, strategies, and 1-on-1 guidance.
           </p>
           <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.97 }}>
-            <a href="/mentors">
+            <Link to="/mentors">
               <Button className="h-11 px-6 font-semibold shadow-lg shadow-primary/20">
                 <TrendingUp className="h-4 w-4 mr-2" /> Browse Mentors
               </Button>
-            </a>
+            </Link>
           </motion.div>
         </motion.div>
       </div>
