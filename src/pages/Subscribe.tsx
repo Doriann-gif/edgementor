@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useMentor } from "@/hooks/use-mentors";
+import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -15,6 +16,7 @@ import PageTransition from "@/components/PageTransition";
 const Subscribe = () => {
   const { id } = useParams<{ id: string }>();
   const { data: mentor, isLoading } = useMentor(id);
+  const { data: alreadySubscribed } = useIsSubscribed(id);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [promoCode, setPromoCode] = useState("");
@@ -62,6 +64,13 @@ const Subscribe = () => {
         },
       });
       if (error) throw error;
+      // Backend detected an existing active subscription — don't double-charge.
+      if (data?.alreadySubscribed) {
+        toast.success("You're already subscribed — taking you to the content.");
+        navigate(`/mentorship/${id}`);
+        return;
+      }
+      if (data?.error) throw new Error(data.error);
       if (data?.url) {
         window.location.href = data.url;
       } else {
@@ -104,6 +113,19 @@ const Subscribe = () => {
         <Link to={`/mentor/${id}`} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6">
           <ArrowLeft className="h-4 w-4" /> Back to profile
         </Link>
+
+        {alreadySubscribed && (
+          <div className="mb-6 rounded-2xl border border-primary/30 bg-primary/[0.05] p-4 flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">You already have access to this mentorship</p>
+              <p className="text-xs text-muted-foreground mt-0.5">No need to pay again.</p>
+            </div>
+            <Link to={`/mentorship/${id}`} className="shrink-0">
+              <Button size="sm" variant="glow" className="text-xs font-semibold">Go to content</Button>
+            </Link>
+          </div>
+        )}
 
         <div className="text-center mb-8">
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
@@ -190,9 +212,17 @@ const Subscribe = () => {
         </div>
 
         {/* Subscribe Button */}
-        <Button variant="glow" className="w-full h-12 font-semibold text-sm" onClick={handleSubscribe} disabled={subscribing}>
-          {subscribing ? "Processing..." : isOneTime ? `Pay $${finalPrice}` : `Subscribe for $${finalPrice}/mo`}
-        </Button>
+        {alreadySubscribed ? (
+          <Link to={`/mentorship/${id}`}>
+            <Button variant="glow" className="w-full h-12 font-semibold text-sm">
+              <CheckCircle2 className="h-4 w-4 mr-2" /> Go to Your Mentorship
+            </Button>
+          </Link>
+        ) : (
+          <Button variant="glow" className="w-full h-12 font-semibold text-sm" onClick={handleSubscribe} disabled={subscribing}>
+            {subscribing ? "Processing..." : isOneTime ? `Pay $${finalPrice}` : `Subscribe for $${finalPrice}/mo`}
+          </Button>
+        )}
 
         <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
           {!isOneTime && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Cancel anytime</span>}

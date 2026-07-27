@@ -27,16 +27,47 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
 
+    // Business-rule rejections return 200 with an { error } field so the real
+    // message reaches the client (supabase.functions.invoke collapses non-2xx
+    // responses into a generic "non-2xx status code" error, hiding the text).
+    const reject = (message: string, extra: Record<string, unknown> = {}) =>
+      new Response(JSON.stringify({ error: message, ...extra }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+
     const { mentorId, promoCode } = await req.json();
     if (!mentorId) throw new Error("mentorId is required");
 
     // Fetch mentor details (public columns only)
     const { data: mentor, error: mentorError } = await supabaseClient
       .from("mentors")
-      .select("id, name, monthly_price, payment_type")
+      .select("id, name, monthly_price, payment_type, available, status")
       .eq("id", mentorId)
       .single();
     if (mentorError || !mentor) throw new Error("Mentor not found");
+
+    // Never charge for a mentor who isn't live or has paused new students.
+    if (mentor.status !== "approved") return reject("This mentor is not available.");
+    if (mentor.available === false) {
+      return reject("This mentor has paused new signups and isn't accepting subscriptions right now.");
+    }
+
+    // Block double-charging: if the user already holds active access, send
+    // them to the content instead of creating a second Stripe subscription.
+    const { data: activeSub } = await supabaseClient
+      .from("subscriptions")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("mentor_id", mentorId)
+      .eq("status", "active")
+      .maybeSingle();
+    if (activeSub) {
+      return new Response(JSON.stringify({ alreadySubscribed: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     // Fetch Stripe Connect account from separate payment config table
     const { data: paymentConfig } = await supabaseClient
@@ -44,6 +75,13 @@ serve(async (req) => {
       .select("stripe_connect_account_id")
       .eq("mentor_id", mentorId)
       .maybeSingle();
+
+    // A mentor with no Connect account can't receive their share — the charge
+    // would land 100% in the platform balance with no way to route it to them.
+    // Block checkout instead of taking money we can't split.
+    if (!paymentConfig?.stripe_connect_account_id) {
+      return reject("This mentor is still setting up payments and can't accept subscriptions yet. Try a free intro call and check back soon.");
+    }
 
     let discountPercent = 0;
     let appliedPromoCode: string | null = null;

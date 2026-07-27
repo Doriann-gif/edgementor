@@ -84,7 +84,19 @@ serve(async (req) => {
       const { error: insertError } = await supabase
         .from("subscriptions")
         .insert({ user_id: user.id, mentor_id: mentorId, status: "active" });
-      if (insertError) throw insertError;
+      if (insertError) {
+        // 23505 = the webhook won the race and already inserted this exact
+        // (user, mentor) row. The user is paid and active — treat as success
+        // rather than erroring out a customer who genuinely paid.
+        if ((insertError as any).code === "23505") {
+          logStep("Insert race — already activated by webhook", { mentorId });
+          return new Response(JSON.stringify({ activated: true }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+        throw insertError;
+      }
       firstActivation = true;
       logStep("Subscription created", { mentorId });
     } else if (existing.status !== "active") {
