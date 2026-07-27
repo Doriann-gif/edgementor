@@ -9,7 +9,11 @@ import { useIsMobile } from "./use-mobile";
  */
 export function useReducedMotion() {
   const isMobile = useIsMobile();
-  const [prefersReduced, setPrefersReduced] = useState(false);
+  // Read the OS setting synchronously so the first render is already correct —
+  // otherwise animated components mount their heavy variant for one frame.
+  const [prefersReduced, setPrefersReduced] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 
   useEffect(() => {
     const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
