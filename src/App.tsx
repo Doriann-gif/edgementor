@@ -12,6 +12,7 @@ import PinkGlow from "@/components/PinkGlow";
 import UptrendLine from "@/components/UptrendLine";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
+import MfaGate from "@/components/MfaGate";
 import Navbar from "./components/Navbar";
 
 // Eagerly load the homepage since it's the landing page
@@ -79,35 +80,37 @@ const App = () => (
           <ScrollToTop />
           <PinkGlow />
           <UptrendLine />
-          <Navbar />
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Homepage />} />
-              <Route path="/mentors" element={<MentorListing />} />
-              <Route path="/mentor/:id" element={<MentorProfile />} />
-              <Route path="/subscribe/:id" element={<Subscribe />} />
-              <Route path="/apply" element={<BecomeAMentor />} />
-              <Route path="/learn" element={<FreeContent />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/dashboard" element={<StudentDashboard />} />
-              <Route path="/mentor-dashboard" element={<MentorDashboard />} />
-              <Route path="/settings" element={<AccountSettings />} />
-              <Route path="/codes" element={<DiscountCodes />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/terms" element={<Terms />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/verification" element={<Verification />} />
-              <Route path="/how-it-works" element={<HowItWorks />} />
-              <Route path="/mentorship/:id" element={<MentorContentPage />} />
-              <Route path="/payment-success" element={<PaymentSuccess />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-          <HideFooterOnAdmin />
-          <CookieConsent />
+          <MfaGate>
+            <Navbar />
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                <Route path="/" element={<Homepage />} />
+                <Route path="/mentors" element={<MentorListing />} />
+                <Route path="/mentor/:id" element={<MentorProfile />} />
+                <Route path="/subscribe/:id" element={<Subscribe />} />
+                <Route path="/apply" element={<BecomeAMentor />} />
+                <Route path="/learn" element={<FreeContent />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/dashboard" element={<StudentDashboard />} />
+                <Route path="/mentor-dashboard" element={<MentorDashboard />} />
+                <Route path="/settings" element={<AccountSettings />} />
+                <Route path="/codes" element={<DiscountCodes />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/verification" element={<Verification />} />
+                <Route path="/how-it-works" element={<HowItWorks />} />
+                <Route path="/mentorship/:id" element={<MentorContentPage />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+            <HideFooterOnAdmin />
+            <CookieConsent />
+          </MfaGate>
         </BrowserRouter>
       </TooltipProvider>
       </MotionConfig>
