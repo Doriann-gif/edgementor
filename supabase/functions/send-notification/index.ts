@@ -85,14 +85,29 @@ serve(async (req) => {
     { auth: { persistSession: false } }
   );
 
-  // Resolve a user's email + email_notifications preference. Returns null when
-  // we shouldn't email them (opted out, or no address on file).
-  const resolveRecipient = async (userId: string | null | undefined): Promise<string | null> => {
+  // Per-type preference columns on `profiles`. Fixed whitelist — never
+  // interpolated from request input — so the dynamic select is safe.
+  type PrefKey = "notify_messages" | "notify_new_subscriber" | "notify_intro_request";
+
+  // Resolve a user's email, honoring the master `email_notifications` switch and,
+  // when given, the per-type preference. Returns null when we shouldn't email
+  // them (opted out at either level, or no address on file). Missing/null pref
+  // columns are treated as opted-in so existing rows keep working.
+  const resolveRecipient = async (
+    userId: string | null | undefined,
+    prefKey?: PrefKey,
+  ): Promise<string | null> => {
     if (!userId) return null;
+    const columns = prefKey ? `email_notifications, ${prefKey}` : "email_notifications";
     const { data: prof } = await admin
-      .from("profiles").select("email_notifications").eq("id", userId).maybeSingle();
-    if (prof && prof.email_notifications === false) {
-      logStep("Recipient opted out", { userId });
+      .from("profiles").select(columns).eq("id", userId).maybeSingle();
+    const p = prof as Record<string, boolean | null> | null;
+    if (p && p.email_notifications === false) {
+      logStep("Recipient opted out (all email)", { userId });
+      return null;
+    }
+    if (p && prefKey && p[prefKey] === false) {
+      logStep("Recipient opted out (type)", { userId, prefKey });
       return null;
     }
     const { data: u, error } = await admin.auth.admin.getUserById(userId);
@@ -113,7 +128,7 @@ serve(async (req) => {
 
     if (type === "new_message") {
       // Notify the message recipient (student or mentor).
-      const to = await resolveRecipient(record.recipient_id);
+      const to = await resolveRecipient(record.recipient_id, "notify_messages");
       if (to) {
         await sendEmail(to, {
           subject: `New message from ${record.sender_name || "your mentor"}`,
@@ -126,7 +141,7 @@ serve(async (req) => {
     } else if (type === "new_subscription") {
       // Notify the mentor that they gained a subscriber.
       const uid = await mentorUserId(record.mentor_id);
-      const to = await resolveRecipient(uid);
+      const to = await resolveRecipient(uid, "notify_new_subscriber");
       if (to) {
         await sendEmail(to, {
           subject: "You have a new subscriber 🎉",
@@ -139,7 +154,7 @@ serve(async (req) => {
     } else if (type === "new_intro_request") {
       // Notify the mentor of a free-intro lead.
       const uid = await mentorUserId(record.mentor_id);
-      const to = await resolveRecipient(uid);
+      const to = await resolveRecipient(uid, "notify_intro_request");
       if (to) {
         await sendEmail(to, {
           subject: "New intro call request",

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ComponentType } from "react";
 import { Navigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,29 @@ const fadeIn = {
     transition: { delay: i * 0.07, duration: 0.4, ease: [0.25, 0.1, 0.25, 1] as const },
   }),
 };
+
+/** A single labelled preference toggle used across the settings tabs. */
+const ToggleRow = ({
+  icon: Icon, title, desc, checked, disabled, onChange,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  title: string; desc: string;
+  checked: boolean; disabled?: boolean;
+  onChange: (v: boolean) => void;
+}) => (
+  <div className={`flex items-center justify-between gap-4 p-4 rounded-xl bg-muted/30 border border-border transition-opacity ${disabled ? "opacity-50" : ""}`}>
+    <div className="flex items-start gap-3">
+      <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div>
+        <h4 className="font-heading font-semibold text-foreground text-sm">{title}</h4>
+        <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+      </div>
+    </div>
+    <Switch checked={checked} disabled={disabled} onCheckedChange={onChange} className="shrink-0" />
+  </div>
+);
 
 const AccountSettings = () => {
   const { user, loading: authLoading, signOut, isMentor } = useAuth();
@@ -141,6 +164,9 @@ const AccountSettings = () => {
   const [countryOpen, setCountryOpen] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
+  const [notifyMessages, setNotifyMessages] = useState(true);
+  const [notifyNewSubscriber, setNotifyNewSubscriber] = useState(true);
+  const [notifyIntroRequest, setNotifyIntroRequest] = useState(true);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -151,6 +177,7 @@ const AccountSettings = () => {
   const { preference: themePreference, setPreference: setThemePreference } = useTheme();
   const [animationsOn, setAnimationsOn] = useState(getAnimationsEnabled);
   const [exportingData, setExportingData] = useState(false);
+  const [signingOutAll, setSigningOutAll] = useState(false);
 
   // Content editing state
   const [editingContent, setEditingContent] = useState<any | null>(null);
@@ -195,6 +222,9 @@ const AccountSettings = () => {
       setTradingInterests((profile as any).trading_interests || []);
       setEmailNotifications(profile.email_notifications ?? true);
       setMarketingEmails(profile.marketing_emails ?? false);
+      setNotifyMessages((profile as any).notify_messages ?? true);
+      setNotifyNewSubscriber((profile as any).notify_new_subscriber ?? true);
+      setNotifyIntroRequest((profile as any).notify_intro_request ?? true);
     }
   }, [profile]);
 
@@ -250,6 +280,21 @@ const AccountSettings = () => {
     },
     onSuccess: () => { setNewPassword(""); setConfirmPassword(""); toast.success("Password updated!"); },
     onError: (err: any) => toast.error(err.message || "Failed to change password."),
+  });
+
+  // Notification preferences save immediately (one column at a time) so each
+  // toggle is a real, independent control — the send-notification edge function
+  // honors every one of these columns before emailing.
+  const notifPrefMutation = useMutation({
+    mutationFn: async (patch: Record<string, boolean>) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ ...patch, updated_at: new Date().toISOString() } as any)
+        .eq("id", user!.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["my-profile"] }); toast.success("Preference saved."); },
+    onError: () => toast.error("Couldn't save preference. Try again."),
   });
 
   const changeEmailMutation = useMutation({
@@ -885,24 +930,87 @@ const AccountSettings = () => {
           </TabsContent>
 
           {/* ──────────── NOTIFICATIONS TAB ──────────── */}
-          <TabsContent value="notifications">
+          <TabsContent value="notifications" className="space-y-6">
+            {/* Email notifications */}
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Mail className="h-4 w-4 text-primary" />
+                <h3 className="font-heading font-semibold text-foreground">Email Notifications</h3>
+              </div>
+
+              <ToggleRow
+                icon={Bell}
+                title="Email notifications"
+                desc="Master switch for all transactional emails from EdgeMentor."
+                checked={emailNotifications}
+                onChange={(v) => { setEmailNotifications(v); notifPrefMutation.mutate({ email_notifications: v }); }}
+              />
+
+              <div className="space-y-3 pl-1">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Send me an email when…</p>
+                <ToggleRow
+                  icon={Mail}
+                  title="I get a new message"
+                  desc="A mentor or student sends you a direct message."
+                  checked={notifyMessages}
+                  disabled={!emailNotifications}
+                  onChange={(v) => { setNotifyMessages(v); notifPrefMutation.mutate({ notify_messages: v }); }}
+                />
+                {isMentor && (
+                  <>
+                    <ToggleRow
+                      icon={Star}
+                      title="A student subscribes"
+                      desc="You gain a new paying subscriber to your mentorship."
+                      checked={notifyNewSubscriber}
+                      disabled={!emailNotifications}
+                      onChange={(v) => { setNotifyNewSubscriber(v); notifPrefMutation.mutate({ notify_new_subscriber: v }); }}
+                    />
+                    <ToggleRow
+                      icon={CalendarDays}
+                      title="Someone requests an intro call"
+                      desc="A prospective student books a free intro call with you."
+                      checked={notifyIntroRequest}
+                      disabled={!emailNotifications}
+                      onChange={(v) => { setNotifyIntroRequest(v); notifPrefMutation.mutate({ notify_intro_request: v }); }}
+                    />
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Marketing */}
+            <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="h-4 w-4 text-primary" />
+                <h3 className="font-heading font-semibold text-foreground">Product & Marketing</h3>
+              </div>
+              <ToggleRow
+                icon={Sparkles}
+                title="Product updates & offers"
+                desc="Occasional news about new features, mentors, and promotions. No spam."
+                checked={marketingEmails}
+                onChange={(v) => { setMarketingEmails(v); notifPrefMutation.mutate({ marketing_emails: v }); }}
+              />
+            </div>
+
+            {/* In-app */}
             <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
               <div className="flex items-center gap-2 mb-1">
                 <Bell className="h-4 w-4 text-primary" />
-                <h3 className="font-heading font-semibold text-foreground">Notifications</h3>
+                <h3 className="font-heading font-semibold text-foreground">In-App Notifications</h3>
               </div>
               <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border">
                 <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                   <Bell className="h-4 w-4 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-heading font-semibold text-foreground text-sm">In-app notifications</h3>
+                  <h4 className="font-heading font-semibold text-foreground text-sm">Real-time alerts</h4>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    New messages appear in real time under the bell icon in the top bar — no setup needed.
+                    New messages and activity appear instantly under the bell icon in the top bar — always on, no setup needed.
                   </p>
                 </div>
               </div>
-              <p className="text-[11px] text-muted-foreground">Email notifications are coming soon.</p>
             </div>
           </TabsContent>
 
@@ -1597,10 +1705,45 @@ const AccountSettings = () => {
                     <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-foreground">Password</p>
-                      <p className="text-[11px] text-muted-foreground">Last changed: —</p>
+                      <p className="text-[11px] text-muted-foreground">Change your account password anytime.</p>
                     </div>
                     <Link to="/settings?tab=password" className="ml-auto text-xs text-primary hover:underline">Change</Link>
                   </div>
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/30 border border-border">
+                    <ShieldCheck className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Two-factor authentication</p>
+                      <p className="text-[11px] text-muted-foreground">Add an authenticator-app code to every sign-in.</p>
+                    </div>
+                    <Link to="/settings?tab=password" className="ml-auto text-xs text-primary hover:underline">Manage</Link>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-4 border-t border-border flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Sign out everywhere</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">End your session on all devices and browsers.</p>
+                  </div>
+                  <Button
+                    variant="outline" size="sm" className="text-xs shrink-0"
+                    disabled={signingOutAll}
+                    onClick={async () => {
+                      setSigningOutAll(true);
+                      try {
+                        // Global scope revokes every refresh token for this user.
+                        const { error } = await supabase.auth.signOut({ scope: "global" });
+                        if (error) throw error;
+                        toast.success("Signed out on all devices.");
+                        window.location.href = "/";
+                      } catch (err: any) {
+                        toast.error(err.message || "Couldn't sign out everywhere.");
+                        setSigningOutAll(false);
+                      }
+                    }}
+                  >
+                    {signingOutAll ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <LogOut className="h-3.5 w-3.5 mr-1.5" />}
+                    Sign out all
+                  </Button>
                 </div>
               </div>
             </div>
