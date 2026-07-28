@@ -53,23 +53,15 @@ async function activateSubscription(
       .upsert({ user_id: userId, stripe_customer_id: customerId }, { onConflict: "user_id" });
   }
 
-  // Record promo redemption once
+  // Record promo redemption once. Atomic increment + insert via RPC so
+  // concurrent redemptions of the same code can't lose a count.
   if (promoCode && firstActivation) {
-    const { data: code } = await supabase
-      .from("discount_codes")
-      .select("id, current_uses")
-      .eq("code", promoCode)
-      .maybeSingle();
-    if (code) {
-      await supabase
-        .from("discount_codes")
-        .update({ current_uses: code.current_uses + 1 })
-        .eq("id", code.id);
-      await supabase
-        .from("code_redemptions")
-        .insert({ code_id: code.id, user_id: userId });
-      logStep("Promo redemption recorded", { promoCode });
-    }
+    const { error: redeemError } = await supabase.rpc("redeem_discount_code", {
+      _code: promoCode,
+      _user_id: userId,
+    });
+    if (redeemError) logStep("Promo redemption failed", { promoCode, message: redeemError.message });
+    else logStep("Promo redemption recorded", { promoCode });
   }
 }
 

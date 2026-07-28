@@ -19,7 +19,7 @@ const MentorMessagesTab = ({ mentorId, mentorName }: { mentorId: string; mentorN
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel("mentor-messages-realtime")
+      .channel(`mentor-messages:${user.id}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "messages", filter: `recipient_id=eq.${user.id}` },

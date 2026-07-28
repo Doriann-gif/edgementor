@@ -109,11 +109,16 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
   };
 
   const handleSave = async () => {
+    const price = parseInt(editPrice, 10);
+    if (!Number.isFinite(price) || price < 1) {
+      toast.error("Please enter a valid price — a whole number of at least $1.");
+      return;
+    }
     try {
       await onUpdate({
         bio: editBio,
         full_bio: editFullBio,
-        monthly_price: parseInt(editPrice, 10),
+        monthly_price: price,
         highlights: editHighlights.filter(Boolean),
         social_link: editSocialLink.trim() || null,
         response_time: editResponseTime || null,

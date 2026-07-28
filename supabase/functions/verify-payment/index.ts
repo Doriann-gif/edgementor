@@ -111,24 +111,16 @@ serve(async (req) => {
       logStep("Subscription already active", { mentorId });
     }
 
-    // Record promo redemption once per activation
+    // Record promo redemption once per activation. Atomic increment + insert
+    // via RPC so concurrent redemptions of the same code can't lose a count.
     const promoCode = session.metadata?.promo_code;
     if (promoCode && firstActivation) {
-      const { data: code } = await supabase
-        .from("discount_codes")
-        .select("id, current_uses")
-        .eq("code", promoCode)
-        .maybeSingle();
-      if (code) {
-        await supabase
-          .from("discount_codes")
-          .update({ current_uses: code.current_uses + 1 })
-          .eq("id", code.id);
-        await supabase
-          .from("code_redemptions")
-          .insert({ code_id: code.id, user_id: user.id });
-        logStep("Promo redemption recorded", { promoCode });
-      }
+      const { error: redeemError } = await supabase.rpc("redeem_discount_code", {
+        _code: promoCode,
+        _user_id: user.id,
+      });
+      if (redeemError) logStep("Promo redemption failed", { promoCode, message: redeemError.message });
+      else logStep("Promo redemption recorded", { promoCode });
     }
 
     return new Response(JSON.stringify({ activated: true }), {

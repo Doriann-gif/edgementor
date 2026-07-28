@@ -70,7 +70,7 @@ export const useMessages = () => {
   useEffect(() => {
     if (!user) return;
     const channel = supabase
-      .channel("student-messages-realtime")
+      .channel(`student-messages:${user.id}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "messages", filter: `recipient_id=eq.${user.id}` },

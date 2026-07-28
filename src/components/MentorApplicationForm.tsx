@@ -124,6 +124,11 @@ const MentorApplicationForm = () => {
       navigate(`/auth?redirect=/apply${email ? `&email=${encodeURIComponent(email)}` : ""}`);
       return;
     }
+    const price = parseInt(monthlyPrice, 10);
+    if (!Number.isFinite(price) || price < 1) {
+      toast.error("Please enter a valid price — a whole number of at least $1.");
+      return;
+    }
     setSubmitting(true);
     try {
       const { error } = await supabase.from("mentor_applications").insert({
@@ -134,7 +139,7 @@ const MentorApplicationForm = () => {
         instruments,
         concepts,
         session,
-        monthly_price: parseInt(monthlyPrice, 10),
+        monthly_price: price,
         payment_type: paymentType,
         bio,
         country: country || null,
