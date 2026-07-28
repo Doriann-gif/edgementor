@@ -99,7 +99,7 @@ const MentorOverviewTab = ({ mentor, mentorUserId, earnings, onGoToTab }: Props)
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { icon: Users, label: "Active students", value: earnings?.activeStudents ?? 0, tab: "students", tint: "text-primary bg-primary/10" },
-          { icon: DollarSign, label: isOneTime ? "Est. net / sale" : "Est. net / mo", value: `$${earnings?.monthlyNet ?? 0}`, tab: "income", tint: "text-emerald-400 bg-emerald-400/10" },
+          { icon: DollarSign, label: isOneTime ? "Est. net / sale" : "Est. net / mo", value: `$${(isOneTime ? earnings?.netPerSale : earnings?.monthlyNet) ?? 0}`, tab: "income", tint: "text-emerald-400 bg-emerald-400/10" },
           { icon: MessageSquare, label: "Unread messages", value: unread, tab: "messages", tint: unread > 0 ? "text-amber-400 bg-amber-400/10" : "text-muted-foreground bg-muted" },
           { icon: Star, label: "Rating", value: mentor.rating || "—", tab: "profile", tint: "text-amber-400 bg-amber-400/10" },
         ].map((m) => (

@@ -501,7 +501,7 @@ const AccountSettings = () => {
                       <Label className="text-xs font-medium text-muted-foreground">Banner Color</Label>
                       {/* Hue slider */}
                       <input
-                        type="range" min={0} max={360} value={parseInt(bannerColor.replace(/[^\d]/g, '') || '270')}
+                        type="range" min={0} max={360} value={Number(bannerColor.match(/hsl\((\d+)/)?.[1] ?? 270)}
                         onChange={(e) => {
                           const h = Number(e.target.value);
                           setBannerColor(`hsl(${h}, 60%, 30%)`);

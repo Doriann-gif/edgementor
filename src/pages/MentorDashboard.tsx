@@ -93,7 +93,7 @@ const MentorDashboard = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {[
             { icon: Users, label: "Active students", value: earnings?.activeStudents ?? 0 },
-            { icon: DollarSign, label: mentor.payment_type === "one_time" ? "Est. net / sale" : "Est. net / mo", value: `$${earnings?.monthlyNet ?? 0}` },
+            { icon: DollarSign, label: mentor.payment_type === "one_time" ? "Est. net / sale" : "Est. net / mo", value: `$${(mentor.payment_type === "one_time" ? earnings?.netPerSale : earnings?.monthlyNet) ?? 0}` },
             { icon: Star, label: "Rating", value: mentor.rating || "—" },
             { icon: TrendingUp, label: "All-time subs", value: earnings?.allTimeSubs ?? 0 },
           ].map((stat) => (

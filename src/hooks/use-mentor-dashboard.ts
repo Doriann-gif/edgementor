@@ -54,7 +54,10 @@ export const useMentorStudents = (mentorId: string | undefined) => {
 
 export const useMentorEarnings = (mentorId: string | undefined, monthlyPrice: number) => {
   return useQuery({
-    queryKey: ["mentor-earnings", mentorId],
+    // Price is part of the key so the estimate recomputes when the mentor
+    // edits their price — otherwise it would show stale earnings from the
+    // cached run at the old price.
+    queryKey: ["mentor-earnings", mentorId, monthlyPrice],
     enabled: !!mentorId,
     queryFn: async () => {
       // Active subs (current students) and all-time count (any status)
@@ -70,7 +73,8 @@ export const useMentorEarnings = (mentorId: string | undefined, monthlyPrice: nu
       return {
         activeStudents: activeCount,
         monthlyRevenue: activeCount * monthlyPrice,        // gross, before 20% platform fee
-        monthlyNet: Math.round(activeCount * monthlyPrice * 0.8),
+        monthlyNet: Math.round(activeCount * monthlyPrice * 0.8),   // total net across active students
+        netPerSale: Math.round(monthlyPrice * 0.8),                 // net from a single one-time sale
         allTimeSubs: allRes.count ?? 0,
       };
     },
