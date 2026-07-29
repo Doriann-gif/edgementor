@@ -252,7 +252,15 @@ const MentorProfile = () => {
       setReviewRating(5);
       toast.success("Review submitted! Thank you.");
     },
-    onError: (err: any) => toast.error(err.message || "Failed to submit review"),
+    onError: (err: any) => {
+      // The DB now enforces one review per mentor per user; the client-side
+      // hasReviewed guard can still be raced or bypassed.
+      if (err?.code === "23505") {
+        toast.error("You've already reviewed this mentor.");
+        return;
+      }
+      toast.error(err.message || "Failed to submit review");
+    },
   });
 
   const { data: showcaseImages = [] } = useQuery({
