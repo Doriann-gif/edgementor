@@ -65,6 +65,50 @@ async function activateSubscription(
   }
 }
 
+// Platform keeps 20%; the mentor's 80% is credited to their internal ledger,
+// which they withdraw to crypto/bank/PayPal. `stripeRef` makes this idempotent
+// against webhook retries via the mentor_ledger dedupe index.
+const MENTOR_SHARE = 0.8;
+
+async function creditMentorEarning(
+  mentorId: string,
+  grossCents: number,
+  stripeRef: string,
+  note: string
+) {
+  if (!grossCents || grossCents <= 0) return;
+  const amount = Math.round(grossCents * MENTOR_SHARE) / 100;
+  const { error } = await supabase.from("mentor_ledger").insert({
+    mentor_id: mentorId,
+    entry_type: "earning",
+    amount,
+    source: "subscription",
+    stripe_ref: stripeRef,
+    note,
+  });
+  // 23505 = this event was already credited on an earlier delivery attempt.
+  if (error && error.code !== "23505") throw error;
+  logStep(error ? "Earning already credited (retry)" : "Mentor earning credited", {
+    mentorId, amount, stripeRef,
+  });
+}
+
+// Refund: claw the mentor's share back so their balance can't be withdrawn twice.
+async function reverseMentorEarning(mentorId: string, grossCents: number, stripeRef: string) {
+  if (!grossCents || grossCents <= 0) return;
+  const amount = Math.round(grossCents * MENTOR_SHARE) / 100;
+  const { error } = await supabase.from("mentor_ledger").insert({
+    mentor_id: mentorId,
+    entry_type: "adjustment",
+    amount: -amount,
+    source: "refund",
+    stripe_ref: stripeRef,
+    note: "Refund reversal",
+  });
+  if (error && error.code !== "23505") throw error;
+  logStep("Mentor earning reversed", { mentorId, amount, stripeRef });
+}
+
 async function cancelSubscription(userId: string, mentorId: string) {
   const { error } = await supabase
     .from("subscriptions")
@@ -111,6 +155,17 @@ serve(async (req) => {
             session.metadata?.promo_code,
             typeof session.customer === "string" ? session.customer : session.customer?.id
           );
+          // One-time purchases are credited here. Recurring plans are credited
+          // on invoice.paid instead, which also covers every renewal — doing
+          // both would double-credit the first month.
+          if (session.mode === "payment") {
+            await creditMentorEarning(
+              mentorId,
+              session.amount_total ?? 0,
+              session.id,
+              "One-time purchase",
+            );
+          }
         } else {
           logStep("Session skipped", {
             hasUser: !!userId,
@@ -118,6 +173,38 @@ serve(async (req) => {
             payment_status: session.payment_status,
           });
         }
+        break;
+      }
+
+      // Every recurring charge — the first month and each renewal. This is the
+      // sole credit path for subscriptions, so mentors keep earning monthly.
+      case "invoice.paid": {
+        const invoice = event.data.object as Stripe.Invoice;
+        const subId = typeof (invoice as any).subscription === "string"
+          ? (invoice as any).subscription
+          : (invoice as any).subscription?.id;
+        if (!subId) {
+          logStep("Invoice without subscription — skipping", { id: invoice.id });
+          break;
+        }
+        const sub = await stripe.subscriptions.retrieve(subId);
+        const mentorId = sub.metadata?.mentor_id;
+        const userId = sub.metadata?.user_id;
+        if (!mentorId) {
+          logStep("Subscription invoice without mentor metadata — skipping", { id: invoice.id });
+          break;
+        }
+        // Renewals only fire invoice.paid, so make sure access is (re)granted.
+        if (userId) {
+          await activateSubscription(userId, mentorId, null,
+            typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id);
+        }
+        await creditMentorEarning(
+          mentorId,
+          invoice.amount_paid ?? 0,
+          invoice.id ?? `inv_${subId}`,
+          "Subscription payment",
+        );
         break;
       }
 
@@ -160,6 +247,8 @@ serve(async (req) => {
           const mentorId = pi.metadata?.mentor_id;
           if (userId && mentorId) {
             await cancelSubscription(userId, mentorId);
+            // Take the mentor's share back out of their balance.
+            await reverseMentorEarning(mentorId, charge.amount_refunded ?? 0, charge.id);
           }
         }
         break;

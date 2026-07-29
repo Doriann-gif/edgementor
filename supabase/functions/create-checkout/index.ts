@@ -69,20 +69,10 @@ serve(async (req) => {
       });
     }
 
-    // Fetch Stripe Connect account from separate payment config table
-    const { data: paymentConfig } = await supabaseClient
-      .from("mentor_payment_config")
-      .select("stripe_connect_account_id")
-      .eq("mentor_id", mentorId)
-      .maybeSingle();
-
-    // A mentor with no Connect account can't receive their share — the charge
-    // would land 100% in the platform balance with no way to route it to them.
-    // Block checkout instead of taking money we can't split.
-    if (!paymentConfig?.stripe_connect_account_id) {
-      return reject("This mentor is still setting up payments and can't accept subscriptions yet. Try a free intro call and check back soon.");
-    }
-
+    // Payments are collected 100% by the platform. The mentor's 80% share is
+    // credited to their internal ledger by the webhook and withdrawn via their
+    // chosen rail (crypto / bank / PayPal), so no Stripe Connect account is
+    // required for a mentor to start selling.
     let discountPercent = 0;
     let appliedPromoCode: string | null = null;
     if (promoCode && typeof promoCode === "string") {
@@ -162,25 +152,7 @@ serve(async (req) => {
         : { subscription_data: { metadata: flowMetadata } }),
     };
 
-    const connectAccountId = paymentConfig?.stripe_connect_account_id;
-    if (connectAccountId) {
-      const applicationFeePercent = 20;
-      if (isOneTime) {
-        const feeAmount = Math.round(unitAmount * applicationFeePercent / 100);
-        sessionParams.payment_intent_data = {
-          ...sessionParams.payment_intent_data,
-          application_fee_amount: feeAmount,
-          transfer_data: { destination: connectAccountId },
-        };
-      } else {
-        sessionParams.subscription_data = {
-          ...sessionParams.subscription_data,
-          transfer_data: { destination: connectAccountId },
-          application_fee_percent: applicationFeePercent,
-        };
-      }
-      console.log(`[CREATE-CHECKOUT] Splitting payments to Connect account ${connectAccountId}, platform fee: ${applicationFeePercent}%, mode: ${isOneTime ? "one_time" : "subscription"}`);
-    }
+    console.log(`[CREATE-CHECKOUT] Platform-collect checkout, mode: ${isOneTime ? "one_time" : "subscription"}, amount: ${unitAmount}`);
 
     const session = await stripe.checkout.sessions.create(sessionParams);
 
