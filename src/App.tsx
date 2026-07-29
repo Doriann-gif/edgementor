@@ -10,6 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import PinkGlow from "@/components/PinkGlow";
 import UptrendLine from "@/components/UptrendLine";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/CookieConsent";
 import MfaGate from "@/components/MfaGate";
@@ -40,7 +41,18 @@ const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const FreeContent = lazy(() => import("./pages/FreeContent"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient();
+// Defaults refetch on every window focus and treat data as instantly stale,
+// so tabbing back re-runs every query on the page. At real traffic that's a
+// needless multiplier on database load for data that rarely changes.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -68,6 +80,7 @@ const HideFooterOnAdmin = () => {
 };
 
 const App = () => (
+  <ErrorBoundary>
   <HelmetProvider>
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -118,6 +131,7 @@ const App = () => (
     </ThemeProvider>
   </QueryClientProvider>
   </HelmetProvider>
+  </ErrorBoundary>
 );
 
 export default App;

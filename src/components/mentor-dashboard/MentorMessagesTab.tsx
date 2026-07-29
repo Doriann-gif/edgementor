@@ -36,11 +36,15 @@ const MentorMessagesTab = ({ mentorId, mentorName }: { mentorId: string; mentorN
     queryKey: ["mentor-messages", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      // Cap the inbox. A popular mentor accumulates thousands of messages and
+      // this ran unbounded, pulling the entire history into the browser on
+      // every tab open.
       const { data, error } = await supabase
         .from("messages")
         .select("*")
         .or(`recipient_id.eq.${user!.id},sender_mentor_id.eq.${mentorId}`)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(200);
       if (error) throw error;
       return data;
     },

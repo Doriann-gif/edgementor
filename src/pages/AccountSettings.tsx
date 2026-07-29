@@ -142,14 +142,17 @@ const AccountSettings = () => {
     queryKey: ["message-stats"],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("id, is_read")
-        .eq("recipient_id", user!.id);
-      if (error) throw error;
-      const total = data?.length || 0;
-      const unread = data?.filter((m) => !m.is_read).length || 0;
-      return { total, unread };
+      // Count server-side. Downloading every row just to call .length loads
+      // the user's whole inbox into memory for two numbers.
+      const [totalRes, unreadRes] = await Promise.all([
+        supabase.from("messages").select("*", { count: "exact", head: true })
+          .eq("recipient_id", user!.id),
+        supabase.from("messages").select("*", { count: "exact", head: true })
+          .eq("recipient_id", user!.id).eq("is_read", false),
+      ]);
+      if (totalRes.error) throw totalRes.error;
+      if (unreadRes.error) throw unreadRes.error;
+      return { total: totalRes.count || 0, unread: unreadRes.count || 0 };
     },
   });
 
@@ -234,6 +237,27 @@ const AccountSettings = () => {
     }
   }, [mentorProfile]);
 
+  // Has the user edited the profile form without saving? Compared against the
+  // loaded row so switching tabs or closing the page can warn instead of
+  // silently discarding their edits.
+  const p = profile as any;
+  const profileDirty = !!profile && (
+    displayName !== (profile.display_name || "") ||
+    country !== (p?.country || "") ||
+    age !== (p?.age ? String(p.age) : "") ||
+    tradingExperience !== (p?.trading_experience || "") ||
+    bio !== (p?.bio || "") ||
+    timezone !== (p?.timezone || "") ||
+    JSON.stringify([...tradingInterests].sort()) !== JSON.stringify([...(p?.trading_interests || [])].sort())
+  );
+
+  useEffect(() => {
+    if (!profileDirty) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [profileDirty]);
+
   const uploadAvatar = async (file: File) => {
     if (!user) return;
     setUploading(true);
@@ -254,10 +278,24 @@ const AccountSettings = () => {
 
   const updateProfileMutation = useMutation({
     mutationFn: async () => {
+      // Validate before writing. The inputs carry min/max attributes but those
+      // are advisory only — nothing stopped a pasted "500" or "abc" from
+      // reaching the column, and the platform is 18+ (enforced at signup).
+      const trimmedName = displayName.trim();
+      if (!trimmedName) throw new Error("Display name can't be empty.");
+      if (trimmedName.length > 50) throw new Error("Display name must be 50 characters or fewer.");
+      let parsedAge: number | null = null;
+      if (age.trim()) {
+        parsedAge = parseInt(age, 10);
+        if (Number.isNaN(parsedAge)) throw new Error("Age must be a number.");
+        if (parsedAge < 18) throw new Error("You must be 18 or older to use EdgeMentor.");
+        if (parsedAge > 120) throw new Error("Please enter a valid age.");
+      }
+
       const { error } = await supabase.from("profiles").update({
-        display_name: displayName, avatar_url: avatarUrl || null,
+        display_name: trimmedName, avatar_url: avatarUrl || null,
         country: country || null,
-        age: age ? parseInt(age, 10) : null,
+        age: parsedAge,
         trading_experience: tradingExperience || null,
         bio: bio.trim() || null,
         timezone: timezone || null,
@@ -268,7 +306,8 @@ const AccountSettings = () => {
       if (error) throw error;
     },
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["my-profile"] }); toast.success("Profile updated!"); },
-    onError: () => toast.error("Failed to update profile."),
+    // Surface the real validation message instead of a generic failure.
+    onError: (err: any) => toast.error(err?.message || "Failed to update profile."),
   });
 
   const changePasswordMutation = useMutation({
@@ -827,15 +866,48 @@ const AccountSettings = () => {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-4 border-t border-border">
+              <div className="flex items-center justify-between pt-4 border-t border-border gap-3">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  <span>Your data is stored securely.</span>
+                  {profileDirty ? (
+                    <>
+                      <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                      <span className="text-amber-400 font-medium">Unsaved changes</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="h-3.5 w-3.5" />
+                      <span>Your data is stored securely.</span>
+                    </>
+                  )}
                 </div>
-                <Button onClick={() => updateProfileMutation.mutate()} disabled={updateProfileMutation.isPending} className="text-sm font-semibold">
-                  <Save className="h-3.5 w-3.5 mr-1.5" />
-                  {updateProfileMutation.isPending ? "Saving..." : "Save changes"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  {profileDirty && (
+                    <Button
+                      variant="ghost"
+                      className="text-sm text-muted-foreground"
+                      onClick={() => {
+                        // Restore the last saved values.
+                        setDisplayName(profile?.display_name || "");
+                        setCountry(p?.country || "");
+                        setAge(p?.age ? String(p.age) : "");
+                        setTradingExperience(p?.trading_experience || "");
+                        setBio(p?.bio || "");
+                        setTimezone(p?.timezone || "");
+                        setTradingInterests(p?.trading_interests || []);
+                      }}
+                    >
+                      Discard
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => updateProfileMutation.mutate()}
+                    disabled={updateProfileMutation.isPending || !profileDirty}
+                    className="text-sm font-semibold"
+                  >
+                    <Save className="h-3.5 w-3.5 mr-1.5" />
+                    {updateProfileMutation.isPending ? "Saving..." : profileDirty ? "Save changes" : "Saved"}
+                  </Button>
+                </div>
               </div>
             </motion.div>
 
