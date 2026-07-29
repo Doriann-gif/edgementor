@@ -177,6 +177,27 @@ serve(async (req) => {
           ctaPath: "/mentor-dashboard",
         });
       }
+    } else if (type === "payout_paid") {
+      // Confirm to the mentor that a withdrawal was actually sent.
+      // Transactional (money movement) — master switch only.
+      const uid = await mentorUserId(record.mentor_id);
+      const to = await resolveRecipient(uid);
+      if (to) {
+        const amount = Number(record.amount ?? 0).toFixed(2);
+        const rail = record.method === "crypto" ? "crypto wallet"
+          : record.method === "bank" ? "bank account"
+          : record.method === "paypal" ? "PayPal account"
+          : "payout method";
+        await sendEmail(to, {
+          subject: `Your $${amount} payout is on the way`,
+          heading: "Payout sent 💸",
+          body: `We've sent <strong>$${amount}</strong> to your ${rail}.${
+            record.tx_reference ? ` Reference: <strong>${record.tx_reference}</strong>.` : ""
+          } Bank transfers usually land in 1–3 business days; crypto is typically much faster.`,
+          ctaLabel: "View earnings",
+          ctaPath: "/mentor-dashboard",
+        });
+      }
     } else {
       logStep("Unknown type", { type });
     }

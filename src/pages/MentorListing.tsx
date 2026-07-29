@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -247,6 +247,17 @@ const MentorListingPage = () => {
 
   const sorted = sortMentors(filtered, sortBy);
   const activeFilterCount = activeInstruments.length + activeConcepts.length + activeCountries.length + (priceRange[0] < 500 ? 1 : 0);
+
+  // Render the grid incrementally. Filtering stays client-side so search feels
+  // instant, but mounting every animated card at once would stall the page
+  // once the marketplace has hundreds of mentors.
+  const PAGE_SIZE = 24;
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const visible = sorted.slice(0, visibleCount);
+  // Any filter/sort change should start again from the top of the new result set.
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, activeInstruments, activeConcepts, activeCountries, priceRange, sortBy]);
 
   // Real headline stats derived from live mentor data (no fabricated numbers)
   const marketStats = computeMarketplaceStats(mentors);
@@ -618,11 +629,27 @@ const MentorListingPage = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-14">
-            {sorted.map((mentor, i) => (
-              <MentorCard key={mentor.id} mentor={mentor} index={i} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-14">
+              {visible.map((mentor, i) => (
+                <MentorCard key={mentor.id} mentor={mentor} index={i} />
+              ))}
+            </div>
+            {visibleCount < sorted.length && (
+              <div className="mt-14 flex flex-col items-center gap-3">
+                <p className="text-xs text-muted-foreground">
+                  Showing {visible.length} of {sorted.length} mentors
+                </p>
+                <Button
+                  variant="outline"
+                  className="font-semibold text-sm"
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                >
+                  Load more mentors
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
         {/* Bottom CTA */}
