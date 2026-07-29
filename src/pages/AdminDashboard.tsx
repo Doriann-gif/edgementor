@@ -2,9 +2,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, LogOut, Tag, ClipboardList, Users, GraduationCap, MessageSquare, BarChart3, Crown, DollarSign, Inbox } from "lucide-react";
+import { ArrowLeft, LogOut, Tag, ClipboardList, Users, GraduationCap, MessageSquare, BarChart3, Crown, DollarSign, Inbox, UserCog } from "lucide-react";
 import AdminApplications from "@/components/admin/AdminApplications";
 import AdminMentors from "@/components/admin/AdminMentors";
+import AdminUsers from "@/components/admin/AdminUsers";
 import AdminStudents from "@/components/admin/AdminStudents";
 import AdminFeed from "@/components/admin/AdminFeed";
 import AdminStats from "@/components/admin/AdminStats";
@@ -59,6 +60,7 @@ const AdminDashboard = () => {
             <TabsTrigger value="stats" className="text-xs gap-1.5"><BarChart3 className="h-3.5 w-3.5" /> Stats</TabsTrigger>
             <TabsTrigger value="applications" className="text-xs gap-1.5"><ClipboardList className="h-3.5 w-3.5" /> Applications</TabsTrigger>
             <TabsTrigger value="mentors" className="text-xs gap-1.5"><Users className="h-3.5 w-3.5" /> Mentors</TabsTrigger>
+            <TabsTrigger value="users" className="text-xs gap-1.5"><UserCog className="h-3.5 w-3.5" /> Users</TabsTrigger>
             <TabsTrigger value="content" className="text-xs gap-1.5"><Crown className="h-3.5 w-3.5" /> Content</TabsTrigger>
             <TabsTrigger value="students" className="text-xs gap-1.5"><GraduationCap className="h-3.5 w-3.5" /> Students</TabsTrigger>
             <TabsTrigger value="feed" className="text-xs gap-1.5"><MessageSquare className="h-3.5 w-3.5" /> Feed</TabsTrigger>
@@ -69,6 +71,7 @@ const AdminDashboard = () => {
           <TabsContent value="stats"><AdminStats /></TabsContent>
           <TabsContent value="applications"><AdminApplications /></TabsContent>
           <TabsContent value="mentors"><AdminMentors /></TabsContent>
+          <TabsContent value="users"><AdminUsers /></TabsContent>
           <TabsContent value="content"><AdminContent /></TabsContent>
           <TabsContent value="students"><AdminStudents /></TabsContent>
           <TabsContent value="feed"><AdminFeed /></TabsContent>
