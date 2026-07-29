@@ -50,7 +50,11 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
       return resp.data;
     },
     onSuccess: (data) => {
-      if (data?.url) window.open(data.url, "_blank");
+      // Redirect in the SAME tab. window.open(_, "_blank") runs after the async
+      // mutation resolves — outside the click's user-gesture window — so browsers
+      // block it as a popup and the button appears to do nothing. Stripe returns
+      // the mentor to /settings?tab=billing when onboarding finishes.
+      if (data?.url) window.location.href = data.url;
       else toast.error("No onboarding URL returned. Please try again.");
     },
     onError: (e: any) => {
