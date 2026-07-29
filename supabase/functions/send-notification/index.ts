@@ -164,6 +164,19 @@ serve(async (req) => {
           ctaPath: "/mentor-dashboard",
         });
       }
+    } else if (type === "mentor_approved") {
+      // Notify a newly approved mentor that their profile is live.
+      // Transactional (account status) — gated only by the master email switch.
+      const to = await resolveRecipient(record.user_id);
+      if (to) {
+        await sendEmail(to, {
+          subject: "You're approved — welcome to EdgeMentor 🎉",
+          heading: "You're an EdgeMentor mentor! 🎉",
+          body: `Congratulations${record.name ? `, <strong>${record.name}</strong>` : ""} — your application has been approved and your profile is now <strong>live in the marketplace</strong>. Head to your Mentor Hub to add your content, connect payouts, and start welcoming students.`,
+          ctaLabel: "Open Mentor Hub",
+          ctaPath: "/mentor-dashboard",
+        });
+      }
     } else {
       logStep("Unknown type", { type });
     }
