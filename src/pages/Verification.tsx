@@ -19,7 +19,7 @@ const steps = [
   {
     icon: UserCheck,
     title: "2. Identity verification",
-    desc: "We confirm the mentor is a real, reachable person — verified through their payout onboarding (government ID via Stripe) and their public trading presence.",
+    desc: "We confirm the mentor is a real, reachable person — through application review and their public trading presence.",
   },
   {
     icon: LineChart,

@@ -36,7 +36,7 @@ const studentSteps = [
 const mentorSteps = [
   { icon: LineChart, title: "Prove your edge", desc: "Apply with a verifiable track record — Myfxbook, broker statements, or prop-firm payouts." },
   { icon: Compass, title: "Build your hub", desc: "Set your price, upload content, and shape your community — we handle payments and hosting." },
-  { icon: Wallet, title: "Earn recurring revenue", desc: "Keep the majority of every subscription and withdraw your balance through Stripe." },
+  { icon: Wallet, title: "Earn recurring revenue", desc: "Keep 80% of every subscription and withdraw your balance to crypto, your bank, or PayPal." },
 ];
 
 const HowItWorks = () => (

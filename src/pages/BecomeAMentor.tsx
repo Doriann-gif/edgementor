@@ -34,8 +34,11 @@ const payoutSteps = [
   },
   {
     icon: Banknote,
-    title: "Withdraw to your bank",
-    desc: "Connect your bank once via Stripe, then withdraw anytime — or switch on automatic monthly payouts. Funds typically arrive in 2–7 business days via Stripe.",
+    // Mirrors the real flow in the Mentor Hub Income tab: pick a rail, request
+    // a withdrawal above MIN_WITHDRAWAL ($20 in the mentor-payouts function),
+    // admin fulfils it manually from the Payouts queue.
+    title: "Withdraw your balance",
+    desc: "Choose how you get paid — crypto, bank transfer, or PayPal. Request a withdrawal any time above the $20 minimum; payouts are reviewed and sent manually, usually within 1–3 business days.",
   },
 ];
 
@@ -50,7 +53,7 @@ const platformTools = [
 
 const verificationRequirements = [
   "A verifiable track record: Myfxbook / broker-verified account, prop-firm payout certificates, or audited statements",
-  "Your real identity — verified through Stripe payout onboarding (government ID)",
+  "Your real identity — confirmed during application review, along with your public trading presence",
   "A clear description of what your mentorship includes and who it's for",
 ];
 
