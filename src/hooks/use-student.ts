@@ -122,6 +122,29 @@ export const useMarkMessageRead = () => {
   });
 };
 
+// Open "chat with mentor" path: any signed-in user can message an approved
+// mentor. Goes through a SECURITY DEFINER RPC that resolves the recipient
+// server-side, so the mentor's user_id never has to be exposed to the client.
+export const useMessageMentor = () => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ mentorId, subject, body }: { mentorId: string; subject: string; body: string }) => {
+      if (!user) throw new Error("Must be logged in");
+      const { data, error } = await supabase.rpc("message_mentor", {
+        _mentor_id: mentorId,
+        _subject: subject,
+        _body: body,
+      });
+      if (error) throw error;
+      return data as string;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messages"] });
+    },
+  });
+};
+
 export const useSendMessage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();

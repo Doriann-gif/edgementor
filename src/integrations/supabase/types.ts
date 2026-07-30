@@ -841,6 +841,10 @@ export type Database = {
         Returns: boolean
       }
       lookup_user_id_by_email: { Args: { _email: string }; Returns: string }
+      message_mentor: {
+        Args: { _mentor_id: string; _subject: string; _body: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

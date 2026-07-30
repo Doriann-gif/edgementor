@@ -18,7 +18,7 @@ import { priceSuffix, planLabel, isOneTime, subscribeVerb } from "@/lib/pricing"
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
+import { useSavedMentors, useToggleSaveMentor, useMessageMentor } from "@/hooks/use-student";
 import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -101,6 +101,96 @@ const IntroCallDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open:
             </Button>
             <p className="text-[10px] text-muted-foreground text-center">
               Your request goes straight to the mentor's dashboard.
+            </p>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+/** Open "chat with mentor" entry point available on every mentor profile.
+ *  Any signed-in user can send a direct message; it lands in the mentor's
+ *  dashboard inbox and the mentor can reply back to the sender. */
+const ChatDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: boolean; onOpenChange: (o: boolean) => void }) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const messageMentor = useMessageMentor();
+  const [subject, setSubject] = useState("");
+  const [body, setBody] = useState("");
+  const [sent, setSent] = useState(false);
+
+  const reset = () => { setSubject(""); setBody(""); setSent(false); };
+
+  const send = async () => {
+    try {
+      await messageMentor.mutateAsync({ mentorId: mentor.id, subject: subject.trim(), body: body.trim() });
+      setSent(true);
+    } catch (err: any) {
+      toast.error(err?.message || "Couldn't send your message.");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) reset(); }}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="font-heading flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" /> Message {mentor.name}
+          </DialogTitle>
+          <DialogDescription className="text-sm leading-relaxed pt-1">
+            Send {mentor.name} a direct message with your question. They'll get notified and can reply straight to your inbox.
+          </DialogDescription>
+        </DialogHeader>
+
+        {!user ? (
+          <div className="py-4 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">Sign in to message {mentor.name}.</p>
+            <Button
+              variant="glow"
+              className="w-full font-semibold"
+              onClick={() => navigate(`/auth?redirect=${encodeURIComponent(`/mentor/${mentor.id}`)}`)}
+            >
+              Sign in to continue
+            </Button>
+          </div>
+        ) : sent ? (
+          <div className="py-6 text-center space-y-3">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+              <CheckCircle2 className="h-6 w-6 text-primary" />
+            </div>
+            <p className="font-heading font-semibold text-foreground">Message sent!</p>
+            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+              {mentor.name} has been notified. Any reply will show up in your{" "}
+              <Link to="/dashboard" className="text-primary hover:underline">Messages</Link>.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <Input
+              placeholder="Subject (optional)"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              maxLength={200}
+              className="bg-muted border-border text-sm"
+            />
+            <Textarea
+              placeholder={`Write your message to ${mentor.name}…`}
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              maxLength={5000}
+              className="bg-muted border-border text-sm min-h-[120px] resize-none"
+            />
+            <Button
+              variant="glow"
+              className="w-full font-semibold"
+              onClick={send}
+              disabled={!body.trim() || messageMentor.isPending}
+            >
+              <Send className="h-4 w-4 mr-2" /> {messageMentor.isPending ? "Sending…" : "Send Message"}
+            </Button>
+            <p className="text-[10px] text-muted-foreground text-center">
+              Be respectful — messaging is rate-limited to keep mentors' inboxes spam-free.
             </p>
           </div>
         )}
@@ -225,6 +315,7 @@ const MentorProfile = () => {
   const [reviewText, setReviewText] = useState("");
   const [showAllImages, setShowAllImages] = useState(false);
   const [introOpen, setIntroOpen] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; caption?: string | null } | null>(null);
 
   const hasReviewed = reviews.some((r: any) => r.user_id === user?.id);
@@ -474,6 +565,15 @@ const MentorProfile = () => {
               {/* Quick action row */}
               <motion.div className="flex items-center gap-3 mt-5 flex-wrap justify-center" variants={fadeUp}>
                 {socialLink && <SocialButton url={socialLink} isElite={isElite} />}
+                <Button
+                  variant="glow"
+                  size="sm"
+                  className="rounded-xl px-4 font-semibold"
+                  onClick={() => setChatOpen(true)}
+                >
+                  <MessageSquare className="h-4 w-4 mr-1.5" />
+                  Chat with mentor
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
@@ -855,6 +955,7 @@ const MentorProfile = () => {
         </div>
 
         <IntroCallDialog mentor={mentor} open={introOpen} onOpenChange={setIntroOpen} />
+        <ChatDialog mentor={mentor} open={chatOpen} onOpenChange={setChatOpen} />
 
         {/* Gallery lightbox */}
         <Dialog open={!!lightboxImage} onOpenChange={(o) => !o && setLightboxImage(null)}>
@@ -890,6 +991,15 @@ const MentorProfile = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                className={`h-11 w-11 rounded-xl ${isElite ? "border-slate-600/50 hover:bg-slate-800" : "border-border hover:border-primary/30"}`}
+                onClick={() => setChatOpen(true)}
+                aria-label={`Message ${mentor.name}`}
+              >
+                <MessageSquare className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
+              </Button>
               <Button
                 variant="outline"
                 size="icon"
