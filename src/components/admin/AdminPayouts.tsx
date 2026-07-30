@@ -163,7 +163,7 @@ const AdminPayouts = () => {
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {METHOD_LABEL[selected.method] ?? selected.method} details
                 </p>
-                {Object.entries(selected.method_details || {}).map(([k, v]) => (
+                {Object.entries(selected.method_details || {}).filter(([k]) => k !== "bank_scheme").map(([k, v]) => (
                   <div key={k} className="flex items-center justify-between gap-2">
                     <span className="text-[11px] text-muted-foreground capitalize shrink-0">{k.replace(/_/g, " ")}</span>
                     <div className="flex items-center gap-1 min-w-0">

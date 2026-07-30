@@ -24,9 +24,35 @@ const MIN_WITHDRAWAL = 20; // USD — keeps manual fulfilment worth the effort.
 // can't stuff arbitrary payload into the payout record the admin acts on.
 const METHOD_FIELDS: Record<string, string[]> = {
   crypto: ["asset", "network", "wallet_address"],
-  bank: ["account_holder", "iban", "swift", "bank_name", "country"],
   paypal: ["paypal_email"],
 };
+
+// Bank rails differ by country: IBAN + BIC across Europe, routing + account
+// number in the US, sort code in the UK, and so on. Every bank submission
+// carries these common fields plus the scheme-specific ones below. The mentor
+// picks a country in the UI which resolves to one of these schemes.
+const BANK_COMMON_FIELDS = ["account_holder", "bank_name", "country", "bank_scheme"];
+const BANK_SCHEME_FIELDS: Record<string, string[]> = {
+  iban: ["iban", "swift"],
+  us: ["routing_number", "account_number", "account_type"],
+  uk: ["sort_code", "account_number"],
+  canada: ["institution_number", "transit_number", "account_number"],
+  australia: ["bsb", "account_number"],
+  india: ["ifsc", "account_number"],
+  other: ["swift", "account_number"],
+};
+
+// Resolve the required field list for a submission. Bank rails depend on the
+// chosen scheme; returns null when the method (or bank scheme) is unknown.
+function requiredFieldsFor(method: string, details: Record<string, unknown>): string[] | null {
+  if (method === "bank") {
+    const scheme = typeof details.bank_scheme === "string" ? details.bank_scheme : "";
+    const schemeFields = BANK_SCHEME_FIELDS[scheme];
+    if (!schemeFields) return null;
+    return [...BANK_COMMON_FIELDS, ...schemeFields];
+  }
+  return METHOD_FIELDS[method] ?? null;
+}
 
 // Balance = sum of ledger entries (earnings positive, payouts negative) minus
 // anything already reserved by a pending/processing request.
@@ -149,8 +175,14 @@ serve(async (req) => {
       case "save_method": {
         const method = body.method as string;
         const details = (body.details ?? {}) as Record<string, unknown>;
-        const required = METHOD_FIELDS[method];
-        if (!required) return json(400, { error: "Choose crypto, bank, or paypal." });
+        const required = requiredFieldsFor(method, details);
+        if (!required) {
+          return json(400, {
+            error: method === "bank"
+              ? "Choose a supported bank country."
+              : "Choose crypto, bank, or paypal.",
+          });
+        }
 
         const clean: Record<string, unknown> = {};
         for (const key of required) {

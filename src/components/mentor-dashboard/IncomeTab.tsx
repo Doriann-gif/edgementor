@@ -100,7 +100,10 @@ const IncomeTab = ({ mentorId }: { mentorId: string }) => {
     if (!method) return null;
     const d = method.details;
     if (method.method === "crypto") return `${d.asset} · ${d.network} · ${d.wallet_address?.slice(0, 10)}…`;
-    if (method.method === "bank") return `${d.bank_name} · ${d.iban?.slice(0, 8)}…`;
+    if (method.method === "bank") {
+      const acct = d.iban || d.account_number || "";
+      return [d.bank_name, acct && `…${acct.slice(-4)}`, d.country].filter(Boolean).join(" · ");
+    }
     return d.paypal_email;
   };
 
