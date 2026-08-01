@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import { useMentors } from "@/hooks/use-mentors";
 import TierBadge from "@/components/TierBadge";
+import CompareToggleButton from "@/components/compare/CompareToggleButton";
 import PageTransition from "@/components/PageTransition";
 import { priceSuffix } from "@/lib/pricing";
 import { computeMarketplaceStats, formatStatCount } from "@/lib/stats";
@@ -140,12 +141,15 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
             <span className="font-heading font-bold text-xl text-foreground">${mentor.monthly_price}</span>
             <span className="text-xs text-muted-foreground ml-0.5">{priceSuffix(mentor)}</span>
           </div>
-          <div className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-300 ${
-            isElite
-              ? "bg-slate-200 text-slate-900 group-hover:bg-white group-hover:shadow-lg"
-              : "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground"
-          }`}>
-            View Profile <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+          <div className="flex items-center gap-2">
+            <CompareToggleButton mentor={mentor} />
+            <div className={`inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all duration-300 ${
+              isElite
+                ? "bg-slate-200 text-slate-900 group-hover:bg-white group-hover:shadow-lg"
+                : "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground"
+            }`}>
+              View Profile <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+            </div>
           </div>
         </div>
       </motion.div>

@@ -8,6 +8,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { CompareProvider } from "@/contexts/CompareContext";
+import CompareBar from "@/components/compare/CompareBar";
 import PinkGlow from "@/components/PinkGlow";
 import UptrendLine from "@/components/UptrendLine";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -85,6 +87,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
     <AuthProvider>
+      <CompareProvider>
       <MotionConfig reducedMotion="user">
       <TooltipProvider>
         <Toaster />
@@ -122,11 +125,13 @@ const App = () => (
               </Routes>
             </Suspense>
             <HideFooterOnAdmin />
+            <CompareBar />
             <CookieConsent />
           </MfaGate>
         </BrowserRouter>
       </TooltipProvider>
       </MotionConfig>
+      </CompareProvider>
     </AuthProvider>
     </ThemeProvider>
   </QueryClientProvider>
