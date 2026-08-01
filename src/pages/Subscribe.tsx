@@ -84,7 +84,11 @@ const Subscribe = () => {
   };
 
   if (isLoading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center"><p className="text-muted-foreground text-sm">Loading...</p></div>;
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
   }
 
   if (!mentor) {
@@ -155,18 +159,21 @@ const Subscribe = () => {
           </div>
         </div>
 
-        {/* What's included */}
-        <div className="rounded-2xl border border-border bg-card p-5 mb-4">
-          <h3 className="font-heading font-semibold text-foreground text-sm mb-3">What's included</h3>
-          <div className="space-y-2">
-            {mentor.highlights.map((h) => (
-              <div key={h} className="flex items-center gap-2.5 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-foreground">{h}</span>
-              </div>
-            ))}
+        {/* What's included — only when the mentor has actually listed items,
+            so we never render an empty titled card. */}
+        {mentor.highlights?.length > 0 && (
+          <div className="rounded-2xl border border-border bg-card p-5 mb-4">
+            <h3 className="font-heading font-semibold text-foreground text-sm mb-3">What's included</h3>
+            <div className="space-y-2">
+              {mentor.highlights.map((h) => (
+                <div key={h} className="flex items-center gap-2.5 text-sm">
+                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                  <span className="text-foreground">{h}</span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Promo Code */}
         <div className="rounded-2xl border border-border bg-card p-5 mb-4">

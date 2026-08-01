@@ -815,6 +815,7 @@ const MentorProfile = () => {
                   <CheckCircle2 className={`h-5 w-5 ${isElite ? "text-slate-300" : "text-primary"}`} />
                   What You Get
                 </h2>
+                {mentor.highlights?.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {mentor.highlights.map((h, i) => (
                     <motion.div
@@ -833,6 +834,11 @@ const MentorProfile = () => {
                     </motion.div>
                   ))}
                 </div>
+                ) : (
+                  <p className={`text-sm leading-relaxed ${isElite ? "text-slate-400" : "text-muted-foreground"}`}>
+                    {mentor.name} is finalizing what's included — book a free 15-min intro to hear exactly what you'll get.
+                  </p>
+                )}
 
                 {/* Price CTA inside included tab */}
                 <div className={`mt-6 rounded-xl border p-5 flex flex-col sm:flex-row items-center justify-between gap-4 ${
