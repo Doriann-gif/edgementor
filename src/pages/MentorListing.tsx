@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState, memo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
@@ -53,7 +53,7 @@ const sortMentors = (mentors: Mentor[], sort: SortOption): Mentor[] => {
   }
 };
 
-const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
+const MentorCard = memo(({ mentor, index }: { mentor: Mentor; index: number }) => {
   const tier = mentor.tier || "verified";
   const isElite = tier === "elite";
 
@@ -163,7 +163,8 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
       </motion.div>
     </Link>
   );
-};
+});
+MentorCard.displayName = "MentorCard";
 
 const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
   const eliteMentors = mentors.filter((m) => (m.tier || "verified") === "elite");
@@ -253,18 +254,21 @@ const MentorListingPage = () => {
     arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item];
 
   // Derive unique countries from mentors data
-  const availableCountries = [...new Set(mentors.map((m) => m.country).filter(Boolean) as string[])].sort();
+  const availableCountries = useMemo(
+    () => [...new Set(mentors.map((m) => m.country).filter(Boolean) as string[])].sort(),
+    [mentors],
+  );
 
-  const filtered = mentors.filter((m) => {
+  const filtered = useMemo(() => mentors.filter((m) => {
     const matchesSearch = !search || m.name.toLowerCase().includes(search.toLowerCase()) || m.bio.toLowerCase().includes(search.toLowerCase());
     const matchesInstrument = activeInstruments.length === 0 || activeInstruments.some((i) => m.instruments.includes(i));
     const matchesConcept = activeConcepts.length === 0 || activeConcepts.some((c) => m.concepts.includes(c));
     const matchesPrice = m.monthly_price <= priceRange[0];
     const matchesCountry = activeCountries.length === 0 || (m.country && activeCountries.includes(m.country));
     return matchesSearch && matchesInstrument && matchesConcept && matchesPrice && matchesCountry;
-  });
+  }), [mentors, search, activeInstruments, activeConcepts, activeCountries, priceRange]);
 
-  const sorted = sortMentors(filtered, sortBy);
+  const sorted = useMemo(() => sortMentors(filtered, sortBy), [filtered, sortBy]);
   const activeFilterCount = activeInstruments.length + activeConcepts.length + activeCountries.length + (priceRange[0] < 500 ? 1 : 0);
 
   // Render the grid incrementally. Filtering stays client-side so search feels
@@ -279,7 +283,7 @@ const MentorListingPage = () => {
   }, [search, activeInstruments, activeConcepts, activeCountries, priceRange, sortBy]);
 
   // Real headline stats derived from live mentor data (no fabricated numbers)
-  const marketStats = computeMarketplaceStats(mentors);
+  const marketStats = useMemo(() => computeMarketplaceStats(mentors), [mentors]);
   const heroStats = [
     { value: `${marketStats.mentorCount}`, label: marketStats.mentorCount === 1 ? "Mentor" : "Mentors" },
     { value: marketStats.avgRating != null ? `${marketStats.avgRating}` : "—", label: "Avg Rating" },

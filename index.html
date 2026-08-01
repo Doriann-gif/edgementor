@@ -3,7 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- TODO: Set the document title to the name of your application -->
+
+    <!-- Warm up the origins first paint & first data fetch depend on. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fklywhkcvwncqznrnihw.supabase.co" crossorigin />
+    <!-- Fonts loaded from the HTML head (not a CSS @import) so the browser
+         discovers them immediately instead of at the end of a render-blocking
+         chain. display=swap keeps text visible while they download. -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+    />
+
     <title>EdgeMentor — Find Your Trading Mentor</title>
     <meta name="description" content="Connect with elite trading mentors in futures, forex, crypto & options. Get personalized 1-on-1 mentorship to accelerate your trading journey." />
     <meta name="author" content="EdgeMentor" />

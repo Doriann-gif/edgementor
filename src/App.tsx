@@ -75,6 +75,25 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Warm the most-likely next routes during browser idle time so navigating
+// into the booking funnel (marketplace → mentor profile) is instant — the
+// lazy chunks are already fetched by the time the user clicks.
+const RoutePrefetch = () => {
+  useEffect(() => {
+    const prefetch = () => {
+      void import("./pages/MentorListing");
+      void import("./pages/MentorProfile");
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(prefetch, { timeout: 3000 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(prefetch, 2500);
+    return () => clearTimeout(t);
+  }, []);
+  return null;
+};
+
 const HideFooterOnAdmin = () => {
   const location = useLocation();
   const hideOn = ["/admin", "/mentor-dashboard", "/settings"];
@@ -95,6 +114,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <ScrollToTop />
+          <RoutePrefetch />
           <PinkGlow />
           <UptrendLine />
           <MfaGate>

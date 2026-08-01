@@ -21,7 +21,14 @@ const slideInLeft = {
   show: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
 
-const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
+const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => {
+  // "Most Popular" must reflect reality: the featured mentor with the most
+  // actual students (and only when any exist), not a fixed card position.
+  const mostPopularId = [...mentors]
+    .filter((m) => (m.students ?? 0) > 0)
+    .sort((a, b) => b.students - a.students)[0]?.id ?? null;
+
+  return (
   <section className="py-28 sm:py-36 px-4 sm:px-6 relative">
     <div className="absolute top-0 right-1/4 w-[400px] h-[400px] bg-pink-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
     <div className="absolute bottom-0 left-1/4 w-[300px] h-[300px] bg-primary/[0.03] rounded-full blur-[100px] pointer-events-none" />
@@ -70,7 +77,7 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
                   <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-primary/[0.05] to-transparent rounded-tr-full pointer-events-none" />
 
                   <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                    {idx === 0 && (
+                    {mentor.id === mostPopularId && (
                       <motion.div
                         className="relative flex items-center gap-1 rounded-full bg-gradient-to-r from-pink-500/20 to-pink-400/10 border border-pink-400/30 px-2.5 py-0.5 text-[10px] font-bold text-pink-400 overflow-hidden"
                         initial={{ opacity: 0, scale: 0, rotate: -12 }}
@@ -83,7 +90,7 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
                         <TrendingUp className="h-3 w-3" /> Most Popular
                       </motion.div>
                     )}
-                    {idx === 2 && (
+                    {isNewMentor(mentor) && (
                       <motion.div
                         className="relative flex items-center gap-1 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 border border-primary/30 px-2.5 py-0.5 text-[10px] font-bold text-primary overflow-hidden"
                         initial={{ opacity: 0, scale: 0, rotate: 12 }}
@@ -172,6 +179,7 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
       </div>
     </div>
   </section>
-);
+  );
+};
 
 export default FeaturedMentors;
