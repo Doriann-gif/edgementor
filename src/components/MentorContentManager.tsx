@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { safeExternalUrl } from "@/lib/safeUrl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -352,7 +353,7 @@ const MentorContentManager = ({ mentorId }: MentorContentManagerProps) => {
                         {item.description && <span className="text-[10px] text-muted-foreground truncate max-w-[240px]">{item.description}</span>}
                         {item.content_url && (
                           <a
-                            href={item.content_url}
+                            href={safeExternalUrl(item.content_url) ?? undefined}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-[10px] text-primary hover:underline inline-flex items-center gap-0.5 shrink-0"

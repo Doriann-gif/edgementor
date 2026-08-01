@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { safeExternalUrl } from "@/lib/safeUrl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -238,7 +239,7 @@ const AdminContent = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <a href={item.content_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs inline-flex items-center gap-1">
+                          <a href={safeExternalUrl(item.content_url) ?? undefined} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs inline-flex items-center gap-1">
                             Open <ExternalLink className="h-3 w-3" />
                           </a>
                         </TableCell>

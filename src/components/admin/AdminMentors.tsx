@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { safeExternalUrl } from "@/lib/safeUrl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -283,7 +284,7 @@ const AdminMentors = () => {
                   <div className="flex items-center gap-1">
                     {m.proof_track_record_url ? (
                       <>
-                        <a href={m.proof_track_record_url} target="_blank" rel="noopener noreferrer" title="Open submitted track record">
+                        <a href={safeExternalUrl(m.proof_track_record_url) ?? undefined} target="_blank" rel="noopener noreferrer" title="Open submitted track record">
                           <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-blue-400 hover:text-blue-300">
                             <ExternalLink className="h-3.5 w-3.5" />
                           </Button>

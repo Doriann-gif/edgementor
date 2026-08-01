@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { safeExternalUrl } from "@/lib/safeUrl";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -159,7 +160,7 @@ const AdminApplications = () => {
                   <TableCell className="text-xs font-medium">${app.monthly_price}/mo</TableCell>
                   <TableCell>
                     {app.proof_url ? (
-                      <a href={app.proof_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 text-xs">
+                      <a href={safeExternalUrl(app.proof_url) ?? undefined} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 text-xs">
                         View <ExternalLink className="h-3 w-3" />
                       </a>
                     ) : (

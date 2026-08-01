@@ -8,6 +8,7 @@ import MultiSelect from "@/components/MultiSelect";
 import { TIMEZONES, LANGUAGES, RESPONSE_TIMES } from "@/lib/profile-options";
 import TierBadge from "@/components/TierBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { safeExternalUrl } from "@/lib/safeUrl";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMentorReviews } from "@/hooks/use-mentors";
 import { motion } from "framer-motion";
@@ -308,7 +309,7 @@ const MentorProfileEditor = ({ mentor, onUpdate, isUpdating, onToggleAvailabilit
             <p className="text-sm text-muted-foreground leading-relaxed">{mentor.full_bio}</p>
             {mentor.social_link && (
               <a
-                href={mentor.social_link}
+                href={safeExternalUrl(mentor.social_link) ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm font-semibold text-primary hover:bg-primary/10 hover:border-primary/50 transition-all"

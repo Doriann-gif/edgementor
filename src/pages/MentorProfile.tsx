@@ -23,6 +23,7 @@ import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import VerifiedBadgePopover from "@/components/VerifiedBadgePopover";
+import { safeExternalUrl } from "@/lib/safeUrl";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
 import type { Mentor } from "@/types/mentor";
@@ -227,10 +228,13 @@ const getSocialPlatform = (url: string) => {
 };
 
 const SocialButton = ({ url, isElite }: { url: string; isElite: boolean }) => {
-  const platform = getSocialPlatform(url);
+  // Neutralize javascript:/data: URLs a mentor could set as their social link.
+  const safe = safeExternalUrl(url);
+  if (!safe) return null;
+  const platform = getSocialPlatform(safe);
   return (
     <a
-      href={url}
+      href={safe}
       target="_blank"
       rel="noopener noreferrer"
       className={`inline-flex items-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] ${
@@ -721,8 +725,8 @@ const MentorProfile = () => {
                   </p>
                 </div>
               </div>
-              {mentor.proof_track_record_url && mentor.proof_verified_at && (
-                <a href={mentor.proof_track_record_url} target="_blank" rel="noopener noreferrer" className="shrink-0">
+              {safeExternalUrl(mentor.proof_track_record_url) && mentor.proof_verified_at && (
+                <a href={safeExternalUrl(mentor.proof_track_record_url)!} target="_blank" rel="noopener noreferrer" className="shrink-0">
                   <Button variant="outline" size="sm" className="rounded-xl text-xs font-semibold border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10">
                     <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> View Track Record
                   </Button>

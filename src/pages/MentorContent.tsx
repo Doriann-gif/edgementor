@@ -6,6 +6,7 @@ import { priceSuffix, subscribeVerb } from "@/lib/pricing";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Lock, BookOpen, ExternalLink, Star, Crown } from "lucide-react";
 import { CONTENT_SECTION_ORDER, getContentType } from "@/lib/content-types";
+import { safeExternalUrl } from "@/lib/safeUrl";
 
 const MentorContent = () => {
   const { id } = useParams<{ id: string }>();
@@ -115,7 +116,7 @@ const MentorContent = () => {
                   {items.map((item) => (
                     <a
                       key={item.id}
-                      href={item.content_url}
+                      href={safeExternalUrl(item.content_url) ?? undefined}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="group flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5"

@@ -17,6 +17,17 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[SEND-NOTIFICATION] ${step}${d}`);
 };
 
+// User-controlled fields (message subject, requester name/email, display name,
+// payout reference) are embedded in the email HTML below. Escape them so a
+// crafted value can't inject markup/links for phishing inside our emails.
+const esc = (s: unknown): string =>
+  String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 const SITE_URL = Deno.env.get("SITE_URL") || "https://edgementor.net";
 const FROM = Deno.env.get("NOTIFY_FROM") || "EdgeMentor <notifications@edgementor.net>";
 
@@ -133,7 +144,7 @@ serve(async (req) => {
         await sendEmail(to, {
           subject: `New message from ${record.sender_name || "your mentor"}`,
           heading: "You have a new message 💬",
-          body: `<strong>${record.sender_name || "Someone"}</strong> sent you a message${record.subject ? `: "<em>${record.subject}</em>"` : ""}. Open EdgeMentor to read and reply.`,
+          body: `<strong>${esc(record.sender_name || "Someone")}</strong> sent you a message${record.subject ? `: "<em>${esc(record.subject)}</em>"` : ""}. Open EdgeMentor to read and reply.`,
           ctaLabel: "Read message",
           ctaPath: "/dashboard",
         });
@@ -159,7 +170,7 @@ serve(async (req) => {
         await sendEmail(to, {
           subject: "New intro call request",
           heading: "Someone wants a free intro call 📅",
-          body: `<strong>${record.requester_name || "A prospective student"}</strong> requested a free intro call${record.requester_email ? ` (${record.requester_email})` : ""}. Reply from your Mentor Hub to schedule it.`,
+          body: `<strong>${esc(record.requester_name || "A prospective student")}</strong> requested a free intro call${record.requester_email ? ` (${esc(record.requester_email)})` : ""}. Reply from your Mentor Hub to schedule it.`,
           ctaLabel: "View request",
           ctaPath: "/mentor-dashboard",
         });
@@ -172,7 +183,7 @@ serve(async (req) => {
         await sendEmail(to, {
           subject: "You're approved — welcome to EdgeMentor 🎉",
           heading: "You're an EdgeMentor mentor! 🎉",
-          body: `Congratulations${record.name ? `, <strong>${record.name}</strong>` : ""} — your application has been approved and your profile is now <strong>live in the marketplace</strong>. Head to your Mentor Hub to add your content, connect payouts, and start welcoming students.`,
+          body: `Congratulations${record.name ? `, <strong>${esc(record.name)}</strong>` : ""} — your application has been approved and your profile is now <strong>live in the marketplace</strong>. Head to your Mentor Hub to add your content, connect payouts, and start welcoming students.`,
           ctaLabel: "Open Mentor Hub",
           ctaPath: "/mentor-dashboard",
         });
@@ -192,7 +203,7 @@ serve(async (req) => {
           subject: `Your $${amount} payout is on the way`,
           heading: "Payout sent 💸",
           body: `We've sent <strong>$${amount}</strong> to your ${rail}.${
-            record.tx_reference ? ` Reference: <strong>${record.tx_reference}</strong>.` : ""
+            record.tx_reference ? ` Reference: <strong>${esc(record.tx_reference)}</strong>.` : ""
           } Bank transfers usually land in 1–3 business days; crypto is typically much faster.`,
           ctaLabel: "View earnings",
           ctaPath: "/mentor-dashboard",
