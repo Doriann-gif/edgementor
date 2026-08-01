@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
 
@@ -10,6 +11,11 @@ const sectionFade = {
 
 const Terms = () => (
   <PageTransition>
+  <Helmet>
+    <title>Terms & Conditions — EdgeMentor</title>
+    <meta name="description" content="EdgeMentor's Terms & Conditions — covering accounts, subscriptions, billing, refunds, and use of the trading mentorship marketplace." />
+    <link rel="canonical" href="https://edgementor.net/terms" />
+  </Helmet>
   <div className="min-h-screen bg-background">
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
