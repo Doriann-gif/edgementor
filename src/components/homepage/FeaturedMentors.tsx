@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Star, Users, TrendingUp, ChevronRight, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { priceSuffix } from "@/lib/pricing";
+import { hasRating, hasStudents, isNewMentor } from "@/lib/mentor-signals";
 import type { Mentor } from "@/types/mentor";
 
 const staggerContainer = {
@@ -119,10 +120,17 @@ const FeaturedMentors = ({ mentors }: { mentors: Mentor[] }) => (
                     <div className="min-w-0 flex-1">
                       <h3 className="font-heading font-semibold text-foreground text-lg group-hover:text-primary transition-colors">{mentor.name}</h3>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className="flex items-center gap-1 text-xs text-amber-400 font-medium">
-                          <Star className="h-3 w-3 fill-current" /> {mentor.rating}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{mentor.students} students</span>
+                        {hasRating(mentor) && (
+                          <span className="flex items-center gap-1 text-xs text-amber-400 font-medium">
+                            <Star className="h-3 w-3 fill-current" /> {mentor.rating}
+                          </span>
+                        )}
+                        {hasStudents(mentor) && (
+                          <span className="text-xs text-muted-foreground">{mentor.students} students</span>
+                        )}
+                        {isNewMentor(mentor) && (
+                          <span className="text-[11px] font-semibold text-primary uppercase tracking-wide">New</span>
+                        )}
                       </div>
                     </div>
                   </div>

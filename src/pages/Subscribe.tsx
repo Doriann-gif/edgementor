@@ -9,8 +9,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  ArrowLeft, Star, CheckCircle2, Shield, Zap, Tag,
+  ArrowLeft, Star, CheckCircle2, Shield, Zap, Tag, Lock,
 } from "lucide-react";
+import { hasRating, hasStudents, isNewMentor } from "@/lib/mentor-signals";
 import PageTransition from "@/components/PageTransition";
 
 const Subscribe = () => {
@@ -144,9 +145,10 @@ const Subscribe = () => {
             </div>
             <div className="flex-1">
               <h2 className="font-heading font-semibold text-foreground">{mentor.name}</h2>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="flex items-center gap-1 text-xs text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>
-                <span className="text-xs text-muted-foreground">{mentor.students} students</span>
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                {hasRating(mentor) && <span className="flex items-center gap-1 text-xs text-amber-400"><Star className="h-3 w-3 fill-current" /> {mentor.rating}</span>}
+                {hasStudents(mentor) && <span className="text-xs text-muted-foreground">{mentor.students} students</span>}
+                {isNewMentor(mentor) && <span className="text-[10px] font-bold text-primary uppercase tracking-wide">New mentor</span>}
                 <span className="text-xs text-muted-foreground">{mentor.session} session</span>
               </div>
             </div>
@@ -224,7 +226,8 @@ const Subscribe = () => {
           </Button>
         )}
 
-        <div className="flex items-center justify-center gap-4 mt-4 text-xs text-muted-foreground">
+        <div className="flex items-center justify-center gap-x-4 gap-y-1.5 mt-4 text-xs text-muted-foreground flex-wrap">
+          <span className="flex items-center gap-1"><Lock className="h-3 w-3" /> Secure checkout via Stripe</span>
           {!isOneTime && <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> Cancel anytime</span>}
           <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> Instant access</span>
         </div>

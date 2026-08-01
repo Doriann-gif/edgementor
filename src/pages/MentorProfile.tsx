@@ -24,6 +24,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import VerifiedBadgePopover from "@/components/VerifiedBadgePopover";
 import { safeExternalUrl } from "@/lib/safeUrl";
+import { hasRating, hasStudents } from "@/lib/mentor-signals";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
 import type { Mentor } from "@/types/mentor";
@@ -425,8 +426,8 @@ const MentorProfile = () => {
   const isPaused = mentor.available === false;
 
   const stats = [
-    { label: "Students", value: mentor.students, icon: Users, color: "text-primary bg-primary/10" },
-    { label: "Rating", value: mentor.rating, icon: Star, color: "text-amber-400 bg-amber-400/10" },
+    { label: "Students", value: hasStudents(mentor) ? mentor.students : "—", icon: Users, color: "text-primary bg-primary/10" },
+    { label: "Rating", value: hasRating(mentor) ? mentor.rating : "New", icon: Star, color: "text-amber-400 bg-amber-400/10" },
     { label: "Experience", value: mentor.experience, icon: Clock, color: "text-blue-400 bg-blue-400/10" },
     { label: "Session", value: mentor.session, icon: MapPin, color: "text-pink-400 bg-pink-400/10" },
   ];
@@ -551,11 +552,19 @@ const MentorProfile = () => {
                 </div>
               </motion.div>
 
-              {/* Rating */}
+              {/* Rating — honest new-mentor treatment instead of a hollow 0.0 */}
               <motion.div className="flex items-center gap-2 mt-3" variants={fadeUp}>
-                <StarRating rating={Math.round(mentor.rating)} />
-                <span className="text-sm font-bold text-foreground">{mentor.rating}</span>
-                <span className="text-xs text-muted-foreground">({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</span>
+                {reviews.length > 0 ? (
+                  <>
+                    <StarRating rating={Math.round(mentor.rating)} />
+                    <span className="text-sm font-bold text-foreground">{mentor.rating}</span>
+                    <span className="text-xs text-muted-foreground">({reviews.length} {reviews.length === 1 ? "review" : "reviews"})</span>
+                  </>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary">
+                    <Sparkles className="h-3.5 w-3.5" /> New mentor — be an early student
+                  </span>
+                )}
               </motion.div>
 
               {/* Quick action row */}

@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import { useMentors } from "@/hooks/use-mentors";
 import TierBadge from "@/components/TierBadge";
 import CompareToggleButton from "@/components/compare/CompareToggleButton";
+import { hasRating, hasStudents, isNewMentor } from "@/lib/mentor-signals";
 import PageTransition from "@/components/PageTransition";
 import { priceSuffix } from "@/lib/pricing";
 import { computeMarketplaceStats, formatStatCount } from "@/lib/stats";
@@ -105,12 +106,19 @@ const MentorCard = ({ mentor, index }: { mentor: Mentor; index: number }) => {
               <span className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" /> {mentor.experience}
               </span>
-              <span className="flex items-center gap-1 text-xs font-medium text-amber-400">
-                <Star className="h-3 w-3 fill-amber-400" /> {mentor.rating}
-              </span>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Users className="h-3 w-3" /> {mentor.students}
-              </span>
+              {hasRating(mentor) && (
+                <span className="flex items-center gap-1 text-xs font-medium text-amber-400">
+                  <Star className="h-3 w-3 fill-amber-400" /> {mentor.rating}
+                </span>
+              )}
+              {hasStudents(mentor) && (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Users className="h-3 w-3" /> {mentor.students}
+                </span>
+              )}
+              {isNewMentor(mentor) && (
+                <span className="rounded-full bg-primary/10 border border-primary/20 px-2 py-0.5 text-[10px] font-bold text-primary uppercase tracking-wide">New</span>
+              )}
               {mentor.country && (
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Globe className="h-3 w-3" /> {mentor.country}
@@ -194,8 +202,15 @@ const FeaturedMentorsRow = ({ mentors }: { mentors: Mentor[] }) => {
                     <h3 className="font-heading font-bold text-foreground text-sm truncate">{mentor.name}</h3>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1 text-xs font-medium text-amber-400"><Star className="h-3 w-3 fill-amber-400" /> {mentor.rating}</span>
-                    <span className="text-xs text-muted-foreground">{mentor.students} students</span>
+                    {hasRating(mentor) && (
+                      <span className="flex items-center gap-1 text-xs font-medium text-amber-400"><Star className="h-3 w-3 fill-amber-400" /> {mentor.rating}</span>
+                    )}
+                    {hasStudents(mentor) && (
+                      <span className="text-xs text-muted-foreground">{mentor.students} students</span>
+                    )}
+                    {isNewMentor(mentor) && (
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-wide">New mentor</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -324,7 +339,7 @@ const MentorListingPage = () => {
             transition={{ delay: 0.1, duration: 0.4 }}
             className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary mb-6 backdrop-blur-sm"
           >
-            <Target className="h-3.5 w-3.5" /> {mentors.length} Verified Mentors Available
+            <Target className="h-3.5 w-3.5" /> {mentors.length} Verified Mentor{mentors.length === 1 ? "" : "s"} Available
           </motion.div>
           <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight mb-5">
             Find Your <span className="text-primary">Edge</span>
