@@ -162,7 +162,7 @@ const ChatDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: bool
             <p className="font-heading font-semibold text-foreground">Message sent!</p>
             <p className="text-xs text-muted-foreground max-w-xs mx-auto">
               {mentor.name} has been notified. Any reply will show up in your{" "}
-              <Link to="/dashboard" className="text-primary hover:underline">Messages</Link>.
+              <Link to="/messages" className="text-primary hover:underline">Messages</Link>.
             </p>
           </div>
         ) : (
