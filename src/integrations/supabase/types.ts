@@ -845,6 +845,31 @@ export type Database = {
         Args: { _mentor_id: string; _subject: string; _body: string }
         Returns: string
       }
+      get_conversations: {
+        Args: Record<string, never>
+        Returns: {
+          counterpart_id: string
+          counterpart_name: string
+          counterpart_avatar: string | null
+          last_body: string
+          last_at: string
+          last_from_me: boolean
+          unread_count: number
+        }[]
+      }
+      get_conversation: {
+        Args: { _with: string; _limit?: number }
+        Returns: {
+          id: string
+          body: string
+          subject: string
+          created_at: string
+          from_me: boolean
+          is_read: boolean
+        }[]
+      }
+      send_chat_message: { Args: { _to: string; _body: string }; Returns: string }
+      mark_conversation_read: { Args: { _with: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
