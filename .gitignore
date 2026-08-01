@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Environment variables — never commit real values. Set VITE_* in the host
+# (Netlify) dashboard. .env.example documents the required keys.
+.env
+.env.*
+!.env.example
+
 # Netlify local state
 .netlify
 
