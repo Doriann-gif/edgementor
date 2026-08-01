@@ -118,14 +118,17 @@ const ChatDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: bool
   const messageMentor = useMessageMentor();
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
-  const [sent, setSent] = useState(false);
 
-  const reset = () => { setSubject(""); setBody(""); setSent(false); };
+  const reset = () => { setSubject(""); setBody(""); };
 
   const send = async () => {
     try {
       await messageMentor.mutateAsync({ mentorId: mentor.id, subject: subject.trim(), body: body.trim() });
-      setSent(true);
+      // Continue the conversation in the real chat rather than a dead-end dialog.
+      toast.success(`Message sent to ${mentor.name}`);
+      onOpenChange(false);
+      reset();
+      navigate("/messages");
     } catch (err: any) {
       toast.error(err?.message || "Couldn't send your message.");
     }
@@ -153,17 +156,6 @@ const ChatDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: bool
             >
               Sign in to continue
             </Button>
-          </div>
-        ) : sent ? (
-          <div className="py-6 text-center space-y-3">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <CheckCircle2 className="h-6 w-6 text-primary" />
-            </div>
-            <p className="font-heading font-semibold text-foreground">Message sent!</p>
-            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              {mentor.name} has been notified. Any reply will show up in your{" "}
-              <Link to="/messages" className="text-primary hover:underline">Messages</Link>.
-            </p>
           </div>
         ) : (
           <div className="space-y-3">
