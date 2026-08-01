@@ -36,7 +36,7 @@ const HeroSection = () => {
           transition={reduced ? undefined : { duration: 4, repeat: Infinity, repeatDelay: 1 }}
         >
           <Sparkles className="h-3.5 w-3.5" />
-          <span>The #1 Trading Mentorship Platform</span>
+          <span>Verified traders · Reviewed track records</span>
           <motion.span
             className="h-2 w-2 rounded-full bg-primary"
             animate={reduced ? undefined : { scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
@@ -69,7 +69,7 @@ const HeroSection = () => {
       </motion.h1>
 
       <motion.p variants={fadeUp} className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto mb-14 leading-relaxed">
-        Connect with verified mentors, join active trading communities, and accelerate your edge with real strategies — not theory.
+        Get mentorship from verified futures, forex, crypto &amp; options traders — each with a reviewed track record. Real strategies, not theory, whether you're just starting out or scaling up.
       </motion.p>
 
       <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
