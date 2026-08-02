@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 // Sends transactional notification emails via Resend. Invoked by Postgres
-// triggers (pg_net) on new subscriptions, messages, and intro requests.
+// triggers (pg_net) on new subscriptions, mentor approvals, and payouts.
 // Fire-and-forget from the DB's perspective: any failure here is logged but
 // never blocks the originating insert.
 
@@ -17,9 +17,9 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[SEND-NOTIFICATION] ${step}${d}`);
 };
 
-// User-controlled fields (message subject, requester name/email, display name,
-// payout reference) are embedded in the email HTML below. Escape them so a
-// crafted value can't inject markup/links for phishing inside our emails.
+// User-controlled fields (display name, payout reference) are embedded in the
+// email HTML below. Escape them so a crafted value can't inject markup/links
+// for phishing inside our emails.
 const esc = (s: unknown): string =>
   String(s ?? "")
     .replace(/&/g, "&amp;")
@@ -98,7 +98,7 @@ serve(async (req) => {
 
   // Per-type preference columns on `profiles`. Fixed whitelist — never
   // interpolated from request input — so the dynamic select is safe.
-  type PrefKey = "notify_messages" | "notify_new_subscriber" | "notify_intro_request";
+  type PrefKey = "notify_new_subscriber";
 
   // Resolve a user's email, honoring the master `email_notifications` switch and,
   // when given, the per-type preference. Returns null when we shouldn't email
@@ -137,19 +137,7 @@ serve(async (req) => {
     const record = payload.record ?? {};
     logStep("Invoked", { type });
 
-    if (type === "new_message") {
-      // Notify the message recipient (student or mentor).
-      const to = await resolveRecipient(record.recipient_id, "notify_messages");
-      if (to) {
-        await sendEmail(to, {
-          subject: `New message from ${record.sender_name || "your mentor"}`,
-          heading: "You have a new message 💬",
-          body: `<strong>${esc(record.sender_name || "Someone")}</strong> sent you a message${record.subject ? `: "<em>${esc(record.subject)}</em>"` : ""}. Open EdgeMentor to read and reply.`,
-          ctaLabel: "Read message",
-          ctaPath: "/dashboard",
-        });
-      }
-    } else if (type === "new_subscription") {
+    if (type === "new_subscription") {
       // Notify the mentor that they gained a subscriber.
       const uid = await mentorUserId(record.mentor_id);
       const to = await resolveRecipient(uid, "notify_new_subscriber");
@@ -159,19 +147,6 @@ serve(async (req) => {
           heading: "New subscriber on EdgeMentor 🎉",
           body: "A new student just subscribed to your mentorship. Head to your Mentor Hub to welcome them and share your content.",
           ctaLabel: "Open Mentor Hub",
-          ctaPath: "/mentor-dashboard",
-        });
-      }
-    } else if (type === "new_intro_request") {
-      // Notify the mentor of a free-intro lead.
-      const uid = await mentorUserId(record.mentor_id);
-      const to = await resolveRecipient(uid, "notify_intro_request");
-      if (to) {
-        await sendEmail(to, {
-          subject: "New intro call request",
-          heading: "Someone wants a free intro call 📅",
-          body: `<strong>${esc(record.requester_name || "A prospective student")}</strong> requested a free intro call${record.requester_email ? ` (${esc(record.requester_email)})` : ""}. Reply from your Mentor Hub to schedule it.`,
-          ctaLabel: "View request",
           ctaPath: "/mentor-dashboard",
         });
       }

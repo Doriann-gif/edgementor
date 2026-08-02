@@ -137,25 +137,6 @@ const AccountSettings = () => {
     },
   });
 
-  // Messages count
-  const { data: messageStats = { total: 0, unread: 0 } } = useQuery({
-    queryKey: ["message-stats"],
-    enabled: !!user,
-    queryFn: async () => {
-      // Count server-side. Downloading every row just to call .length loads
-      // the user's whole inbox into memory for two numbers.
-      const [totalRes, unreadRes] = await Promise.all([
-        supabase.from("messages").select("*", { count: "exact", head: true })
-          .eq("recipient_id", user!.id),
-        supabase.from("messages").select("*", { count: "exact", head: true })
-          .eq("recipient_id", user!.id).eq("is_read", false),
-      ]);
-      if (totalRes.error) throw totalRes.error;
-      if (unreadRes.error) throw unreadRes.error;
-      return { total: totalRes.count || 0, unread: unreadRes.count || 0 };
-    },
-  });
-
   const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [country, setCountry] = useState("");
@@ -167,9 +148,7 @@ const AccountSettings = () => {
   const [countryOpen, setCountryOpen] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
-  const [notifyMessages, setNotifyMessages] = useState(true);
   const [notifyNewSubscriber, setNotifyNewSubscriber] = useState(true);
-  const [notifyIntroRequest, setNotifyIntroRequest] = useState(true);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -225,9 +204,7 @@ const AccountSettings = () => {
       setTradingInterests((profile as any).trading_interests || []);
       setEmailNotifications(profile.email_notifications ?? true);
       setMarketingEmails(profile.marketing_emails ?? false);
-      setNotifyMessages((profile as any).notify_messages ?? true);
       setNotifyNewSubscriber((profile as any).notify_new_subscriber ?? true);
-      setNotifyIntroRequest((profile as any).notify_intro_request ?? true);
     }
   }, [profile]);
 
@@ -651,12 +628,11 @@ const AccountSettings = () => {
             </motion.div>
 
             {/* Stats Grid */}
-            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={1} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <motion.div variants={fadeIn} initial="hidden" animate="show" custom={1} className="grid grid-cols-3 gap-3">
               {[
                 { label: "Days Active", value: daysSinceJoin, icon: CalendarDays, color: "text-blue-400 bg-blue-400/10" },
                 { label: "Active Subs", value: activeSubCount, icon: Star, color: "text-amber-400 bg-amber-400/10" },
                 { label: "Saved Mentors", value: savedCount, icon: Award, color: "text-pink-400 bg-pink-400/10" },
-                { label: "Messages", value: messageStats.total, icon: Mail, color: messageStats.unread > 0 ? "text-primary bg-primary/10" : "text-muted-foreground bg-muted" },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-xl border border-border bg-card p-4 hover:border-border/80 transition-colors">
                   <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${stat.color} mb-2.5`}>
@@ -664,11 +640,6 @@ const AccountSettings = () => {
                   </div>
                   <p className="font-heading text-xl font-bold text-foreground">{stat.value}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">{stat.label}</p>
-                  {stat.label === "Messages" && messageStats.unread > 0 && (
-                    <span className="inline-block mt-1 text-[10px] font-semibold text-primary bg-primary/10 rounded-full px-2 py-0.5">
-                      {messageStats.unread} unread
-                    </span>
-                  )}
                 </div>
               ))}
             </motion.div>
@@ -946,7 +917,7 @@ const AccountSettings = () => {
               <Link to="/dashboard" className="rounded-xl border border-border bg-card p-4 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group">
                 <Award className="h-5 w-5 text-primary mb-2 group-hover:scale-110 transition-transform" />
                 <h4 className="font-heading font-semibold text-sm text-foreground">Dashboard</h4>
-                <p className="text-[11px] text-muted-foreground mt-0.5">View your subscriptions & messages</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">View your subscriptions & saved mentors</p>
               </Link>
               <Link to="/learn" className="rounded-xl border border-border bg-card p-4 hover:border-primary/30 hover:bg-primary/[0.02] transition-all group">
                 <BookOpen className="h-5 w-5 text-blue-400 mb-2 group-hover:scale-110 transition-transform" />
@@ -1018,37 +989,19 @@ const AccountSettings = () => {
                 onChange={(v) => { setEmailNotifications(v); notifPrefMutation.mutate({ email_notifications: v }); }}
               />
 
-              <div className="space-y-3 pl-1">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Send me an email when…</p>
-                <ToggleRow
-                  icon={Mail}
-                  title="I get a new message"
-                  desc="A mentor or student sends you a direct message."
-                  checked={notifyMessages}
-                  disabled={!emailNotifications}
-                  onChange={(v) => { setNotifyMessages(v); notifPrefMutation.mutate({ notify_messages: v }); }}
-                />
-                {isMentor && (
-                  <>
-                    <ToggleRow
-                      icon={Star}
-                      title="A student subscribes"
-                      desc="You gain a new paying subscriber to your mentorship."
-                      checked={notifyNewSubscriber}
-                      disabled={!emailNotifications}
-                      onChange={(v) => { setNotifyNewSubscriber(v); notifPrefMutation.mutate({ notify_new_subscriber: v }); }}
-                    />
-                    <ToggleRow
-                      icon={CalendarDays}
-                      title="Someone requests an intro call"
-                      desc="A prospective student books a free intro call with you."
-                      checked={notifyIntroRequest}
-                      disabled={!emailNotifications}
-                      onChange={(v) => { setNotifyIntroRequest(v); notifPrefMutation.mutate({ notify_intro_request: v }); }}
-                    />
-                  </>
-                )}
-              </div>
+              {isMentor && (
+                <div className="space-y-3 pl-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Send me an email when…</p>
+                  <ToggleRow
+                    icon={Star}
+                    title="A student subscribes"
+                    desc="You gain a new paying subscriber to your mentorship."
+                    checked={notifyNewSubscriber}
+                    disabled={!emailNotifications}
+                    onChange={(v) => { setNotifyNewSubscriber(v); notifPrefMutation.mutate({ notify_new_subscriber: v }); }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Marketing */}
@@ -1066,24 +1019,6 @@ const AccountSettings = () => {
               />
             </div>
 
-            {/* In-app */}
-            <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Bell className="h-4 w-4 text-primary" />
-                <h3 className="font-heading font-semibold text-foreground">In-App Notifications</h3>
-              </div>
-              <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/30 border border-border">
-                <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Bell className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-heading font-semibold text-foreground text-sm">Real-time alerts</h4>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    New messages and activity appear instantly under the bell icon in the top bar — always on, no setup needed.
-                  </p>
-                </div>
-              </div>
-            </div>
           </TabsContent>
 
           {/* ──────────── BILLING TAB ──────────── */}
@@ -1666,7 +1601,6 @@ const AccountSettings = () => {
                     { action: `Joined EdgeMentor`, time: memberSince.toLocaleDateString(), icon: Award, color: "text-pink-400 bg-pink-400/10" },
                     ...(activeSubCount > 0 ? [{ action: `${activeSubCount} active subscription(s)`, time: "Current", icon: Star, color: "text-amber-400 bg-amber-400/10" }] : []),
                     ...(savedCount > 0 ? [{ action: `${savedCount} mentor(s) saved`, time: "Total", icon: Heart, color: "text-pink-400 bg-pink-400/10" }] : []),
-                    ...(messageStats.total > 0 ? [{ action: `${messageStats.total} message(s) received`, time: `${messageStats.unread} unread`, icon: Mail, color: "text-blue-400 bg-blue-400/10" }] : []),
                   ].map((item, i) => (
                     <motion.div
                       key={i}
@@ -1719,7 +1653,7 @@ const AccountSettings = () => {
                   <h3 className="font-heading font-semibold text-foreground">Data & Export</h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Download a copy of your account data — profile info, subscriptions, saved mentors, and messages — as a JSON file.
+                  Download a copy of your account data — profile info, subscriptions, and saved mentors — as a JSON file.
                 </p>
                 <Button
                   variant="outline" size="sm" className="text-xs font-semibold"
@@ -1727,10 +1661,9 @@ const AccountSettings = () => {
                   onClick={async () => {
                     setExportingData(true);
                     try {
-                      const [subs, saved, msgs] = await Promise.all([
+                      const [subs, saved] = await Promise.all([
                         supabase.from("subscriptions").select("status, started_at, mentors(name, monthly_price)").eq("user_id", user.id),
                         supabase.from("saved_mentors").select("mentor_id, created_at").eq("user_id", user.id),
-                        supabase.from("messages").select("subject, body, sender_name, created_at, is_read").or(`recipient_id.eq.${user.id},sender_user_id.eq.${user.id}`),
                       ]);
                       const exportData = {
                         exported_at: new Date().toISOString(),
@@ -1738,7 +1671,6 @@ const AccountSettings = () => {
                         profile,
                         subscriptions: subs.data ?? [],
                         saved_mentors: saved.data ?? [],
-                        messages: msgs.data ?? [],
                       };
                       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
                       const url = URL.createObjectURL(blob);

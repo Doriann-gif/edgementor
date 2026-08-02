@@ -41,7 +41,6 @@ const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const MentorContentPage = lazy(() => import("./pages/MentorContent"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const FreeContent = lazy(() => import("./pages/FreeContent"));
-const Messages = lazy(() => import("./pages/Messages"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Defaults refetch on every window focus and treat data as instantly stale,
@@ -137,7 +136,6 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="/dashboard" element={<StudentDashboard />} />
-                <Route path="/messages" element={<Messages />} />
                 <Route path="/mentor-dashboard" element={<MentorDashboard />} />
                 <Route path="/settings" element={<AccountSettings />} />
                 <Route path="/codes" element={<DiscountCodes />} />

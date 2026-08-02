@@ -2,15 +2,15 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSubscriptions, useMessages, useMarkMessageRead, useSavedMentors } from "@/hooks/use-student";
+import { useSubscriptions, useSavedMentors } from "@/hooks/use-student";
 import { useMentors } from "@/hooks/use-mentors";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
-  Star, Clock, BookOpen, Heart, MessageSquare,
-  Mail, MailOpen, LogOut, ChevronRight, Users, CreditCard, MoreVertical,
+  Star, Clock, BookOpen, Heart,
+  LogOut, ChevronRight, Users, CreditCard, MoreVertical,
   XCircle, ExternalLink,
 } from "lucide-react";
 import {
@@ -48,8 +48,6 @@ const StudentDashboard = () => {
   const { data: subscriptions = [], isLoading: subsLoading } = useSubscriptions();
   const { data: savedMentorIds, isLoading: savedLoading } = useSavedMentors();
   const { data: allMentors = [] } = useMentors();
-  const { data: messages = [], isLoading: msgsLoading } = useMessages();
-  const markRead = useMarkMessageRead();
   const [portalLoading, setPortalLoading] = useState(false);
   const [canManageBilling, setCanManageBilling] = useState(false);
   const [cancellingSubId, setCancellingSubId] = useState<string | null>(null);
@@ -122,10 +120,6 @@ const StudentDashboard = () => {
   if (!user) return <Navigate to="/auth?redirect=%2Fdashboard" replace />;
 
   const savedMentors = allMentors.filter((m) => savedMentorIds?.has(m.id));
-  // Person-to-person chat now lives on /messages; the dashboard inbox only
-  // surfaces system/admin announcements (messages with no human sender).
-  const announcements = messages.filter((m) => !m.sender_user_id);
-  const unreadAnnouncements = announcements.filter((m) => !m.is_read).length;
   const displayName = user.user_metadata?.display_name || user.email?.split("@")[0] || "Trader";
   const totalSpend = subscriptions.reduce((sum: number, s: any) => {
     const m = s.mentors as Mentor;
@@ -160,7 +154,7 @@ const StudentDashboard = () => {
 
         {/* Stats Row */}
         <motion.div
-          className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10"
+          className="grid grid-cols-3 gap-4 mb-10"
           variants={stagger}
           initial="hidden"
           animate="show"
@@ -168,7 +162,6 @@ const StudentDashboard = () => {
           {[
             { icon: BookOpen, label: "Active Mentorships", value: subscriptions.length },
             { icon: Heart, label: "Saved Mentors", value: savedMentors.length },
-            { icon: Mail, label: "Announcements", value: announcements.length },
             { icon: CreditCard, label: "Monthly Spend", value: `$${totalSpend}` },
           ].map((stat, i) => (
             <motion.div
@@ -195,20 +188,12 @@ const StudentDashboard = () => {
           transition={{ delay: 0.2 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="w-full grid grid-cols-3 h-11 bg-muted/50 border border-border rounded-xl">
+            <TabsList className="w-full grid grid-cols-2 h-11 bg-muted/50 border border-border rounded-xl">
               <TabsTrigger value="mentorships" className="text-xs font-semibold gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
                 <BookOpen className="h-3.5 w-3.5" /> Mentorships
               </TabsTrigger>
               <TabsTrigger value="favourites" className="text-xs font-semibold gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
                 <Heart className="h-3.5 w-3.5" /> Favourites
-              </TabsTrigger>
-              <TabsTrigger value="messages" className="text-xs font-semibold gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
-                <Mail className="h-3.5 w-3.5" /> Inbox
-                {unreadAnnouncements > 0 && (
-                  <span className="ml-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 min-w-[18px] text-center">
-                    {unreadAnnouncements}
-                  </span>
-                )}
               </TabsTrigger>
             </TabsList>
 
@@ -341,87 +326,6 @@ const StudentDashboard = () => {
               </AnimatePresence>
             </TabsContent>
 
-            {/* Inbox Tab — direct chat lives on /messages; this tab keeps
-                system/admin announcements (broadcasts with no human sender). */}
-            <TabsContent value="messages">
-              {/* Chat launcher */}
-              <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-4 flex items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <MessageSquare className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">Chat with your mentors</p>
-                    <p className="text-xs text-muted-foreground truncate">Direct messages now live in Chat.</p>
-                  </div>
-                </div>
-                <Link to="/messages" className="shrink-0">
-                  <Button size="sm" className="text-xs">
-                    <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Open Chat
-                  </Button>
-                </Link>
-              </div>
-
-              <h3 className="font-heading font-semibold text-sm text-foreground mb-3">Announcements</h3>
-              <AnimatePresence mode="wait">
-                {msgsLoading ? (
-                  <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-16">
-                    <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                    <p className="text-sm text-muted-foreground">Loading announcements...</p>
-                  </motion.div>
-                ) : announcements.length === 0 ? (
-                  <motion.div key="empty" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-xl border border-dashed border-border bg-card/50 p-12 text-center">
-                    <Mail className="h-10 w-10 text-muted-foreground/20 mx-auto mb-4" />
-                    <p className="text-sm text-muted-foreground">No announcements yet.</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Updates from EdgeMentor will show up here.</p>
-                  </motion.div>
-                ) : (
-                  <motion.div key="list" variants={stagger} initial="hidden" animate="show" className="space-y-3">
-                    {announcements.map((msg, i) => (
-                      <motion.div
-                        key={msg.id}
-                        variants={fadeUp}
-                        custom={i}
-                        className={`rounded-xl border bg-card p-4 ${!msg.is_read ? "border-primary/20" : "border-border"}`}
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className={`h-8 w-8 rounded-full flex items-center justify-center ${msg.is_read ? "bg-muted" : "bg-primary/10"}`}>
-                              {msg.is_read ? (
-                                <MailOpen className="h-3.5 w-3.5 text-muted-foreground" />
-                              ) : (
-                                <Mail className="h-3.5 w-3.5 text-primary" />
-                              )}
-                            </div>
-                            <div>
-                              <span className="font-heading font-semibold text-sm text-foreground">{msg.sender_name}</span>
-                              {!msg.is_read && (
-                                <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 text-primary text-[9px] font-bold px-1.5 py-0.5">NEW</span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] text-muted-foreground">
-                              {new Date(msg.created_at).toLocaleDateString()}
-                            </span>
-                            {!msg.is_read && (
-                              <button
-                                onClick={() => markRead.mutate(msg.id)}
-                                className="text-[10px] text-primary hover:underline font-medium"
-                              >
-                                Mark read
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                        <h4 className="text-sm font-medium text-foreground mb-1">{msg.subject}</h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{msg.body}</p>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </TabsContent>
           </Tabs>
         </motion.div>
       </div>

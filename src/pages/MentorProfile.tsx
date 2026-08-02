@@ -2,15 +2,14 @@ import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   ArrowLeft, Star, Clock, Users, MapPin, Globe, TrendingUp,
   CheckCircle2, MessageSquare, Heart, Crown, ChevronRight,
   Sparkles, Shield, Award, Send, ImageIcon, ExternalLink, Zap, BookOpen,
-  ShieldCheck, CalendarClock, Languages, Timer, Share2, PauseCircle,
+  ShieldCheck, Languages, Timer, Share2, PauseCircle,
 } from "lucide-react";
 import { useReducedMotion } from "@/hooks/use-reduced-motion";
 import { useMentor, useMentorReviews, useFeaturedMentors } from "@/hooks/use-mentors";
@@ -18,7 +17,7 @@ import { priceSuffix, planLabel, isOneTime, subscribeVerb } from "@/lib/pricing"
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSavedMentors, useToggleSaveMentor, useMessageMentor } from "@/hooks/use-student";
+import { useSavedMentors, useToggleSaveMentor } from "@/hooks/use-student";
 import { useIsSubscribed } from "@/hooks/use-mentor-content";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -28,170 +27,6 @@ import { hasRating, hasStudents } from "@/lib/mentor-signals";
 import PageTransition from "@/components/PageTransition";
 import { motion } from "framer-motion";
 import type { Mentor } from "@/types/mentor";
-
-/** Low-risk entry point: free intro request before committing to a paid plan.
- *  Requests land in intro_requests — mentors see their own, admins see all. */
-const IntroCallDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: boolean; onOpenChange: (o: boolean) => void }) => {
-  const { user } = useAuth();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [sent, setSent] = useState(false);
-
-  const submitIntro = useMutation({
-    mutationFn: async () => {
-      const trimmedEmail = (email || user?.email || "").trim().toLowerCase();
-      if (!name.trim()) throw new Error("Please tell us your name.");
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(trimmedEmail)) throw new Error("Please enter a valid email.");
-      const { error } = await supabase.from("intro_requests").insert({
-        mentor_id: mentor.id,
-        requester_name: name.trim(),
-        requester_email: trimmedEmail,
-        message: message.trim() || null,
-        user_id: user?.id ?? null,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => setSent(true),
-    onError: (err: any) => toast.error(err.message || "Failed to send request."),
-  });
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) setSent(false); }}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="font-heading flex items-center gap-2">
-            <CalendarClock className="h-5 w-5 text-primary" /> Free 15-min intro with {mentor.name}
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-relaxed pt-1">
-            Not ready to subscribe? Request a free 15-minute intro call to ask questions,
-            see if the mentorship fits your goals, and meet {mentor.name} before paying anything.
-          </DialogDescription>
-        </DialogHeader>
-        {sent ? (
-          <div className="py-6 text-center space-y-3">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <CheckCircle2 className="h-6 w-6 text-primary" />
-            </div>
-            <p className="font-heading font-semibold text-foreground">Request sent!</p>
-            <p className="text-xs text-muted-foreground max-w-xs mx-auto">
-              {mentor.name} will reach out to <span className="text-foreground font-medium">{(email || user?.email || "").trim()}</span> to schedule your intro call.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="rounded-xl border border-border bg-muted/40 p-4 space-y-2">
-              {["No payment or card required", "Ask about strategy, markets, and schedule", "Zero obligation to continue"].map((line) => (
-                <div key={line} className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" /> {line}
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <Input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} className="bg-muted border-border text-sm" />
-              <Input type="email" placeholder={user?.email || "you@example.com"} value={email} onChange={(e) => setEmail(e.target.value)} className="bg-muted border-border text-sm" />
-            </div>
-            <Textarea
-              placeholder="What do you want to ask about? (optional)"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              maxLength={1000}
-              className="bg-muted border-border text-sm min-h-[70px] resize-none"
-            />
-            <Button variant="glow" className="w-full font-semibold" onClick={() => submitIntro.mutate()} disabled={submitIntro.isPending}>
-              <Send className="h-4 w-4 mr-2" /> {submitIntro.isPending ? "Sending…" : "Request Intro Call"}
-            </Button>
-            <p className="text-[10px] text-muted-foreground text-center">
-              Your request goes straight to the mentor's dashboard.
-            </p>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-/** Open "chat with mentor" entry point available on every mentor profile.
- *  Any signed-in user can send a direct message; it lands in the mentor's
- *  dashboard inbox and the mentor can reply back to the sender. */
-const ChatDialog = ({ mentor, open, onOpenChange }: { mentor: Mentor; open: boolean; onOpenChange: (o: boolean) => void }) => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const messageMentor = useMessageMentor();
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
-
-  const reset = () => { setSubject(""); setBody(""); };
-
-  const send = async () => {
-    try {
-      await messageMentor.mutateAsync({ mentorId: mentor.id, subject: subject.trim(), body: body.trim() });
-      // Continue the conversation in the real chat rather than a dead-end dialog.
-      toast.success(`Message sent to ${mentor.name}`);
-      onOpenChange(false);
-      reset();
-      navigate("/messages");
-    } catch (err: any) {
-      toast.error(err?.message || "Couldn't send your message.");
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) reset(); }}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="font-heading flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" /> Message {mentor.name}
-          </DialogTitle>
-          <DialogDescription className="text-sm leading-relaxed pt-1">
-            Send {mentor.name} a direct message with your question. They'll get notified and can reply straight to your inbox.
-          </DialogDescription>
-        </DialogHeader>
-
-        {!user ? (
-          <div className="py-4 text-center space-y-3">
-            <p className="text-sm text-muted-foreground">Sign in to message {mentor.name}.</p>
-            <Button
-              variant="glow"
-              className="w-full font-semibold"
-              onClick={() => navigate(`/auth?redirect=${encodeURIComponent(`/mentor/${mentor.id}`)}`)}
-            >
-              Sign in to continue
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <Input
-              placeholder="Subject (optional)"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              maxLength={200}
-              className="bg-muted border-border text-sm"
-            />
-            <Textarea
-              placeholder={`Write your message to ${mentor.name}…`}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              maxLength={5000}
-              className="bg-muted border-border text-sm min-h-[120px] resize-none"
-            />
-            <Button
-              variant="glow"
-              className="w-full font-semibold"
-              onClick={send}
-              disabled={!body.trim() || messageMentor.isPending}
-            >
-              <Send className="h-4 w-4 mr-2" /> {messageMentor.isPending ? "Sending…" : "Send Message"}
-            </Button>
-            <p className="text-[10px] text-muted-foreground text-center">
-              Be respectful — messaging is rate-limited to keep mentors' inboxes spam-free.
-            </p>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
@@ -311,8 +146,6 @@ const MentorProfile = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
   const [showAllImages, setShowAllImages] = useState(false);
-  const [introOpen, setIntroOpen] = useState(false);
-  const [chatOpen, setChatOpen] = useState(false);
   const [lightboxImage, setLightboxImage] = useState<{ url: string; caption?: string | null } | null>(null);
 
   const hasReviewed = reviews.some((r: any) => r.user_id === user?.id);
@@ -571,24 +404,6 @@ const MentorProfile = () => {
               <motion.div className="flex items-center gap-3 mt-5 flex-wrap justify-center" variants={fadeUp}>
                 {socialLink && <SocialButton url={socialLink} isElite={isElite} />}
                 <Button
-                  variant="glow"
-                  size="sm"
-                  className="rounded-xl px-4 font-semibold"
-                  onClick={() => setChatOpen(true)}
-                >
-                  <MessageSquare className="h-4 w-4 mr-1.5" />
-                  Chat with mentor
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={`rounded-xl px-4 ${isElite ? "border-slate-600/50 hover:bg-slate-800" : "border-primary/30 text-primary hover:bg-primary/10"}`}
-                  onClick={() => setIntroOpen(true)}
-                >
-                  <CalendarClock className="h-4 w-4 mr-1.5" />
-                  Free 15-min intro
-                </Button>
-                <Button
                   variant="outline"
                   size="sm"
                   className={`rounded-xl px-4 ${isElite ? "border-slate-600/50 hover:bg-slate-800" : ""}`}
@@ -689,7 +504,7 @@ const MentorProfile = () => {
               <div>
                 <p className="text-sm font-semibold text-foreground">Not accepting new students right now</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {mentor.name} has paused new signups. You can still request a free intro call to get in line for when spots open up.
+                  {mentor.name} has paused new signups. Save this mentor and check back — spots may open up soon.
                 </p>
               </div>
             </motion.div>
@@ -836,7 +651,7 @@ const MentorProfile = () => {
                 </div>
                 ) : (
                   <p className={`text-sm leading-relaxed ${isElite ? "text-slate-400" : "text-muted-foreground"}`}>
-                    {mentor.name} is finalizing what's included — book a free 15-min intro to hear exactly what you'll get.
+                    {mentor.name} is still finalizing what's included.
                   </p>
                 )}
 
@@ -856,13 +671,6 @@ const MentorProfile = () => {
                     </Link>
                   ) : (
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                      <Button
-                        variant="outline"
-                        className={`h-11 px-5 font-semibold ${isElite ? "border-slate-600/50 hover:bg-slate-800" : "border-primary/30 text-primary hover:bg-primary/10"}`}
-                        onClick={() => setIntroOpen(true)}
-                      >
-                        <CalendarClock className="h-4 w-4 mr-2" /> Free 15-min intro
-                      </Button>
                       {isPaused ? (
                         <Button variant="outline" className="h-11 px-6 font-semibold text-muted-foreground" disabled>
                           <PauseCircle className="h-4 w-4 mr-2" /> Not Accepting Students
@@ -965,9 +773,6 @@ const MentorProfile = () => {
           </Tabs>
         </div>
 
-        <IntroCallDialog mentor={mentor} open={introOpen} onOpenChange={setIntroOpen} />
-        <ChatDialog mentor={mentor} open={chatOpen} onOpenChange={setChatOpen} />
-
         {/* Gallery lightbox */}
         <Dialog open={!!lightboxImage} onOpenChange={(o) => !o && setLightboxImage(null)}>
           <DialogContent className="max-w-3xl p-2 sm:p-3 bg-background/95">
@@ -1002,15 +807,6 @@ const MentorProfile = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <Button
-                variant="outline"
-                size="icon"
-                className={`h-11 w-11 rounded-xl ${isElite ? "border-slate-600/50 hover:bg-slate-800" : "border-border hover:border-primary/30"}`}
-                onClick={() => setChatOpen(true)}
-                aria-label={`Message ${mentor.name}`}
-              >
-                <MessageSquare className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors" />
-              </Button>
               <Button
                 variant="outline"
                 size="icon"

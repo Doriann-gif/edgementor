@@ -10,14 +10,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Zap, User, Settings, Menu, X, Moon, Sun, Bell, Shield, LogOut, CreditCard, MessageSquare } from "lucide-react";
+import { Zap, User, Settings, Menu, X, Moon, Sun, Bell, Shield, LogOut, CreditCard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { signInWithGoogle } from "@/integrations/auth/google";
-import NotificationBell from "@/components/NotificationBell";
-import { useChatRealtime, useChatUnreadCount } from "@/hooks/use-chat";
 import { toast } from "sonner";
 
 const Navbar = () => {
@@ -25,12 +23,6 @@ const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
-
-  // One app-wide chat realtime subscription keeps the unread badge live on
-  // every page (the Navbar is always mounted for a signed-in user).
-  useChatRealtime();
-  const { data: unreadChats = 0 } = useChatUnreadCount();
-  const chatBadge = unreadChats > 9 ? "9+" : String(unreadChats);
 
   const handleSignOut = async () => {
     await signOut();
@@ -141,17 +133,6 @@ const Navbar = () => {
                   <User className="h-3.5 w-3.5 mr-1" /> Dashboard
                 </Button>
               </Link>
-              <Link to="/messages" className="relative" aria-label="Chats">
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                </Button>
-                {unreadChats > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
-                    {chatBadge}
-                  </span>
-                )}
-              </Link>
-              <NotificationBell />
               <SettingsDropdown />
             </>
           ) : (
@@ -205,16 +186,6 @@ const Navbar = () => {
               )}
               <Link to="/dashboard" onClick={() => setMobileOpen(false)}>
                 <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">Dashboard</Button>
-              </Link>
-              <Link to="/messages" onClick={() => setMobileOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">
-                  <MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Chats
-                  {unreadChats > 0 && (
-                    <span className="ml-auto flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground">
-                      {chatBadge}
-                    </span>
-                  )}
-                </Button>
               </Link>
               <Link to="/settings" onClick={() => setMobileOpen(false)}>
                 <Button variant="ghost" size="sm" className="w-full justify-start text-xs text-muted-foreground">

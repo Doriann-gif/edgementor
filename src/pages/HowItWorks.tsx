@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Search, ShieldCheck, CalendarClock, GraduationCap, Compass, LineChart, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowRight, Search, ShieldCheck, Users, GraduationCap, Compass, LineChart, Wallet } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
@@ -22,14 +22,14 @@ const studentSteps = [
     desc: "Open any profile and look at the Proof of Profitability section and the badge — it tells you exactly what we verified: identity, track record, or both.",
   },
   {
-    icon: CalendarClock,
-    title: "3. Start with a free intro",
-    desc: "Not sure yet? Request a free 15-minute intro call from the mentor's profile. No card, no commitment — just a conversation.",
+    icon: Users,
+    title: "3. Compare your shortlist",
+    desc: "Read student reviews and use Compare Traders to line up your top picks side by side — instruments, price, and edge — before you commit.",
   },
   {
     icon: GraduationCap,
     title: "4. Subscribe and learn",
-    desc: "Subscribe monthly or buy one-time access. You get the mentor's private content, community, and direct messaging. Cancel anytime from your dashboard.",
+    desc: "Subscribe monthly or buy one-time access. You get the mentor's private content and community. Cancel anytime from your dashboard.",
   },
 ];
 
@@ -43,17 +43,17 @@ const HowItWorks = () => (
   <PageTransition>
     <Helmet>
       <title>How It Works — EdgeMentor</title>
-      <meta name="description" content="How EdgeMentor works: browse verified trading mentors, check their proof, start with a free intro call, and subscribe only when it fits." />
+      <meta name="description" content="How EdgeMentor works: browse verified trading mentors, check their proof, compare your shortlist, and subscribe only when it fits." />
       <link rel="canonical" href="https://edgementor.net/how-it-works" />
       <meta property="og:title" content="How It Works — EdgeMentor" />
-      <meta property="og:description" content="Browse verified mentors, check their proof, start with a free intro." />
+      <meta property="og:description" content="Browse verified mentors, check their proof, and subscribe when it fits." />
       <meta property="og:type" content="website" />
       <meta property="og:url" content="https://edgementor.net/how-it-works" />
       <meta property="og:image" content="https://edgementor.net/og-image.jpg" />
       <meta property="og:site_name" content="EdgeMentor" />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="How It Works — EdgeMentor" />
-      <meta name="twitter:description" content="Browse verified mentors, check their proof, start with a free intro." />
+      <meta name="twitter:description" content="Browse verified mentors, check their proof, and subscribe when it fits." />
       <meta name="twitter:image" content="https://edgementor.net/og-image.jpg" />
     </Helmet>
     <div className="min-h-screen bg-background">

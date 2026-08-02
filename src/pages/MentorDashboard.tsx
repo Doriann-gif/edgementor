@@ -8,14 +8,12 @@ import MentorContentManager from "@/components/MentorContentManager";
 import MentorProfileEditor from "@/components/MentorProfileEditor";
 import PageTransition from "@/components/PageTransition";
 import IncomeTab from "@/components/mentor-dashboard/IncomeTab";
-import MentorMessagesTab from "@/components/mentor-dashboard/MentorMessagesTab";
 import MentorOverviewTab from "@/components/mentor-dashboard/MentorOverviewTab";
 import StudentsTab from "@/components/mentor-dashboard/StudentsTab";
 import { motion } from "framer-motion";
 import {
   LogOut, Users, DollarSign, TrendingUp, Edit3,
   Star, Eye, Tag, Crown, BookOpen, LayoutDashboard,
-  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -109,12 +107,11 @@ const MentorDashboard = () => {
 
         {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-6 h-auto sm:h-10 gap-1 bg-muted/50 rounded-xl p-1">
+          <TabsList className="w-full grid grid-cols-3 sm:grid-cols-5 h-auto sm:h-10 gap-1 bg-muted/50 rounded-xl p-1">
             <TabsTrigger value="overview" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm"><LayoutDashboard className="h-3.5 w-3.5 mr-1.5" /> Overview</TabsTrigger>
             <TabsTrigger value="profile" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm"><Edit3 className="h-3.5 w-3.5 mr-1.5" /> Profile</TabsTrigger>
             <TabsTrigger value="content" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm"><Crown className="h-3.5 w-3.5 mr-1.5" /> Content</TabsTrigger>
             <TabsTrigger value="students" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm"><Users className="h-3.5 w-3.5 mr-1.5" /> Students</TabsTrigger>
-            <TabsTrigger value="messages" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm"><MessageSquare className="h-3.5 w-3.5 mr-1.5" /> Messages</TabsTrigger>
             <TabsTrigger value="income" className="text-xs font-semibold rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm"><DollarSign className="h-3.5 w-3.5 mr-1.5" /> Income</TabsTrigger>
           </TabsList>
 
@@ -131,11 +128,7 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="students">
-            <StudentsTab mentorId={mentor.id} mentorUserId={user.id} />
-          </TabsContent>
-
-          <TabsContent value="messages">
-            <MentorMessagesTab mentorId={mentor.id} mentorName={mentor.name} />
+            <StudentsTab mentorId={mentor.id} />
           </TabsContent>
 
           <TabsContent value="income">

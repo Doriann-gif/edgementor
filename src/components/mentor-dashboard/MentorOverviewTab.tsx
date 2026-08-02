@@ -1,15 +1,12 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useMentorStudents } from "@/hooks/use-mentor-dashboard";
 import { useMentorReviews } from "@/hooks/use-mentors";
-import { Button } from "@/components/ui/button";
 import {
-  Users, DollarSign, Star, MessageSquare, TrendingUp, Crown,
+  Users, DollarSign, Star, TrendingUp, Crown,
   Eye, ArrowRight, CalendarDays, Wallet, AlertCircle, CheckCircle2,
-  CalendarClock, Mail,
 } from "lucide-react";
-import { toast } from "sonner";
 
 interface Props {
   mentor: any;
@@ -23,49 +20,6 @@ const daysSince = (iso: string) => Math.max(0, Math.floor((Date.now() - new Date
 const MentorOverviewTab = ({ mentor, mentorUserId, earnings, onGoToTab }: Props) => {
   const { data: students = [] } = useMentorStudents(mentor.id);
   const { data: reviews = [] } = useMentorReviews(mentor.id);
-  const queryClient = useQueryClient();
-
-  // Free intro requests waiting on this mentor (RLS: mentors read their own)
-  const { data: introRequests = [] } = useQuery({
-    queryKey: ["mentor-intro-requests", mentor.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("intro_requests")
-        .select("*")
-        .eq("mentor_id", mentor.id)
-        .eq("status", "new")
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data || [];
-    },
-  });
-
-  const markContacted = useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("intro_requests").update({ status: "contacted" }).eq("id", id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mentor-intro-requests", mentor.id] });
-      toast.success("Marked as contacted.");
-    },
-    onError: () => toast.error("Failed to update request."),
-  });
-
-  // Unread messages from students
-  const { data: unread = 0 } = useQuery({
-    queryKey: ["mentor-unread-overview", mentorUserId],
-    enabled: !!mentorUserId,
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .eq("recipient_id", mentorUserId)
-        .eq("is_read", false);
-      if (error) throw error;
-      return count ?? 0;
-    },
-  });
 
   // Content count
   const { data: contentCount = 0 } = useQuery({
@@ -96,11 +50,10 @@ const MentorOverviewTab = ({ mentor, mentorUserId, earnings, onGoToTab }: Props)
   return (
     <div className="space-y-4">
       {/* Metric cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         {[
           { icon: Users, label: "Active students", value: earnings?.activeStudents ?? 0, tab: "students", tint: "text-primary bg-primary/10" },
           { icon: DollarSign, label: isOneTime ? "Est. net / sale" : "Est. net / mo", value: `$${(isOneTime ? earnings?.netPerSale : earnings?.monthlyNet) ?? 0}`, tab: "income", tint: "text-emerald-400 bg-emerald-400/10" },
-          { icon: MessageSquare, label: "Unread messages", value: unread, tab: "messages", tint: unread > 0 ? "text-amber-400 bg-amber-400/10" : "text-muted-foreground bg-muted" },
           { icon: Star, label: "Rating", value: mentor.rating || "—", tab: "profile", tint: "text-amber-400 bg-amber-400/10" },
         ].map((m) => (
           <button key={m.label} onClick={() => onGoToTab(m.tab)}
@@ -130,38 +83,6 @@ const MentorOverviewTab = ({ mentor, mentorUserId, earnings, onGoToTab }: Props)
                 <span className={`text-sm ${c.done ? "text-muted-foreground line-through" : "text-foreground group-hover:text-primary transition-colors"}`}>{c.label}</span>
                 {!c.done && <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/50 ml-auto group-hover:text-primary transition-colors" />}
               </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Free intro requests — hot leads, answer fast */}
-      {introRequests.length > 0 && (
-        <div className="rounded-xl border border-amber-500/25 bg-amber-500/[0.04] p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <CalendarClock className="h-4 w-4 text-amber-400" />
-            <h3 className="font-heading font-semibold text-sm text-foreground">Free intro requests</h3>
-            <span className="ml-auto rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-bold text-amber-400">{introRequests.length} waiting</span>
-          </div>
-          <div className="space-y-2.5">
-            {introRequests.slice(0, 5).map((r) => (
-              <div key={r.id} className="flex items-start gap-3 rounded-lg border border-border/50 bg-card/60 p-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{r.requester_name}</p>
-                  {r.message && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{r.message}</p>}
-                  <p className="text-[10px] text-muted-foreground mt-1">{daysSince(r.created_at) === 0 ? "Today" : `${daysSince(r.created_at)}d ago`}</p>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <a href={`mailto:${r.requester_email}?subject=${encodeURIComponent("Your free intro call — " + mentor.name)}`}>
-                    <Button size="sm" variant="outline" className="h-7 text-[11px]">
-                      <Mail className="h-3 w-3 mr-1" /> Reply
-                    </Button>
-                  </a>
-                  <Button size="sm" variant="ghost" className="h-7 text-[11px] text-muted-foreground" onClick={() => markContacted.mutate(r.id)} disabled={markContacted.isPending}>
-                    <CheckCircle2 className="h-3 w-3 mr-1" /> Done
-                  </Button>
-                </div>
-              </div>
             ))}
           </div>
         </div>
@@ -220,16 +141,11 @@ const MentorOverviewTab = ({ mentor, mentorUserId, earnings, onGoToTab }: Props)
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <button onClick={() => onGoToTab("content")} className="rounded-xl border border-border bg-card p-4 text-left hover:border-primary/30 transition-colors group">
           <Crown className="h-5 w-5 text-primary mb-2" />
           <p className="text-sm font-semibold text-foreground">Manage content</p>
           <p className="text-[11px] text-muted-foreground mt-0.5">{contentCount} item{contentCount === 1 ? "" : "s"}</p>
-        </button>
-        <button onClick={() => onGoToTab("students")} className="rounded-xl border border-border bg-card p-4 text-left hover:border-primary/30 transition-colors">
-          <MessageSquare className="h-5 w-5 text-primary mb-2" />
-          <p className="text-sm font-semibold text-foreground">Message students</p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">Announce or DM</p>
         </button>
         <button onClick={() => onGoToTab("income")} className="rounded-xl border border-border bg-card p-4 text-left hover:border-primary/30 transition-colors">
           <Wallet className="h-5 w-5 text-primary mb-2" />

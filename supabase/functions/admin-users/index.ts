@@ -17,7 +17,7 @@ const logStep = (step: string, details?: unknown) => {
 const EDITABLE_PROFILE_COLS = new Set([
   "display_name", "country", "age", "trading_experience", "bio", "timezone",
   "trading_interests", "email_notifications", "marketing_emails",
-  "notify_messages", "notify_new_subscriber", "notify_intro_request",
+  "notify_new_subscriber",
 ]);
 
 // Roles an admin may grant/revoke through this console. `user` is the implicit
