@@ -170,47 +170,6 @@ export type Database = {
         }
         Relationships: []
       }
-      intro_requests: {
-        Row: {
-          created_at: string
-          id: string
-          mentor_id: string
-          message: string | null
-          requester_email: string
-          requester_name: string
-          status: string
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          mentor_id: string
-          message?: string | null
-          requester_email: string
-          requester_name: string
-          status?: string
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          mentor_id?: string
-          message?: string | null
-          requester_email?: string
-          requester_name?: string
-          status?: string
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "intro_requests_mentor_id_fkey"
-            columns: ["mentor_id"]
-            isOneToOne: false
-            referencedRelation: "mentors"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       mentor_applications: {
         Row: {
           bio: string
@@ -541,57 +500,6 @@ export type Database = {
         }
         Relationships: []
       }
-      messages: {
-        Row: {
-          body: string
-          created_at: string
-          id: string
-          is_read: boolean
-          recipient_id: string
-          sender_mentor_id: string | null
-          sender_name: string
-          sender_user_id: string | null
-          subject: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          id?: string
-          is_read?: boolean
-          recipient_id: string
-          sender_mentor_id?: string | null
-          sender_name: string
-          sender_user_id?: string | null
-          subject: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          id?: string
-          is_read?: boolean
-          recipient_id?: string
-          sender_mentor_id?: string | null
-          sender_name?: string
-          sender_user_id?: string | null
-          subject?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "messages_sender_mentor_id_fkey"
-            columns: ["sender_mentor_id"]
-            isOneToOne: false
-            referencedRelation: "mentors"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_sender_mentor_id_fkey"
-            columns: ["sender_mentor_id"]
-            isOneToOne: false
-            referencedRelation: "mentors_public"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       profiles: {
         Row: {
           age: number | null
@@ -841,35 +749,6 @@ export type Database = {
         Returns: boolean
       }
       lookup_user_id_by_email: { Args: { _email: string }; Returns: string }
-      message_mentor: {
-        Args: { _mentor_id: string; _subject: string; _body: string }
-        Returns: string
-      }
-      get_conversations: {
-        Args: Record<string, never>
-        Returns: {
-          counterpart_id: string
-          counterpart_name: string
-          counterpart_avatar: string | null
-          last_body: string
-          last_at: string
-          last_from_me: boolean
-          unread_count: number
-        }[]
-      }
-      get_conversation: {
-        Args: { _with: string; _limit?: number }
-        Returns: {
-          id: string
-          body: string
-          subject: string
-          created_at: string
-          from_me: boolean
-          is_read: boolean
-        }[]
-      }
-      send_chat_message: { Args: { _to: string; _body: string }; Returns: string }
-      mark_conversation_read: { Args: { _with: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
